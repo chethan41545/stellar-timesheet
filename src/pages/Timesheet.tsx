@@ -24,18 +24,7 @@ import { LuTrash2 } from "react-icons/lu";
 /* ========= Types ========= */
 type DayHours = number;
 
-type Entry = {
-	id: string;
-	costCenterId?: string;
-	costCenterName: string;
-	chargeCodeId?: string;
-	chargeCodeName: string;
-	notes?: string;
-	hours: DayHours[];
-	comments: string[];
-	enabled: any[];
-	can_delete: boolean;
-};
+
 
 type Frequency = "WEEKLY" | "BIWEEKLY" | "SEMI_MONTHLY" | "MONTHLY";
 
@@ -309,7 +298,8 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 			holiday: Boolean(tr.is_holiday || tr.is_weekend),
 			enabled: tr.is_editable,
 		})),
-		can_delete: row.can_delete
+		can_delete: row.can_delete,
+		timesheet_entry_code: row.timesheet_entry_code
 	}));
 
 	return {
@@ -328,7 +318,7 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 /* ========= Mapping API → state ========= */
 function mapApiDataToState(api: any): {
 	days: Date[];
-	entries: Entry[];
+	entries: any;
 	holidayByDay: boolean[];
 	history: any[];
 } {
@@ -348,7 +338,7 @@ function mapApiDataToState(api: any): {
 		const costCenterName: any = ts.costCenterName;
 		const chargeCodeName: any = ts.chargeCode;
 		const can_delete: any = ts.can_delete;
-		const timesheet_code: any = ts.timesheet_code;
+		const timesheet_entry_code: any = ts.timesheet_entry_code;
 
 
 		const hours: number[] = Array(days.length).fill(0);
@@ -379,7 +369,7 @@ function mapApiDataToState(api: any): {
 			comments,
 			enabled,
 			can_delete,
-			timesheet_code
+			timesheet_entry_code
 		});
 	});
 
@@ -563,7 +553,7 @@ export default function Timesheet({
 
 	const [days, setDays] = useState<Date[]>([]);
 	const [holidayByDay, setHolidayByDay] = useState<boolean[]>([]);
-	const [entries, setEntries] = useState<Entry[]>([]);
+	const [entries, setEntries] = useState<any[]>([]);
 	const [history, setHistory] = useState<any[]>([]);
 	const [timesheetStatus, setTimesheetStatus] = useState<any>(null);
 	const [agencyName, setagencyName] = useState<any>(null);
@@ -1486,6 +1476,7 @@ export default function Timesheet({
 	};
 
 	const handleDeleteEntry = async (timesheetEntryCode: any) => {
+		debugger
 		if (!timesheetEntryCode) {
 			toast.error("Missing timesheet entry code.");
 			return;
