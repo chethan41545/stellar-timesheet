@@ -1,0 +1,113 @@
+.radioGroupInline {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	/* space between question and options */
+	flex-wrap: wrap;
+}
+
+.question {
+	font-size: 14px;
+	font-weight: 500;
+	margin-right: 12px;
+	width: 600px;
+	margin-top: -5px;
+}
+
+.agencyQueriesquestion {
+	font-size: 14px;
+	font-weight: 500;
+
+}
+
+.usermoduleradio {
+	font-size: 14px;
+	font-weight: 400;
+	margin-right: 12px;
+	width: 500px;
+	margin-top: -5px;
+}
+
+.radioWrapper {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	position: relative;
+}
+
+.radio {
+	display: none;
+	/* hide default radio */
+}
+
+.customRadio {
+	width: 16px;
+	height: 16px;
+	border: 2px solid #666;
+	border-radius: 50%;
+	margin-right: 6px;
+
+	display: flex;
+	/* center inner dot */
+	align-items: center;
+	justify-content: center;
+
+	box-sizing: border-box;
+}
+
+.customRadiodisabled {
+	width: 16px;
+	height: 16px;
+	border: 2px solid #666;
+	border-radius: 50%;
+	margin-right: 6px;
+
+	display: flex;
+	/* center inner dot */
+	align-items: center;
+	justify-content: center;
+
+	box-sizing: border-box;
+	opacity: 0.5;
+	cursor: not-allowed !important;
+
+}
+
+/* Outer circle changes color when checked */
+.radio:checked+.customRadio {
+	border-color: #007bff;
+}
+
+/* Inner dot — perfectly centered */
+.radio:checked+.customRadio::after {
+	content: "";
+	width: 8px;
+	height: 8px;
+	background: #007bff;
+	border-radius: 50%;
+}
+
+.radio:checked+.customRadiodisabled {
+	border-color: #007bff;
+}
+
+/* Inner dot — perfectly centered */
+.radio:checked+.customRadiodisabled::after {
+	content: "";
+	width: 8px;
+	height: 8px;
+	background: #007bff;
+	border-radius: 50%;
+}
+
+.label {
+	font-size: 14px;
+	color: #333;
+}
+
+.errorText {
+	color: var(--error);
+	font-size: 12px;
+	font-weight: 500;
+	margin-left: 10px;
+}

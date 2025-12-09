@@ -1,0 +1,88 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  width: 89%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.metricRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.metricRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+h3 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.up {
+  color: #22c55e;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.down {
+  color: #ef4444;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.subtext {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+
+.chart {
+  height: 40px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between; /* space out title and calendar */
+  align-items: center;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendarIcon {
+  font-size: 16px;
+  color: #1e293b;
+  cursor: pointer;
+}
+

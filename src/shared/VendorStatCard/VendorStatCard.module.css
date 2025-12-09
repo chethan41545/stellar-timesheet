@@ -1,0 +1,73 @@
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 16px ; /* bottom padding is minimal; chart hugs the bottom */
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  overflow: hidden; /* clips sparkline gradient to rounded corners */
+}
+
+/* header */
+.topRow {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--h3black);
+  opacity: 70%;
+}
+
+.cornerIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #0b1324;
+}
+
+/* main number */
+.count {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--blackmenubar);
+  margin: 0px 0 8px;
+}
+
+/* change row */
+.metricRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.up, .down {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.up { color: #268B2A; }
+.down { color: #ef4444; }
+
+.subtext {
+  font-size: 14px;
+  color: var(--bodyblack);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* sparkline container pinned to bottom edge */
+.chart {
+  height: 52px;
+  margin: 8px -16px 0;  /* extend to card edges */
+  padding: 0 16px;      /* keep line away from rounded corners */
+  background: transparent;
+}
+
+

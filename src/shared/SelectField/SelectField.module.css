@@ -1,0 +1,25 @@
+.selectWrapper {
+  /* display: flex; */
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+/* label {
+  margin-bottom: 6px;
+  font-weight: 500;
+} */
+
+
+.selectFieldOutlined {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+}
+
+
+
+.errorText {
+  color: var(--error) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin-bottom: 10px !important;
+}

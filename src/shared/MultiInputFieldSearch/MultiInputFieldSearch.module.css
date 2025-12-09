@@ -1,0 +1,233 @@
+/* container */
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+/* notched outline */
+.fieldset {
+	position: relative;
+	border: 1.5px solid var(--border);
+	border-radius: var(--radius);
+	padding: 8px 10px;
+	background: white;
+	transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+/* Legend creates the notch look */
+.legend {
+	padding: 0;
+	margin-left: 12px;
+	/* a small offset like Material */
+	height: 0;
+}
+
+.legend span {
+	display: inline-block;
+	padding: 0 6px;
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: .2px;
+	color: var(--label);
+	background: white;
+	position: absolute;
+	top: -7px;
+}
+
+/* input */
+.input {
+	width: 100%;
+	border: 0;
+	outline: none;
+	background: transparent;
+	color: var(--text);
+	font-size: 14px;
+	letter-spacing: .3px;
+	padding: 2px 40px 2px 12px;
+	/* leave space for end icon */
+	box-sizing: border-box;
+}
+
+/* start icon slot */
+.startIcon {
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--muted);
+	pointer-events: none;
+}
+
+.startIcon~.input {
+	padding-left: 36px;
+	/* add left space when startIcon rendered */
+}
+
+/* end icon / button slot */
+.endSlot {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.iconBtn {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	color: var(--muted);
+	padding: 4px;
+	border-radius: 8px;
+}
+
+.iconBtn:hover {
+	background: rgba(0, 0, 0, 0.04);
+}
+
+/* focus, error, disabled */
+/* .focused {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+} */
+.error {
+	border-color: var(--error);
+}
+
+.disabled {
+	width: 100%;
+	border: 0;
+	outline: none;
+	background: transparent;
+	color: #000000;
+	font-size: 14px;
+	letter-spacing: .3px;
+	padding: 2px 40px 2px 12px;
+	/* leave space for end icon */
+	box-sizing: border-box;
+}
+
+/* helper & error row */
+.metaRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	min-height: 18px;
+	margin-bottom: 10px;
+}
+
+.helperText {
+	color: #6b7280;
+	font-size: 12px;
+}
+
+.errorText {
+	color: var(--error);
+	font-size: 12px;
+	font-weight: 500;
+	margin-bottom: 10px;
+	margin-left: 15px;
+}
+
+.counter {
+	color: #6b7280;
+	font-size: 12px;
+}
+
+/* Optional: nicer placeholder color */
+.input::placeholder {
+	color: #98a2b3;
+}
+
+/* === Autofill fix (Chrome / Edge / Safari) === */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+	/* paint over the UA background */
+	-webkit-box-shadow: 0 0 0 1000px white inset !important;
+	box-shadow: 0 0 0 1000px white inset !important;
+
+	/* keep text/caret colors consistent */
+	-webkit-text-fill-color: var(--text, #111827) !important;
+	caret-color: var(--text, #111827);
+
+	/* prevents flash of yellow on focus */
+	transition: background-color 9999s ease-out 0s;
+	border-radius: inherit;
+}
+
+/* ensure font size doesn’t change on autofilled line */
+.input:-webkit-autofill::first-line {
+	font-size: 14px;
+	font-family: inherit;
+	letter-spacing: .3px;
+}
+
+/* === Firefox === */
+.input:-moz-autofill {
+	box-shadow: 0 0 0 1000px white inset;
+	color: var(--text, #111827);
+}
+
+.optionRow {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	font-size: 14px;
+	cursor: pointer;
+	background: white;
+	transition: background 0.2s ease;
+}
+
+.optionRow:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+.checkbox {
+	display: none;
+}
+
+.customCheck {
+	width: 16px;
+	height: 16px;
+	border: 2px solid #ccc;
+	border-radius: 4px;
+	background-color: white;
+	margin-right: 10px;
+	position: relative;
+	transition: all 0.2s ease;
+}
+
+/* ✅ When checked — blue background with white tick */
+.checkbox:checked+.customCheck {
+	border-color: #007bff;
+	background-color: #007bff;
+}
+
+.checkbox:checked+.customCheck::after {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	width: 4px;
+	height: 8px;
+	border: solid white;
+	/* ✅ white tick */
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+/* Optional: small hover glow */
+.optionRow:hover .customCheck {
+	border-color: #007bff;
+}
+
+.optionLabel {
+	flex: 1;
+	cursor: pointer;
+	user-select: none;
+}

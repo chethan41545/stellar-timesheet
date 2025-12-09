@@ -1,0 +1,15 @@
+.editorWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* margin-bottom: 50px; */
+}
+
+.editorWrapper label {
+  font-weight: 500;
+}
+
+.editorWrapper :global(.se-wrapper) {
+  min-height: 200px; /* change to desired height */
+   margin: 0;
+}

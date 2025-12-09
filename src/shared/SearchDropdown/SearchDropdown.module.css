@@ -1,0 +1,171 @@
+.dropdownWrapper{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #DAECEF;
+  border-radius: 4px;
+  gap: 8px;
+  color: #202224;
+}
+
+.icon{ display:inline-flex; }
+
+.trigger{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #202224;
+  padding: 8px 12px; /* a little padding so it looks like a pill */
+}
+
+.triggerText{
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caret{ font-size: 10px; }
+
+.menu{
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 260px;
+  background: #ffffff;              /* light popup */
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(2,12,27,0.08);
+  padding: 10px;
+  z-index: 10;
+}
+
+.searchInput{
+  width: 90%;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+  background: #ffffff;
+  color: #111827;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.options{
+  max-height: 280px;
+  overflow: auto;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #B8C3CF transparent;
+}
+
+/* WebKit (Chrome/Edge/Safari) */
+.options::-webkit-scrollbar{ width: 8px; }
+.options::-webkit-scrollbar-track{
+  background: transparent;
+  border-radius: 8px;
+  margin: 6px;
+}
+.options::-webkit-scrollbar-thumb{
+  background: #C9D3DD;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.options:hover::-webkit-scrollbar-thumb{ background: #AEBBCC; }
+.options::-webkit-scrollbar-thumb:active{ background: #0954D5; }
+
+/* (Optional) Smooth feel on iOS Safari */
+@supports (-webkit-overflow-scrolling: touch){
+  .options{ -webkit-overflow-scrolling: touch; }
+}
+
+.optionRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.optionRow:hover{
+  background: #f3f4f6;
+}
+
+/* SINGLE-SELECT look: same row styling, highlight + right checkmark */
+.selected{
+  background: #f3f4f6;
+}
+
+.focused{
+  outline: 2px solid #E5EEF9; /* subtle focus ring for keyboard nav */
+}
+
+.checkmark{
+  margin-left: auto;
+  font-size: 14px;
+  color: #0954D5;
+  font-weight: 700;
+}
+
+.optionLabel{
+  font-size: 14px;
+  color: #111827;
+}
+
+.noData{
+  padding: 10px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ---------- MULTI: ensure native checkboxes render correctly inside panel ---------- */
+.dropdownPanel input[type="checkbox"]{
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  width: 16px;
+  height: 16px;
+  margin: 0 10px 0 0;
+  background: #fff !important;
+  border: 1.5px solid #A7B0B9 !important;
+  border-radius: 4px;
+  accent-color: #0954D5;
+  box-shadow: none !important;
+}
+
+.dropdownPanel input[type="checkbox"]:checked {
+  background: #fff !important; /* keep bg white; check uses accent-color */
+}
+
+/* Legacy hooks kept for compatibility with your layout helpers */
+.checkboxHost{ display:inline-flex; width:16px; height:16px; margin-right:10px; align-items:center; }
+.vHidden{
+  position:absolute; width:1px; height:1px; margin:-1px; border:0; padding:0; clip:rect(0 0 0 0); overflow:hidden;
+}
+
+/* Remove any duplicate rules / stray braces from previous file */
+
+/* ensure the trigger is the positioning context */
+.dropdownWrapper {
+  position: relative;
+}
+
+/* change this block */
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0; 
+  left: auto;  
+  z-index: 1000;
+  max-width: min(340px, calc(100vw - 24px)); /* optional: clamp width */
+}
+
