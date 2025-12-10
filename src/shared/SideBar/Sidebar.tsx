@@ -1,93 +1,239 @@
-import { NavLink } from "react-router-dom";
+import React from 'react';
+import {
+	Box,
+	Paper,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemIcon,
+	ListItemText,
+	Divider,
+	useTheme,
+	Tooltip,
+} from '@mui/material';
+import {
+	Dashboard,
+	Today,
+	CalendarMonth,
+	BarChart,
+	People,
+	Settings,
+} from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { ROUTES } from "../../constants/routes";
-import styles from "./Sidebar.module.css";
-import { normalize, readRole } from "../../utils/userUtils";
-import { LOCAL_STORAGE_VARIABLES } from "../../constants/storageVariables";
-import { LuCalendarCheck2 } from "react-icons/lu";
-import { GrUserAdmin } from "react-icons/gr";
-
-export default function Sidebar() {
-	let mainItems: any;
-	const role = normalize(readRole());
-
-	const permissions = JSON.parse(localStorage.getItem(LOCAL_STORAGE_VARIABLES.USER_PERMISSIONS) || "{}");
-
-	// if (role === "msp") {
-	mainItems = [
-		permissions.menu_dashboard && { to: ROUTES.DASHBOARD, label: "Dashboard", icon: <DashboardOutlinedIcon fontSize={"small"} /> },
-		permissions.menu_requisition && { to: ROUTES.REQUESITIONS, label: "Requisitions", icon: <WorkOutlineIcon fontSize={"small"} /> },
-		permissions.menu_candidate && { to: ROUTES.CANDIDATES, label: "Candidates", icon: <GroupOutlinedIcon fontSize={"small"} /> },
-		permissions.menu_placement && { to: ROUTES.PLACEMENTS, label: "Placements", icon: <AssignmentTurnedInOutlinedIcon fontSize={"small"} /> },
-		permissions.menu_expenses && { to: ROUTES.EXPENSES, label: "Expenses", icon: <AccountBalanceWalletIcon fontSize={"small"} /> },
-		permissions.menu_reports && { to: ROUTES.REPORTS, label: "Reports", icon: <DescriptionOutlinedIcon fontSize={"small"} /> },
-		permissions.menu_admin && { to: ROUTES.ADMIN, label: "Admin", icon: <GrUserAdmin fontSize={"18px"} /> },
-		// permissions.menu_timesheet && { to: ROUTES.TIMESHEETS, label: "Timesheets", icon: <LuCalendarCheck2 fontSize={"18px"} /> },
-		permissions.menu_timesheet && {
-			to: role === "candidate" ? ROUTES.TIMESHEETS_CANDIDATE : ROUTES.TIMESHEETS,
-			label: "Timesheets",
-			icon: <LuCalendarCheck2 fontSize={"18px"} />
-		},
-	].filter(Boolean);
-	// }
-	// else {
-	// 	mainItems = [
-	// 		{ to: ROUTES.DASHBOARD, label: "Dashboard", icon: <DashboardOutlinedIcon fontSize={"small"} /> },
-	// 		{ to: ROUTES.REQUESITIONS, label: "Requisitions", icon: <WorkOutlineIcon fontSize={"small"} /> },
-	// 		{ to: ROUTES.CANDIDATES, label: "Candidates", icon: <GroupOutlinedIcon fontSize={"small"} /> },
-	// 		{ to: ROUTES.PLACEMENTS, label: "Placements", icon: <AssignmentTurnedInOutlinedIcon fontSize={"small"} /> },
-	// 		{ to: ROUTES.EXPENSES, label: "Expenses", icon: <AccountBalanceWalletIcon fontSize={"small"} /> },
-	// 		{ to: ROUTES.REPORTS, label: "Reports", icon: <DescriptionOutlinedIcon fontSize={"small"} /> },
-	// 	];
-
-	// }
-
-	const bottomItems = [
-		{ to: ROUTES.SETTINGS, label: "Settings", icon: <SettingsOutlinedIcon fontSize={"medium"} /> },
-		{ to: ROUTES.HELP, label: "Help", icon: <ErrorOutlineOutlinedIcon fontSize={"small"} /> },
-	];
-	return (
-		<aside className={styles.sidebar}>
-			<nav className={styles.nav}>
-				{mainItems.map((item: any) => (
-					<NavLink
-						key={item.to}
-						to={item.to}
-						className={({ isActive }) =>
-							`${styles.item} ${isActive ? styles.active : ""}`
-						}
-					>
-						<span className={styles.icon}>{item.icon}</span><br></br>
-						<span className={styles.text}>{item.label}</span>
-					</NavLink>
-				))}
-			</nav>
-
-			{/* <div className={styles.divider} /> */}
-			<hr className={styles.divider} />
-
-			<nav className={styles.bottom}>
-				{bottomItems.map((item) => (
-					<NavLink
-						key={item.to}
-						to={item.to}
-						className={({ isActive }) =>
-							`${styles.item} ${isActive ? styles.active : ""}`
-						}
-					>
-						<span className={styles.icon}>{item.icon}</span><br></br>
-						<span className={styles.text}>{item.label}</span>
-					</NavLink>
-				))}
-			</nav>
-		</aside>
-	);
+interface SidebarItem {
+	id: string;
+	label: string;
+	icon: React.ReactNode;
+	path: string;
 }
+
+interface SidebarProps {
+	width?: number;
+	collapsed?: boolean;
+	onToggleCollapse?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
+	width = 240,
+	collapsed = false,
+	onToggleCollapse,
+}) => {
+	const theme = useTheme();
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	// alert(collapsed);
+	// Sidebar navigation items
+	const menuItems: SidebarItem[] = [
+		{
+			id: 'dashboard',
+			label: 'Dashboard',
+			icon: <Dashboard />,
+			path: '/dashboard',
+		},
+		{
+			id: 'timesheets',
+			label: 'Timesheets',
+			icon: <Today />,
+			path: '/timesheets',
+		},
+		{
+			id: 'calendar',
+			label: 'Calendar',
+			icon: <CalendarMonth />,
+			path: '/users-timesheet',
+		},
+		{
+			id: 'reports',
+			label: 'Reports',
+			icon: <BarChart />,
+			path: '/reports',
+		},
+		{
+			id: 'team',
+			label: 'Team',
+			icon: <People />,
+			path: '/team',
+		},
+		{
+			id: 'settings',
+			label: 'Settings',
+			icon: <Settings />,
+			path: '/settings',
+		},
+	];
+
+	const handleNavigation = (path: string) => {
+		navigate(path);
+	};
+
+	const isActive = (path: string) => {
+		return location.pathname === path;
+	};
+
+	return (
+		<Paper
+			elevation={0}
+			sx={{
+				width: collapsed ? 72 : width,
+				height: '91vh',
+				position: 'fixed',
+				borderRadius: 0,
+				borderRight: '1px solid',
+				borderColor: 'divider',
+				backgroundColor: 'background.paper',
+				display: 'flex',
+				flexDirection: 'column',
+				overflowX: 'hidden', // <-- add this
+				transition: theme.transitions.create('width', {
+					easing: theme.transitions.easing.sharp,
+					duration: theme.transitions.duration.enteringScreen,
+				}),
+				zIndex: theme.zIndex.appBar - 1,
+			}}
+		>
+
+
+			{/* Navigation Items */}
+			<Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', py: 2 }}>
+
+				<List>
+					{menuItems.map((item) => (
+						<ListItem
+							key={item.id}
+							disablePadding
+							sx={{
+								mb: 0.5,
+								px: collapsed ? 1 : 2
+							}}
+						>
+							<ListItemButton
+								onClick={() => handleNavigation(item.path)}
+								selected={isActive(item.path)}
+								sx={{
+									borderRadius: 1,
+									py: 1.25,
+									justifyContent: collapsed ? 'center' : 'flex-start',
+									minHeight: 48,
+									'&.Mui-selected': {
+										backgroundColor: 'primary.light',
+										color: 'secondary.main',
+										'&:hover': {
+											backgroundColor: 'primary.light',
+										},
+										'& .MuiListItemIcon-root': {
+											color: 'secondary.main',
+										},
+									},
+									'&:hover': {
+										backgroundColor: 'action.hover',
+									},
+								}}
+							>
+
+								<Tooltip title={item.label} placement="right"
+									disableHoverListener={!collapsed} // Only active when collapsed
+									disableFocusListener={!collapsed}
+									disableTouchListener={!collapsed}>
+
+									<ListItemIcon
+										sx={{
+											minWidth: 0,
+											mr: collapsed ? 0 : 2,
+											justifyContent: 'center',
+											color: isActive(item.path) ? 'primary.main' : 'text.secondary',
+										}}
+									>
+										{item.icon}
+									</ListItemIcon>
+								</Tooltip>
+
+								{!collapsed && (
+									<ListItemText
+										primary={item.label}
+										sx={{
+											opacity: 1,
+											'& .MuiTypography-root': {
+												fontWeight: isActive(item.path) ? 600 : 400,
+												fontSize: '0.875rem',
+											},
+										}}
+									/>
+								)}
+							</ListItemButton>
+						</ListItem>
+					))}
+				</List>
+			</Box>
+
+			{/* Optional: Collapse Toggle */}
+			{onToggleCollapse && (
+				<Box sx={{
+					p: 2,
+					borderTop: '1px solid',
+					borderColor: 'divider',
+					display: 'flex',
+					justifyContent: 'center',
+				}}>
+					<ListItemButton
+						onClick={onToggleCollapse}
+						sx={{
+							borderRadius: 1,
+							justifyContent: 'center',
+							p: 1,
+							minHeight: 40,
+							width: collapsed ? 32 : 'auto',
+						}}
+					>
+						{collapsed ? (
+							<Box >
+								<Box sx={{
+									width: 24,
+									height: 24,
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center'
+								}}>
+									→
+								</Box>
+							</Box>
+						) : (
+							<Box sx={{
+								width: 24,
+								height: 24,
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center'
+							}}>
+								←
+							</Box>
+						)}
+					</ListItemButton>
+				</Box>
+			)}
+		</Paper>
+	);
+};
+
+export default Sidebar;

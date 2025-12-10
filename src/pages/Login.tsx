@@ -83,7 +83,7 @@ const LoginPage = () => {
                     if (role === "employee" || role === "candidate") {
                         navigate("/timesheets", { replace: true });
                     } else {
-                        navigate("/dashboard", { replace: true });
+                        navigate("/users-timesheet", { replace: true });
                     }
                 }
                 else if (status === "error") {

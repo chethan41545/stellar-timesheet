@@ -2,6 +2,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import CandidateTimesheet from "./pages/CandidateTimesheet";
+import TimesheetList from "./pages/TimesheetList";
+import CommonLayout from "./Layout/Common";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -14,21 +16,24 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 export default function App() {
   return (
     <Routes>
-      {/* PUBLIC */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* EMPLOYEE / CANDIDATE TIMESHEETS */}
       <Route
-        path="/timesheets"
+        path="/"
         element={
           <PrivateRoute>
-            <CandidateTimesheet />
+            <CommonLayout />
           </PrivateRoute>
         }
-      />
+      >
+        <Route index element={<Navigate to="timesheets" replace />} />
+        <Route path="timesheets" element={<CandidateTimesheet />} handle={{ title: 'My Timesheets' }} />
+        <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
+      </Route>
 
-      {/* DEFAULT */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+
+      {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
     </Routes>
+
   );
 }

@@ -3,7 +3,8 @@ export const API_ENDPOINTS = {
   LOGIN: "/user/login",           // adjust path if your real endpoint differs
   VERIFY_OTP: "/auth/verify-otp",
   LOOKUP: "/lookup",
-   CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
-   GET_TIMESHEET_USER: "/timesheet/details",
+  CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
+  GET_TIMESHEET_USER: "/timesheet/details",
+  GET_USER_LIST: "/user/search"
   // add other endpoints as needed
 };
