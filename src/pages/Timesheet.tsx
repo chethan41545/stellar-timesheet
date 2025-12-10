@@ -1476,7 +1476,6 @@ export default function Timesheet({
 	};
 
 	const handleDeleteEntry = async (timesheetEntryCode: any) => {
-		debugger
 		if (!timesheetEntryCode) {
 			toast.error("Missing timesheet entry code.");
 			return;
@@ -1484,15 +1483,9 @@ export default function Timesheet({
 
 		try {
 			setLoading(true);
-
-			const payload = {
-				timesheet_entry_code: timesheetEntryCode,
-			};
-
-			// 👇 Using POST wrapper for DELETE endpoint (change to deleteMethod if your Apiservice supports it)
+			
 			const res = await Apiservice.deleteMethod(
-				"/timesheet/delete-entry",
-				payload
+				"/timesheet/delete-entry"+ `?timesheet_entry_code=${timesheetEntryCode}`
 			);
 
 			if (res?.data?.status === "success") {
