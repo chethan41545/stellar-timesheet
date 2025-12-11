@@ -369,8 +369,8 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 					page={page}
 					pageSize={rowsPerPage}
 					totalRows={totalRows}
-					// pageSizeOptions={[10, 20, 50]}
-					pageSizeOptions={[2,3,4]}
+					pageSizeOptions={[10, 20, 50]}
+					// pageSizeOptions={[2,3,4]}
 					onPageChange={(newPage) => {
 						setPage(newPage);
 						onPageChange?.(newPage, rowsPerPage);

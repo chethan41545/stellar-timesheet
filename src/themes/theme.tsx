@@ -19,7 +19,7 @@ declare module '@mui/material/styles' {
     }
 }
 
-export const Theme = createTheme({
+export const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
@@ -32,15 +32,16 @@ export const Theme = createTheme({
             main: '#FFFFFF', // Cool gray
             light: '#FFFFFF',
             dark: '#FFFFFF',
-            contrastText: '#000000ff',
+            contrastText: '#000000',
         },
         background: {
             default: '#ECEFF1', // Light blue-gray
             paper: '#FFFFFF',   // White
         },
         text: {
-            primary: '#202224',     // Dark slate gray
-            secondary: '#292929',   // Cool gray
+            primary: '#202224',
+            secondary: '#565656',
+            disabled: '#9e9e9e',
         },
         error: {
             main: '#D32F2F',

@@ -23,8 +23,7 @@ const TimesheetList: React.FC = () => {
     const [data, setData] = useState<TimesheetResponse | null>(null);
 
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(2);
-    const [totalRows, setTotalRows] = useState(0);
+    const [size, setSize] = useState(10);
 
 
     const [loading, setLoading] = useState(true);
@@ -39,6 +38,30 @@ const TimesheetList: React.FC = () => {
             id: 'timesheet_status',
             label: 'Status',
             width: '120px',
+            format: (value: string) => {
+                const colorMap: Record<string, string> = {
+                    "Approved": '#4caf50',
+                    Draft: '#ff9800',
+                    "Partial Approved": '#81c946ff',
+                    Rejected: '#f44336',
+                };
+
+                return (
+                    <span
+                        style={{
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            background: `${colorMap[value]}`,
+                            // color: `${colorMap[value]}`,
+                            // color: colorMap[value],
+                            fontWeight: 600,
+                            fontSize: '12px',
+                        }}
+                    >
+                        {value}
+                    </span>
+                );
+            }
         },
         {
             id: 'week_start',

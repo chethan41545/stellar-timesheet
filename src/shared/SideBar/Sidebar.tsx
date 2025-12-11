@@ -7,7 +7,6 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
-	Divider,
 	useTheme,
 	Tooltip,
 } from '@mui/material';
@@ -137,10 +136,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 									justifyContent: collapsed ? 'center' : 'flex-start',
 									minHeight: 48,
 									'&.Mui-selected': {
-										backgroundColor: 'primary.light',
+										backgroundColor: 'secondary.contrastText',
 										color: 'secondary.main',
 										'&:hover': {
-											backgroundColor: 'primary.light',
+											backgroundColor: 'secondary.contrastText',
 										},
 										'& .MuiListItemIcon-root': {
 											color: 'secondary.main',

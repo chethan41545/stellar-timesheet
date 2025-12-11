@@ -56,19 +56,19 @@ const CommonLayout: React.FC = () => {
 
                 {/* Page Content */}
                 <Box
-                    sx={{
+                    sx={(theme) => ({
                         flex: 1,
                         p: 3,
                         minWidth: 0,
                         overflow: 'auto',
-                        backgroundColor: 'grey.50',
-                    }}
+                        backgroundColor: theme.customColors.surfaceDark, // <- correct way
+                    })}
                 >
                     <Typography
                         variant="h5"
                         sx={{
                             fontWeight: 600,
-                            color: 'primary.main',
+                            color: 'text.main',
                             mb: 3,
                         }}
                     >
