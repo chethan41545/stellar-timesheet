@@ -114,7 +114,6 @@ const ReportsScreen: React.FC = () => {
 
     return (
         <div style={{ padding: "20px" }}>
-            hello
 
             {/* <WeekPicker
                 value={selectedDate}
