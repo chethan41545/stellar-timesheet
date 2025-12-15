@@ -34,7 +34,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-	width = 240,
+	width = 190,
 	collapsed = false,
 	onToggleCollapse,
 }) => {

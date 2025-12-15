@@ -1453,7 +1453,7 @@ export default function Timesheet({
 				task_code: selectedTaskId,
 			};
 
-			const res = await Apiservice.postMethod("/timesheet/create", payload);
+			const res = await Apiservice.postMethod("/timesheet/create-entry", payload);
 
 			if (res?.data?.status === "success") {
 				toast.success(res.data.message || "Entry added successfully");

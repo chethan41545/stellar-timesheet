@@ -6,11 +6,13 @@ import App from "./App";
 import "./index.css";
 import { CustomThemeProvider } from "./contexts/themeContext";
 
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <CustomThemeProvider >
-        <App />
+      <CustomThemeProvider>
+        
+          <App />
       </CustomThemeProvider>
     </BrowserRouter>
   </React.StrictMode>

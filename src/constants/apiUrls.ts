@@ -5,6 +5,8 @@ export const API_ENDPOINTS = {
   LOOKUP: "/lookup",
   CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
   GET_TIMESHEET_USER: "/timesheet/details",
-  GET_USER_LIST: "/user/search"
+  GET_USER_LIST: "/user/search",
+
+  PROJECT_REPORTS:"/reports/projects"
   // add other endpoints as needed
 };

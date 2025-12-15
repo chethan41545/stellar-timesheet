@@ -40,7 +40,7 @@ const CommonLayout: React.FC = () => {
             }}>
                 {/* Sidebar */}
                 <Box sx={{
-                    width: sidebarCollapsed ? 72 : 240,
+                    width: sidebarCollapsed ? 72 : 190,
                     flexShrink: 0,
                     borderRight: '1px solid',
                     borderColor: 'divider',
