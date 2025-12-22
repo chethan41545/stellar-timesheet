@@ -18,6 +18,8 @@ import {
 } from "recharts";
 import GraphTooltip from "../shared/GraphTooltip/GraphTooltip";
 import { customScrollbar } from "../shared/Styles/CommonStyles";
+import MultiSelect from "../shared/MultiSelect/MultiSelectWithoutController";
+// import MultiSelectField from "../shared/MultiSelect/MultiSelectField";
 // import WeekPicker from "../shared/DatePicker/WeekPicker";
 // import dayjs, { Dayjs } from 'dayjs';
 // import WeekPicker from "../shared/DatePicker/WeekPicker";
@@ -42,18 +44,60 @@ const COLORS = [
 
 const ReportsScreen: React.FC = () => {
     const [data, setData] = useState<ReportResponse | null>(null);
+    const [users, setUsers] = useState<any>(null);
+
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<any>("");
+
+    const options = [
+        { label: 'Oliver Hansen', value: 'oliver' },
+        { label: 'Van Henry', value: 'van' },
+        { label: 'April Tucker', value: 'april' },
+    ];
+
+    const [selected, setSelected] = React.useState<string[]>([]);
+
+
 
 
 
     useEffect(() => {
         fetchReports();
+        fetchUsers();
     }, []);
+
+    useEffect(() => {
+        fetchReports();
+    }, [selected]);
+
+    const fetchUsers = async () => {
+        try {
+            const payload = {show_all:true}
+            const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST, payload);
+
+            const usersList = response.data.data.map((user:any) => ({
+                label: user.name,
+                value: user.code,
+            }));
+
+            setUsers(usersList);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error("API Error:", error.response?.data);
+            } else {
+                console.error(error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchReports = async () => {
         try {
-            const response = await apiService.getMethod(API_ENDPOINTS.PROJECT_REPORTS);
+            const payload = {
+                user_codes: selected
+            }
+            const response = await apiService.postMethod(API_ENDPOINTS.PROJECT_REPORTS, payload);
             setData(response.data.data);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -138,6 +182,14 @@ const ReportsScreen: React.FC = () => {
                     </p>
                 ))}
             </div> */}
+            <MultiSelect
+                label="Users"
+                options={users}
+                value={selected}
+                onChange={setSelected}
+            />
+
+            {/* <MultiSelectField name={"Users"}  options={[{value:"Vikram",label:"vikram"}]}/> */}
 
 
             {/* SUMMARY CARDS */}
