@@ -49,11 +49,11 @@ const ReportsScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<any>("");
 
-    const options = [
-        { label: 'Oliver Hansen', value: 'oliver' },
-        { label: 'Van Henry', value: 'van' },
-        { label: 'April Tucker', value: 'april' },
-    ];
+    // const options = [
+    //     { label: 'Oliver Hansen', value: 'oliver' },
+    //     { label: 'Van Henry', value: 'van' },
+    //     { label: 'April Tucker', value: 'april' },
+    // ];
 
     const [selected, setSelected] = React.useState<string[]>([]);
 

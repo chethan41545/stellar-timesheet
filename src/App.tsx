@@ -5,6 +5,7 @@ import CandidateTimesheet from "./pages/CandidateTimesheet";
 import TimesheetList from "./pages/TimesheetList";
 import CommonLayout from "./Layout/Common";
 import ReportsScreen from "./pages/Reports";
+import Projects from "./pages/Projects";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="timesheets" element={<CandidateTimesheet />} handle={{ title: 'My Timesheets' }} />
         <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
         <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
+        <Route path="projects" element={<Projects />} handle={{ title: 'Projects' }} />
       </Route>
 
 

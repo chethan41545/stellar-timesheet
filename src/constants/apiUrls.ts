@@ -7,6 +7,8 @@ export const API_ENDPOINTS = {
   GET_TIMESHEET_USER: "/timesheet/details",
   GET_USER_LIST: "/user/search",
 
-  PROJECT_REPORTS:"/reports/projects"
+  PROJECT_REPORTS:"/reports/projects",
+
+  PROJECT_LIST:"/project/search"
   // add other endpoints as needed
 };
