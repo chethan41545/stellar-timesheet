@@ -16,11 +16,14 @@ const CommonLayout: React.FC = () => {
     const location = useLocation();
     const title = routeTitles[location.pathname] || 'Default Title';
 
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
     const handleLogout = () => {
         console.log('Logging out...');
     };
+
+    const isTimesheetsPage = location.pathname === "/timesheets";
+
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -55,43 +58,53 @@ const CommonLayout: React.FC = () => {
                 </Box>
 
                 {/* Page Content */}
-                <Box
-                    sx={(theme) => ({
-                        flex: 1,
-                        p: 3,
-                        minWidth: 0,
-                        overflow: 'auto',
-                        backgroundColor: theme.customColors.surfaceDark, // <- correct way
-                    })}
-                >
-                    <Typography
-                        variant="h5"
-                        sx={{
-                            fontWeight: 600,
-                            color: 'text.main',
-                            mb: 3,
-                        }}
-                    >
-                        {title}
-                    </Typography>
+                {/* Page Content */}
+{isTimesheetsPage ? (
+  // 🔹 Timesheets: ONLY outlet
+  <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
+    <Outlet />
+  </Box>
+) : (
+  // 🔹 Other pages: full layout
+  <Box
+    sx={(theme) => ({
+      flex: 1,
+      p: 3,
+      minWidth: 0,
+      overflow: 'auto',
+      backgroundColor: theme.customColors.surfaceDark,
+    })}
+  >
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 600,
+        color: 'text.main',
+        mb: 3,
+      }}
+    >
+      {title}
+    </Typography>
 
-                    <Paper
-                        sx={{
-                            p: 3,
-                            width: '100%',
-                            maxWidth: '100%',
-                            minHeight: '70vh',
-                            borderRadius: 2,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            backgroundColor: 'white',
-                            boxSizing: 'border-box',
-                        }}
-                    >
-                        <Outlet />
-                    </Paper>
-                </Box>
+    <Paper
+      sx={{
+        p: 3,
+        width: '100%',
+        maxWidth: '100%',
+        minHeight: '70vh',
+        borderRadius: 2,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        border: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'white',
+        boxSizing: 'border-box',
+      }}
+    >
+      <Outlet />
+    </Paper>
+  </Box>
+)}
+
 
             </Box>
         </Box>

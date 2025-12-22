@@ -271,7 +271,7 @@
 
 
 .weekendHead {
-	background: #DAECEF !important;
+	background: #a0acbd !important;
 	color: #0b2540 !important;
 	border-left: 1px solid rgba(13, 76, 136, 0.04);
 	border-right: 1px solid rgba(13, 76, 136, 0.04);
@@ -1055,7 +1055,7 @@
 
 /* ===== NEW: Holiday styling ===== */
 .holidayHead {
-	background: #ffe4c1 !important;
+	background: #ffedcb !important;
 	color: #e19e20 !important;
 	position: relative;
 }
