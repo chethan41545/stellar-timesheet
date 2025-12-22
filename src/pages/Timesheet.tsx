@@ -34,12 +34,14 @@ type ProjectOption = { id: string; name: string };
 /* ========= API Types (legacy internal shape) ========= */
 
 type TimesheetApiTimeRecord = {
-	date: string; // "11/24/2025" (MM/DD/YYYY)
-	hours: string; // "8"
+	date: string;
+	hours: string;
 	comments: string;
 	holiday: boolean;
-	enabled: any;
+	weekend: boolean;
+	enabled: boolean;
 };
+
 
 type TimesheetApiTimesheet = {
 	costCenterId?: string;
@@ -295,7 +297,8 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 			date: tr.date ? formatDateMDY(new Date(tr.date)) : "",
 			hours: String(tr.hours ?? 0),
 			comments: tr.note ?? "",
-			holiday: Boolean(tr.is_holiday || tr.is_weekend),
+			holiday: Boolean(tr.is_holiday),
+			weekend: Boolean(tr.is_weekend),
 			enabled: tr.is_editable,
 		})),
 		can_delete: row.can_delete,
@@ -663,7 +666,8 @@ export default function Timesheet({
 		const date = days[dayIdx];
 		const isHol = holidayByDay[dayIdx];
 		const wknd = isWeekend(date);
-		const isNonWorking = isHol || wknd;
+		const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
+
 		const isOver8 = newHours > 8;
 
 		setHolidayConfirm({
@@ -721,6 +725,11 @@ export default function Timesheet({
 			isOver8: false,
 		});
 		setPopupCell(null);
+		updateTimesheetCell(
+			entries.find((e) => e.id === entryId),
+			dayIdx
+		);
+
 	};
 
 	const cancelHolidayChange = () => {
@@ -769,7 +778,8 @@ export default function Timesheet({
 		const d = days[dayIdx];
 		const isHol = holidayByDay[dayIdx];
 		const wknd = isWeekend(d);
-		const isNonWorking = isHol || wknd;
+		const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
+
 		const isOver8 = parsedHours > 8;
 
 		if ((isNonWorking || isOver8) && parsedHours > 0) {
@@ -787,6 +797,8 @@ export default function Timesheet({
 				return { ...e, hours, comments };
 			})
 		);
+
+
 		setDrafts(({ [k]: _omit, ...rest }) => rest);
 	};
 
@@ -928,49 +940,28 @@ export default function Timesheet({
 		const mm = String(d.getMonth() + 1).padStart(2, "0");
 		const dd = String(d.getDate()).padStart(2, "0");
 		const yyyy = d.getFullYear();
-		return `${mm}/${dd}/${yyyy}`;
+		return `${yyyy}-${mm}-${dd}`;
 	};
 
-	const buildTimesheetPayload = (status: string) => {
-		if (!days.length) {
-			throw new Error("No days loaded for timesheet");
-		}
 
-		const hasHolidayWork = entries.some((e) =>
-			e.hours.some(
-				(h, i) => h > 0 && (holidayByDay[i] || isWeekend(days[i]))
-			)
-		);
 
-		const alertMessage = hasHolidayWork
-			? "Hours were logged on a holiday/weekend. Approve anyway?"
-			: "Approve timesheet?";
+	const buildFullUpdatePayload = (status :any) => {
+  return {
+    timesheets: entries.map((e) => ({
+      timesheet_entry_code: e.timesheet_entry_code,
+      comment: "",
+      time_records: days.map((d, idx) => ({
+        date: formatDateForApi(d),
+        hours: Number(e.hours[idx] || 0),
+        note: (e.comments?.[idx] || "").slice(0, 250),
+      })),
+    })),
+	action: status,
+	timesheet_code: timesheetCode
+  };
+};
 
-		const start = days[0];
-		const end = days[days.length - 1];
 
-		const timesheets = entries.map((e) => ({
-			costCenterName: e.costCenterName,
-			chargeCode: e.chargeCodeName,
-			timeRecords: days.map((date, idx) => ({
-				date: formatDateForApi(date),
-				hours: String(e.hours[idx] || 0),
-				comments: (e.comments[idx] || "").slice(0, 250),
-				holiday: Boolean(holidayByDay[idx]),
-				enabled: e.enabled[idx],
-			})),
-			can_delete: e.can_delete
-		}));
-
-		return {
-			startDate: formatDateForApi(start),
-			endDate: formatDateForApi(end),
-			status,
-			alertMessage,
-			timesheetId: timesheetId ?? "",
-			timesheets,
-		};
-	};
 
 	const periodTotal = useMemo(
 		() =>
@@ -1056,102 +1047,158 @@ export default function Timesheet({
 		return true;
 	};
 
-	const savePeriod = async (type: any) => {
-		const isRejectedStatus = timesheetStatus === "Rejected";
-		const canEditStatus =
-			!timesheetStatus ||
-			timesheetStatus === "Draft" ||
-			timesheetStatus === "New" ||
-			isRejectedStatus;
+	const submitTimesheetForReview = async () => {
+  const effectiveTimesheetCode =
+    timesheetCode || (typeof id === "string" ? id : "");
 
-		if (!isCandidate || !canEditStatus) return;
-		if (!validateTimesheet("save")) return;
+  if (!effectiveTimesheetCode) {
+    toast.error("Missing timesheet code");
+    return;
+  }
 
-		try {
-			setSaving(true);
-			const payload = buildTimesheetPayload("Draft");
+  // Usually backend expects ONE entry code
+  const firstEntry = entries.find(e => e.timesheet_entry_code);
 
-			const res = await Apiservice.postMethod(
-				API_ENDPOINTS.SAVE_TIMESHEET,
-				payload
-			);
+  if (!firstEntry) {
+    toast.error("No timesheet entries found");
+    return;
+  }
 
-			if (res?.data?.status === "success") {
-				const newId = res.data.timesheetId;
-				if (newId) setTimesheetId(newId);
-				setTimesheetStatus("Draft");
+  const payload = {
+    timesheet_code: effectiveTimesheetCode,
+    timesheet_entry_code: "",
+    action: "submit",
+    comment: ""
+  };
 
-				toast.success(res.data.message || "Draft saved successfully");
-				onReloadPeriods?.();
-				fetchTimesheet("");
-			} else {
-				toast.error("Failed to save timesheet.");
-			}
-		} catch (err: unknown) {
-			if (axios.isAxiosError(err)) {
-				console.error("Save API Error:", err.response?.data || err.message);
-				toast.error(
-					err.response?.data?.message || "Error while saving timesheet."
-				);
-			} else {
-				console.error("Unexpected Error:", err);
-				toast.error("Unexpected error while saving timesheet.");
-			}
-		} finally {
-			setSaving(false);
-		}
-	};
+  return Apiservice.postMethod(
+    API_ENDPOINTS.TIMESHEET_REVIEW,
+    payload
+  );
+};
+
+
+	const savePeriod = async () => {
+  const isRejectedStatus = timesheetStatus === "Rejected";
+  const canEditStatus =
+    !timesheetStatus ||
+    timesheetStatus === "Draft" ||
+    timesheetStatus === "New" ||
+    isRejectedStatus;
+
+  if (!isCandidate || !canEditStatus) return;
+  if (!validateTimesheet("save")) return;
+
+  try {
+    setSaving(true);
+
+    const payload = buildFullUpdatePayload('save');
+
+    const res = await Apiservice.putMethod(
+      API_ENDPOINTS.TIMESHEET_UPDATE,
+      payload
+    );
+
+    if (res?.data?.status === "success") {
+      setTimesheetStatus("Draft");
+      toast.success(res.data.message || "Timesheet updated successfully");
+      onReloadPeriods?.();
+      fetchTimesheet("");
+    } else {
+      toast.error("Failed to update timesheet.");
+    }
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      toast.error(
+        err.response?.data?.message || "Error while updating timesheet."
+      );
+    } else {
+      toast.error("Unexpected error while updating timesheet.");
+    }
+  } finally {
+    setSaving(false);
+  }
+};
+
+
 
 	const Recall = async () => {
 		fetchTimesheet("Recall");
 	};
 
 	const submitPeriod = async () => {
-		const isRejectedStatus = timesheetStatus === "Rejected";
-		const canEditStatus =
-			!timesheetStatus ||
-			timesheetStatus === "Draft" ||
-			timesheetStatus === "New" ||
-			isRejectedStatus;
+  const isRejectedStatus = timesheetStatus === "Rejected";
+  const canEditStatus =
+    !timesheetStatus ||
+    timesheetStatus === "Draft" ||
+    timesheetStatus === "New" ||
+    isRejectedStatus;
 
-		if (!isCandidate || !canEditStatus) return;
-		if (!validateTimesheet("submit")) return;
+  if (!isCandidate || !canEditStatus) return;
+  if (!validateTimesheet("submit")) return;
 
+  try {
+    _setSubmitting(true);
+
+   const payload = buildFullUpdatePayload('submit');
+
+	const res = await Apiservice.putMethod(
+      API_ENDPOINTS.TIMESHEET_UPDATE,
+      payload
+    );
+
+    if (res?.data?.status === "success") {
+      setTimesheetStatus("Draft");
+      toast.success(res.data.message || "Timesheet updated successfully");
+      onReloadPeriods?.();
+      fetchTimesheet("");
+    } else {
+      toast.error("Failed to update timesheet.");
+    }
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      toast.error(
+        err.response?.data?.message || "Error while updating timesheet."
+      );
+    } else {
+      toast.error("Unexpected error while updating timesheet.");
+    }
+  } finally {
+    setSaving(false);
+  }
+};
+
+
+	const navigate = useNavigate();
+
+	const updateTimesheetCell = async (
+		entry: any,
+		dayIdx: number
+	) => {
+		debugger
 		try {
-			_setSubmitting(true);
-			const payload = buildTimesheetPayload("Pending Approval");
+			const payload = {
+				timesheets: [
+					{
+						timesheet_entry_code: entry.timesheet_entry_code,
+						comment: "",
+						time_records: [
+							{
+								date: formatDateMDY(days[dayIdx]),
+								hours: entry.hours[dayIdx] || 0,
+								note: (entry.comments?.[dayIdx] || "").trim(),
+							},
+						],
+					},
+				],
+			};
 
-			const res = await Apiservice.postMethod(
-				API_ENDPOINTS.SAVE_TIMESHEET,
-				payload
-			);
-
-			if (res?.data?.status === "success") {
-				const newId = res.data.timesheetId;
-				if (newId) setTimesheetId(newId);
-				setTimesheetStatus("Pending Approval");
-
-				toast.success(res.data.message || "Timesheet submitted successfully");
-				onReloadPeriods?.();
-			} else {
-				toast.error("Failed to submit timesheet.");
-			}
-		} catch (err: unknown) {
-			if (axios.isAxiosError(err)) {
-				console.error("Submit API Error:", err.response?.data || err.message);
-				toast.error(
-					err.response?.data?.message || "Error while submitting timesheet."
-				);
-			} else {
-				console.error("Unexpected Error:", err);
-				toast.error("Unexpected error while submitting timesheet.");
-			}
-		} finally {
-			_setSubmitting(false);
+			await Apiservice.putMethod(API_ENDPOINTS.TIMESHEET_UPDATE, payload);
+		} catch (e) {
+			toast.error("Failed to update hours");
 		}
 	};
 
-	const navigate = useNavigate();
 
 	const prevPeriod = () => {
 		if (!prevTimesheetId) return;
@@ -1483,9 +1530,9 @@ export default function Timesheet({
 
 		try {
 			setLoading(true);
-			
+
 			const res = await Apiservice.deleteMethod(
-				"/timesheet/delete-entry"+ `?timesheet_entry_code=${timesheetEntryCode}`
+				"/timesheet/delete-entry" + `?timesheet_entry_code=${timesheetEntryCode}`
 			);
 
 			if (res?.data?.status === "success") {
@@ -1786,7 +1833,8 @@ export default function Timesheet({
 																	return;
 																}
 
-																const isNonWorking = isHol || wknd;
+																const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
+
 																const isOver8 = val > 8;
 
 																if ((isNonWorking || isOver8) && val > 0) {
@@ -1806,8 +1854,8 @@ export default function Timesheet({
 														{focused && (
 															<div
 																className={`${styles.inlineCommentOnly} ${alignRight
-																		? styles.inlineCommentRight
-																		: ""
+																	? styles.inlineCommentRight
+																	: ""
 																	}`}
 																ref={popupRef}
 															>

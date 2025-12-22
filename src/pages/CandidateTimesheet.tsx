@@ -101,9 +101,9 @@ export default function CandidateTimesheet() {
       format: (_: any, r: any) => (
         <div
           onClick={() => setSelectedCode(r.timesheet_code)}
-          style={{ cursor: "pointer", display: "flex", flexDirection: "column" }}
+          style={{ cursor: "pointer", display: "flex", flexDirection: "column", padding: '10px 0px' }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>
             {r.week_start} – {r.week_end}
           </span>
           <span
@@ -117,6 +117,29 @@ export default function CandidateTimesheet() {
         </div>
       ),
     },
+    {
+			id: "total_hours",
+			label: "Total Hours",
+			width: "35%",
+			align: "center",
+			format: (_: any, r: any) => {
+
+				return (
+					<div
+						style={{
+							borderRadius: 4,
+							display: "flex",
+							flexDirection: "column",
+							gap: 3,
+							cursor: "pointer",
+						}}
+					>
+						<span style={{ fontSize: 13, fontWeight: 600, color: "#222", padding: '6px 0', paddingBottom: 0 }}>{r.total_hours}</span>
+						<span style={{ visibility: 'hidden' }}>{r.total_hours}</span>
+					</div>
+				);
+			},
+		},
   ];
 
   const getRowProps = (r: any) => ({
@@ -162,7 +185,7 @@ export default function CandidateTimesheet() {
                   onPageChange={handlePageChange}
                   highlightedRowValue={selectedCode}
                   highlightedRowKey="timesheet_code"
-                  highlightedColor="#E3F2FD"
+                  highlightColor="#E3F2FD"
                   smallFont
                   getRowProps={getRowProps}
                 />

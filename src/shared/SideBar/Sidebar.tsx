@@ -35,7 +35,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({
 	width = 190,
-	collapsed = false,
+	collapsed = true,
 	onToggleCollapse,
 }) => {
 	const theme = useTheme();
@@ -101,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				borderRadius: 0,
 				borderRight: '1px solid',
 				borderColor: 'divider',
-				backgroundColor: 'background.paper',
+				backgroundColor: '#6f94bc',
 				display: 'flex',
 				flexDirection: 'column',
 				overflowX: 'hidden', // <-- add this
@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											minWidth: 0,
 											mr: collapsed ? 0 : 2,
 											justifyContent: 'center',
-											color: isActive(item.path) ? 'primary.main' : 'text.secondary',
+											color: isActive(item.path) ? 'primary.main' : '#effaff',
 										}}
 									>
 										{item.icon}

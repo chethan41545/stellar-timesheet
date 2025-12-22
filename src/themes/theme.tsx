@@ -59,7 +59,7 @@ export const theme = createTheme({
 
     customColors: {
         surface: '#edf7fa',       // Lighter blue-gray
-        surfaceDark: '#daecef',       // Lighter blue-gray
+        surfaceDark: '#effaff',       // Lighter blue-gray
         sidebar: '#B0BEC5',       // Cool gray
         accent: '#1565C0',        // Professional Blue accent
     },
