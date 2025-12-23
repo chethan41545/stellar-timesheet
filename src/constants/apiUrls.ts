@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
 
   PROJECT_REPORTS:"/reports/projects",
 
-  PROJECT_LIST:"/project/search"
+  PROJECT_LIST:"/project/search",
+  CREATE_PROJECT:"project/create-project",
+  CREATE_TASK:"project/create-task"
   // add other endpoints as needed
 };

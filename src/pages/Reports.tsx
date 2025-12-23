@@ -15,6 +15,7 @@ import {
     Cell,
     ResponsiveContainer,
     Legend,
+    CartesianGrid,
 } from "recharts";
 import GraphTooltip from "../shared/GraphTooltip/GraphTooltip";
 import { customScrollbar } from "../shared/Styles/CommonStyles";
@@ -44,7 +45,7 @@ const COLORS = [
 
 const ReportsScreen: React.FC = () => {
     const [data, setData] = useState<ReportResponse | null>(null);
-    const [users, setUsers] = useState<any>(null);
+    const [users, setUsers] = useState<any>([]);
 
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<any>("");
@@ -58,9 +59,6 @@ const ReportsScreen: React.FC = () => {
     const [selected, setSelected] = React.useState<string[]>([]);
 
 
-
-
-
     useEffect(() => {
         fetchReports();
         fetchUsers();
@@ -72,10 +70,10 @@ const ReportsScreen: React.FC = () => {
 
     const fetchUsers = async () => {
         try {
-            const payload = {show_all:true}
+            const payload = { variant: "all" }
             const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST, payload);
 
-            const usersList = response.data.data.map((user:any) => ({
+            const usersList = response.data.data.map((user: any) => ({
                 label: user.name,
                 value: user.code,
             }));
@@ -128,68 +126,24 @@ const ReportsScreen: React.FC = () => {
     // task_summary is already grouped by project with tasks as keys
     const taskNames = Object.keys(data?.task_summary[0] || {}).filter((k) => k !== "project_name");
 
-    const employee_summary = [
-        { user_full_name: "Vikram KM", total_hours: 23 },
-        { user_full_name: "Chetan S", total_hours: 2 },
-        { user_full_name: "Amit R", total_hours: 15 },
-        { user_full_name: "Sneha P", total_hours: 18 },
-        { user_full_name: "Rahul D", total_hours: 12 },
-        { user_full_name: "Priya M", total_hours: 20 },
-        { user_full_name: "Karan V", total_hours: 9 },
-        { user_full_name: "Neha S", total_hours: 14 },
-        { user_full_name: "Ankit T", total_hours: 17 },
-        { user_full_name: "Pooja L", total_hours: 6 },
-        { user_full_name: "Rohit K", total_hours: 21 },
-        { user_full_name: "Tanya C", total_hours: 8 },
-        { user_full_name: "Manish G", total_hours: 13 },
-        { user_full_name: "Sonal B", total_hours: 19 },
-        { user_full_name: "Vivek H", total_hours: 11 },
-        { user_full_name: "Riya J", total_hours: 16 },
-        { user_full_name: "Naveen F", total_hours: 7 },
-        { user_full_name: "Simran D", total_hours: 10 },
-        { user_full_name: "Aditya S", total_hours: 22 },
-        { user_full_name: "Shreya N", total_hours: 5 }
-    ];
-
-    // const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(dayjs());
-    // const [selectedDate, setSelectedDate] = useState(true);
-
+    
 
 
     return (
         <div style={{ padding: "20px" }}>
 
-            {/* <WeekPicker
-                value={selectedDate}
-                onChange={(newDate) => setSelectedDate(newDate)}
-            /> */}
 
-            {/* <WeekPicker
-                onWeekSelect={(r) => {
-                    setRange(r);
-                }}
-            />a */}
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}> */}
-
-            {/* <WeekPicker value={selectedRange} onChange={setSelectedRange} /> */}
-
-            {/* </LocalizationProvider> */}
-
-            {/* <div>
-                {weeks.map((w, i) => (
-                    <p key={i}>
-                        {w.weekStart} → {w.weekEnd}
-                    </p>
-                ))}
-            </div> */}
-            <MultiSelect
-                label="Users"
-                options={users}
-                value={selected}
-                onChange={setSelected}
-            />
-
-            {/* <MultiSelectField name={"Users"}  options={[{value:"Vikram",label:"vikram"}]}/> */}
+            {
+                users && (
+                    <MultiSelect
+                        label="Users"
+                        options={users}
+                        value={selected}
+                        onChange={setSelected}
+                        selectAllByDefault={true}
+                    />
+                )
+            }
 
 
             {/* SUMMARY CARDS */}
@@ -222,13 +176,20 @@ const ReportsScreen: React.FC = () => {
                     <h3>Employee Hours</h3>
                     <Box sx={{ overflowX: "auto", ...customScrollbar }}>
                         {/* Make the inner chart wider than container */}
-                        <div style={{ width: `${data?.employee_summary?.length ? data.employee_summary.length * 120 : 800}px`, height: "400px" }}>
+                        <div style={{ width: `${data?.employee_summary?.length ? data.employee_summary.length * 110 : 800}px`, height: "400px" }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
                                     data={data?.employee_summary}
                                     margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                    // margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                                    barGap={6}
                                 >
-                                    <XAxis dataKey="user_full_name" angle={-45} textAnchor="end" interval={0} />
+                                    {/* <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" /> */}
+                                    <XAxis 
+                                    dataKey="user_full_name" 
+                                    angle={-45} 
+                                    textAnchor="end" 
+                                    interval={0} />
                                     <YAxis />
                                     <Tooltip
                                         content={
@@ -237,7 +198,7 @@ const ReportsScreen: React.FC = () => {
                                             />
                                         }
                                     />
-                                    <Bar dataKey="total_hours">
+                                    <Bar dataKey="total_hours" radius={[4, 4, 0, 0]} barSize={40}>
                                         {data?.employee_summary.map((_, idx) => {
 
                                             const fill = COLORS[idx % COLORS.length];
@@ -289,7 +250,7 @@ const ReportsScreen: React.FC = () => {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 data={data?.task_summary || []}
-                                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                                margin={{ top: 20, right: 20, left: 20, bottom: 80 }}
                             >
                                 <XAxis
                                     dataKey="project_name"
@@ -307,6 +268,7 @@ const ReportsScreen: React.FC = () => {
                                             key={task}
                                             dataKey={task}
                                             fill={COLORS[idx % COLORS.length]}
+                                            barSize={40}
                                         />
                                     );
                                 })}
