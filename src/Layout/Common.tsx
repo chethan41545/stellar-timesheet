@@ -8,6 +8,7 @@ import Sidebar from '../shared/SideBar/Sidebar';
 const routeTitles: Record<string, string> = {
     '/timesheets': 'My Timesheets',
     '/users-timesheet': 'Users Timesheet',
+    '/create-project': 'Create Project',
 };
 
 
