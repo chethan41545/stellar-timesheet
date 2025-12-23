@@ -53,12 +53,12 @@ type TimesheetApiTimesheet = {
 };
 
 type TimesheetApiStatusHistoryItem = {
-	dateTime: string; // "11/20/2025 06:10 pm"
-	statusId: number;
+	date: string; // "11/20/2025 06:10 pm"
+	history_id: number;
 	userId: number;
-	statusName: string; // "Draft"
+	old_status: string; // "Draft"
 	timesheetConfig: string;
-	userName: string; // "Brown, Olivia"
+	user: string; // "Brown, Olivia"
 };
 
 type TimesheetApiData = {
@@ -67,7 +67,7 @@ type TimesheetApiData = {
 	startDate: string; // "11/24/2025"
 	endDate: string; // "12/07/2025"
 	status: string;
-	statusHistory: TimesheetApiStatusHistoryItem[];
+	history: TimesheetApiStatusHistoryItem[];
 	timesheets: TimesheetApiTimesheet[];
 	createdAt: string | null;
 	lastUpdate: string | null;
@@ -271,7 +271,7 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 			startDate: "",
 			endDate: "",
 			status: topStatus,
-			statusHistory: [],
+			history: [],
 			timesheets: [],
 			createdAt: null,
 			lastUpdate: null,
@@ -308,10 +308,10 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 	return {
 		userId: 0,
 		timesheetId: null,
-		startDate: startDateStr,
-		endDate: endDateStr,
-		status: topStatus || first.status || "",
-		statusHistory: [],
+		startDate: formatDateMDY(new Date(first.week_start)),
+		endDate: formatDateMDY(new Date(first.week_end)),
+		status: apiRaw.timesheet_status,
+		history: apiRaw.timesheet_data[0]?.history || [], // ✅ FIX
 		timesheets,
 		createdAt: null,
 		lastUpdate: null,
@@ -375,17 +375,17 @@ function mapApiDataToState(api: any): {
 			timesheet_entry_code
 		});
 	});
-
-	const history = (api.statusHistory || []).map((item: any) => ({
+	const history = (api.history || []).map((item: any) => ({
 		id: uid(),
-		status: item.statusName,
-		by: item.userName,
-		at: item.dateTime,
-		comment: item.comment,
-		prevStatus: null,
-		newStatus: item.statusName,
+		status: item.new_status,
+		by: item.user,
+		at: item.date,
+		comment: null,
+		prevStatus: item.old_status,
+		newStatus: item.new_status,
 		changeType: "StatusUpdate",
 	}));
+
 
 	return { days, entries, holidayByDay, history };
 }
@@ -562,7 +562,7 @@ export default function Timesheet({
 	const [agencyName, setagencyName] = useState<any>(null);
 
 	const [saving, setSaving] = useState(false);
-	const [submitting, _setSubmitting] = useState(false);
+	const [submitting, setSubmitting] = useState(false);
 	const [showRejectModal, setShowRejectModal] = useState(false);
 	const [rejectReason, setRejectReason] = useState("");
 	const [rejecting, setRejecting] = useState(false);
@@ -874,7 +874,6 @@ export default function Timesheet({
 				setApiEndDate("");
 				return;
 			}
-
 			const adapted: any = adaptNewApiToLegacy(apiRaw);
 
 			setTimesheetId(adapted.timesheetId ?? null);
@@ -945,21 +944,21 @@ export default function Timesheet({
 
 
 
-	const buildFullUpdatePayload = (status :any) => {
-  return {
-    timesheets: entries.map((e) => ({
-      timesheet_entry_code: e.timesheet_entry_code,
-      comment: "",
-      time_records: days.map((d, idx) => ({
-        date: formatDateForApi(d),
-        hours: Number(e.hours[idx] || 0),
-        note: (e.comments?.[idx] || "").slice(0, 250),
-      })),
-    })),
-	action: status,
-	timesheet_code: timesheetCode
-  };
-};
+	const buildFullUpdatePayload = (status: any) => {
+		return {
+			timesheets: entries.map((e) => ({
+				timesheet_entry_code: e.timesheet_entry_code,
+				comment: "",
+				time_records: days.map((d, idx) => ({
+					date: formatDateForApi(d),
+					hours: Number(e.hours[idx] || 0),
+					note: (e.comments?.[idx] || "").slice(0, 250),
+				})),
+			})),
+			action: status,
+			timesheet_code: timesheetCode
+		};
+	};
 
 
 
@@ -1047,7 +1046,53 @@ export default function Timesheet({
 		return true;
 	};
 
-	const submitTimesheetForReview = async () => {
+	
+
+	const savePeriod = async () => {
+		const isRejectedStatus = timesheetStatus === "Rejected";
+		const canEditStatus =
+			!timesheetStatus ||
+			timesheetStatus === "Draft" ||
+			timesheetStatus === "New" ||
+			isRejectedStatus;
+
+		if (!isCandidate || !canEditStatus) return;
+		if (!validateTimesheet("save")) return;
+
+		try {
+			setSaving(true);
+
+			const payload = buildFullUpdatePayload('save');
+
+			const res = await Apiservice.putMethod(
+				API_ENDPOINTS.TIMESHEET_UPDATE,
+				payload
+			);
+
+			if (res?.data?.status === "success") {
+				setTimesheetStatus("Draft");
+				toast.success(res.data.message || "Timesheet updated successfully");
+				onReloadPeriods?.();
+				fetchTimesheet("");
+			} else {
+				toast.error("Failed to update timesheet.");
+			}
+		} catch (err: unknown) {
+			if (axios.isAxiosError(err)) {
+				toast.error(
+					err.response?.data?.message || "Error while updating timesheet."
+				);
+			} else {
+				toast.error("Unexpected error while updating timesheet.");
+			}
+		} finally {
+			setSaving(false);
+		}
+	};
+
+
+
+	const Recall = async () => {
   const effectiveTimesheetCode =
     timesheetCode || (typeof id === "string" ? id : "");
 
@@ -1056,9 +1101,7 @@ export default function Timesheet({
     return;
   }
 
-  // Usually backend expects ONE entry code
   const firstEntry = entries.find(e => e.timesheet_entry_code);
-
   if (!firstEntry) {
     toast.error("No timesheet entries found");
     return;
@@ -1067,106 +1110,72 @@ export default function Timesheet({
   const payload = {
     timesheet_code: effectiveTimesheetCode,
     timesheet_entry_code: "",
-    action: "submit",
+    action: "cancel",
     comment: ""
   };
 
-  return Apiservice.postMethod(
-    API_ENDPOINTS.TIMESHEET_REVIEW,
-    payload
-  );
-};
-
-
-	const savePeriod = async () => {
-  const isRejectedStatus = timesheetStatus === "Rejected";
-  const canEditStatus =
-    !timesheetStatus ||
-    timesheetStatus === "Draft" ||
-    timesheetStatus === "New" ||
-    isRejectedStatus;
-
-  if (!isCandidate || !canEditStatus) return;
-  if (!validateTimesheet("save")) return;
-
   try {
-    setSaving(true);
-
-    const payload = buildFullUpdatePayload('save');
-
-    const res = await Apiservice.putMethod(
-      API_ENDPOINTS.TIMESHEET_UPDATE,
+    const res = await Apiservice.postMethod(
+      API_ENDPOINTS.TIMESHEET_REVIEW,
       payload
     );
 
     if (res?.data?.status === "success") {
-      setTimesheetStatus("Draft");
-      toast.success(res.data.message || "Timesheet updated successfully");
-      onReloadPeriods?.();
-      fetchTimesheet("");
+      toast.success(res.data.message || "Timesheet recalled successfully");
+      fetchTimesheet(""); // ✅ NOW it will run
     } else {
-      toast.error("Failed to update timesheet.");
+      toast.error(res?.data?.message || "Recall failed");
     }
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      toast.error(
-        err.response?.data?.message || "Error while updating timesheet."
-      );
-    } else {
-      toast.error("Unexpected error while updating timesheet.");
-    }
-  } finally {
-    setSaving(false);
+  } catch (error) {
+    toast.error("Failed to recall timesheet");
+    console.error(error);
   }
 };
 
 
-
-	const Recall = async () => {
-		fetchTimesheet("Recall");
-	};
 
 	const submitPeriod = async () => {
-  const isRejectedStatus = timesheetStatus === "Rejected";
-  const canEditStatus =
-    !timesheetStatus ||
-    timesheetStatus === "Draft" ||
-    timesheetStatus === "New" ||
-    isRejectedStatus;
+		const isRejectedStatus = timesheetStatus === "Rejected";
+		const canEditStatus =
+			!timesheetStatus ||
+			timesheetStatus === "Draft" ||
+			timesheetStatus === "New" ||
+			isRejectedStatus;
 
-  if (!isCandidate || !canEditStatus) return;
-  if (!validateTimesheet("submit")) return;
+		if (!isCandidate || !canEditStatus) return;
+		if (!validateTimesheet("submit")) return;
 
-  try {
-    _setSubmitting(true);
+		try {
+			setSubmitting(true);
 
-   const payload = buildFullUpdatePayload('submit');
+			const payload = buildFullUpdatePayload('submit');
 
-	const res = await Apiservice.putMethod(
-      API_ENDPOINTS.TIMESHEET_UPDATE,
-      payload
-    );
+			const res = await Apiservice.putMethod(
+				API_ENDPOINTS.TIMESHEET_UPDATE,
+				payload
+			);
 
-    if (res?.data?.status === "success") {
-      setTimesheetStatus("Draft");
-      toast.success(res.data.message || "Timesheet updated successfully");
-      onReloadPeriods?.();
-      fetchTimesheet("");
-    } else {
-      toast.error("Failed to update timesheet.");
-    }
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      toast.error(
-        err.response?.data?.message || "Error while updating timesheet."
-      );
-    } else {
-      toast.error("Unexpected error while updating timesheet.");
-    }
-  } finally {
-    setSaving(false);
-  }
-};
+			if (res?.data?.status === "success") {
+				setTimesheetStatus("Draft");
+				toast.success(res.data.message || "Timesheet updated successfully");
+				onReloadPeriods?.();
+				fetchTimesheet("");
+			} else {
+				toast.error("Failed to update timesheet.");
+			}
+		} catch (err: unknown) {
+			if (axios.isAxiosError(err)) {
+				toast.error(
+					err.response?.data?.message || "Error while updating timesheet."
+				);
+			} else {
+				toast.error("Unexpected error while updating timesheet.");
+			}
+		} finally {
+			setSubmitting(false);
+			setSaving(false);
+		}
+	};
 
 
 	const navigate = useNavigate();
@@ -1175,7 +1184,6 @@ export default function Timesheet({
 		entry: any,
 		dayIdx: number
 	) => {
-		debugger
 		try {
 			const payload = {
 				timesheets: [
@@ -1265,14 +1273,12 @@ export default function Timesheet({
 	const rowTotal = (e: Entry) =>
 		e.hours.reduce((s, n) => s + (n || 0), 0);
 
-	const formatDateTimeMDY = (d: Date | string) => {
-		const date = d instanceof Date ? d : new Date(d);
-		const time = date.toLocaleTimeString(undefined, {
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-		return `${formatDateMDYLocal(date)} ${time}`;
+	const formatDateTimeMDY = (d: string) => {
+		const [dd, mm, yyyy] = d.split("/");
+		const date = new Date(+yyyy, +mm - 1, +dd);
+		return `${formatDateMDYLocal(date)}`;
 	};
+
 
 	const onApproveConfirm = () => {
 		apicall_approveReject(timesheetCode || id, "Approved", "");
@@ -1702,8 +1708,7 @@ export default function Timesheet({
 										colSpan={days.length + 2}
 										style={{ textAlign: "center", padding: "24px 0" }}
 									>
-										No entries yet. Click <strong>Add Entry</strong> to create
-										one.
+										No entries yet.
 									</td>
 								</tr>
 							) : (
@@ -2132,16 +2137,14 @@ export default function Timesheet({
 								<li key={ev.id} className={styles.event}>
 									<div className={styles.eventBody}>
 										<div className={styles.eventHeader}>
-											<strong>{ev.status}</strong> • {ev.by}
+											<strong>
+												{ev.status !== "Pending Approval" ? ev.status : "Submitted"}
+											</strong>
+											• {ev.by}
 										</div>
 										<div className={styles.eventMeta}>
-											{formatDateTimeMDY(ev.at)}
-											{ev.prevStatus && ev.newStatus && (
-												<>
-													{" "}
-													• {ev.prevStatus} → {ev.newStatus}
-												</>
-											)}
+											{ev.at}
+
 										</div>
 									</div>
 									{ev.comment && (

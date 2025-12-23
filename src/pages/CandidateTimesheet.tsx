@@ -82,13 +82,15 @@ export default function CandidateTimesheet() {
     [rows, selectedCode]
   );
 
-  const STATUS_COLORS: Record<string, string> = {
-    "pending approval": "#FB8C00",
-    approved: "#5CD862",
-    draft: "#0954D5",
-    rejected: "#C62828",
-    default: "#7F7F7F",
-  };
+  const STATUS_COLORS: any = {
+  "pending approval": "#E19E20", // deeper amber (better contrast)
+  draft: "#3F51B5",              // indigo (calmer than pure blue)
+  approved: "#2E7D32",           // dark green (professional)
+  rejected: "#C62828",           // strong red
+  default: "#6B7280",
+};
+
+
 
   const getStatusColor = (status?: string) =>
     STATUS_COLORS[status?.toLowerCase() || ""] || STATUS_COLORS.default;
@@ -158,7 +160,8 @@ export default function CandidateTimesheet() {
         {/* LEFT LIST */}
         <Grid sx={{ width: "25%", minWidth: 300, borderRight: "1px solid #ddd" }}>
           <Box p={3}>
-            <Typography fontSize={26} fontWeight={700} mb={2}>
+            <Box sx={{display:'flex',justifyContent: 'space-between', alignItems: 'baseline'}}>
+            <Typography fontSize={20} fontWeight={700} mb={2}>
               Timesheets
             </Typography>
 
@@ -171,6 +174,7 @@ export default function CandidateTimesheet() {
               placeholder="Status"
               allSelectedHeading="Status"
             />
+            </Box>
 
             <Box mt={2}>
               {loading ? (
