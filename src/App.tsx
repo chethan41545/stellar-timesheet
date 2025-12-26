@@ -11,7 +11,6 @@ import { ToastContainer } from "react-toastify";
 import ConfirmDialog, { type ConfirmDialogHandle } from "./shared/ConfirmDialogProvider/ConfirmDialogProvider";
 import { useRef } from "react";
 import CreateTaskScreen from "./pages/Projects/CreateTask";
-import ProjectDetailsScreen from "./pages/Projects/ProjectDetails";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
