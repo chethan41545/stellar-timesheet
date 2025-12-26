@@ -537,7 +537,7 @@ export default function Timesheet({
 	const [periodStart, setPeriodStart] = useState<Date>(initialPeriodStart);
 
 	const [days, setDays] = useState<Date[]>([]);
-	const [holidayByDay, setHolidayByDay] = useState<boolean[]>([]);
+	const [holidayByDay, setHolidayByDay] = useState<any>([]);
 	const [entries, setEntries] = useState<any[]>([]);
 	const [history, setHistory] = useState<any[]>([]);
 	const [timesheetStatus, setTimesheetStatus] = useState<any>(null);
@@ -1028,7 +1028,6 @@ export default function Timesheet({
 
 
 	const savePeriod = async () => {
-		debugger
 		const isRejectedStatus = timesheetStatus === "Rejected" ||
 			timesheetStatus === "Partially Rejected";
 		const canEditStatus =
@@ -1858,7 +1857,7 @@ export default function Timesheet({
 																	return;
 																}
 
-																const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
+																const isNonWorking = holidayByDay[i] || isWeekend(days[i]);
 
 																const isOver8 = val > 8;
 
@@ -2017,7 +2016,7 @@ export default function Timesheet({
 								}
 								variant="secondary"
 								type="button"
-								onClick={() => savePeriod("Initial")}
+								onClick={() => savePeriod()}
 								disabled={saving || !editable}
 							/>
 							<Button
