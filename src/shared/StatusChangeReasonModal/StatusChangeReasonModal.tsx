@@ -9,7 +9,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 
 import Button from '../Button/Button';
-import { CustomThemeProvider } from '../../context/themeContext';
+import { CustomThemeProvider } from '../../contexts/themeContext';
+// import { CustomThemeProvider } from '../../context/themeContext';
 
 interface CommentModalProps {
     open: boolean;

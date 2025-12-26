@@ -5,7 +5,6 @@ import { Box, Grid, Typography } from "@mui/material";
 import CustomTable from "../shared/CustomTable/CustomTable";
 import CustomSkeleton from "../shared/CustomSkeleton/CustomSkeleton";
 import Timesheet from "./Timesheet";
-import SearchDropdown from "../shared/SearchDropdown/SearchDropdown";
 import Apiservice from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import { CustomLoader } from "../shared/CustomLoader/CustomLoader";
@@ -15,26 +14,26 @@ export default function CandidateTimesheet() {
   const [rows, setRows] = useState<any[]>([]);
   const [PAGE_SIZE, setSize] = useState(10);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [_totalPages, setTotalPages] = useState(1);
 
-  const [statusFilter, setStatusFilter] = useState<string[]>([
-    "Draft",
-    "Pending Approval",
-    "Approved",
-    "Rejected",
-  ]);
+  // const [statusFilter, setStatusFilter] = useState<string[]>([
+  //   "Draft",
+  //   "Pending Approval",
+  //   "Approved",
+  //   "Rejected",
+  // ]);
 
   // ✅ use timesheet_code as selected row id
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
-  const STATUS_OPTIONS = useMemo(
-    () =>
-      ["Draft", "Pending Approval", "Approved", "Rejected"].map((s) => ({
-        label: s,
-        value: s,
-      })),
-    []
-  );
+  // const STATUS_OPTIONS = useMemo(
+  //   () =>
+  //     ["Draft", "Pending Approval", "Approved", "Rejected"].map((s) => ({
+  //       label: s,
+  //       value: s,
+  //     })),
+  //   []
+  // );
 
   useEffect(() => {
     fetchData();
@@ -80,11 +79,11 @@ export default function CandidateTimesheet() {
     }
   };
 
-  const formatDate = (d: string) => {
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return "";
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-  };
+  // const formatDate = (d: string) => {
+  //   const date = new Date(d);
+  //   if (isNaN(date.getTime())) return "";
+  //   return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  // };
 
   const activeRow = useMemo(() => {
   return rows.find(

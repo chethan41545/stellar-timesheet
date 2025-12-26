@@ -1,8 +1,6 @@
 // src/pages/auth/LoginPage.tsx
 import styles from "./Login.module.css";
 import InputField from "../shared/InputField/InputField";
-import CheckboxField from "../shared/CheckboxField/CheckboxField";
-import loginBg from "../assets/login/bg.png";
 import logo from "../assets/logos/main-logo.png";
 import { useForm, FormProvider } from "react-hook-form";
 import Button from "../shared/Button/Button";
@@ -12,8 +10,6 @@ import Apiservice from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import { toast } from "react-toastify";
 import { ROUTES } from "../constants/routes";
-import { Box, Paper } from "@mui/material";
-import { LOCAL_STORAGE_VARIABLES } from "../constants/storageVariables";
 
 type LoginFormValues = {
     email: string;
@@ -35,10 +31,9 @@ const LoginPage = () => {
     const [showMfa, setShowMfa] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [userPwd, setUserPwd] = useState("");
-    const [remember, setRemember] = useState(false);
-    const [tempToken, setTempToken] = useState("");
-    const [mfaImage, setMfaImage] = useState<string | null>(null);
-    const [apiError, _setApiError] = useState<string | null>(null);
+    const [_remember, setRemember] = useState(false);
+    const [tempToken, _setTempToken] = useState("");
+    const [_apiError, _setApiError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -62,7 +57,7 @@ const LoginPage = () => {
                 // Expecting the top-level status and data shape you provided:
                 // { status: "success", data: { access_token, refresh_token, user: { ... } }, message: "..." }
                 const status = res?.data?.status;
-                const dat = res?.data?.data ?? {};
+                // const dat = res?.data?.data ?? {};
                 if (status === "success") {
                     const dat = res.data.data;
 

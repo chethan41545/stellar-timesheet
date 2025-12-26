@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Timesheet.module.css";
 import { toast } from "react-toastify";
 import { normalize, readRole } from "../utils/userUtils";
-import { FiAlertTriangle, FiDownload } from "react-icons/fi";
+import { FiAlertTriangle} from "react-icons/fi";
 import Button from "../shared/Button/Button";
 import { BiCommentDetail } from "react-icons/bi";
 import axios from "axios";
@@ -26,7 +26,6 @@ import {
 import { LuTrash2 } from "react-icons/lu";
 
 /* ========= Types ========= */
-type DayHours = number;
 
 
 
@@ -97,9 +96,6 @@ function addDays(d: Date, days: number) {
 	x.setDate(x.getDate() + days);
 	x.setHours(0, 0, 0, 0);
 	return x;
-}
-function lastOfMonth(d: Date) {
-	return new Date(d.getFullYear(), d.getMonth() + 1, 0);
 }
 
 function buildHeaderParts(d: Date) {
@@ -202,20 +198,6 @@ const startOfPeriodByFreq = (freq: Frequency, date = new Date()) => {
 	}
 };
 
-const daysInPeriodByFreq = (freq: Frequency, periodStart: Date) => {
-	switch (freq) {
-		case "WEEKLY":
-			return 7;
-		case "BIWEEKLY":
-			return 14;
-		case "SEMI_MONTHLY":
-			return periodStart.getDate() === 1
-				? 15
-				: lastOfMonth(periodStart).getDate() - 15;
-		case "MONTHLY":
-			return lastOfMonth(periodStart).getDate();
-	}
-};
 
 /* strict MM/DD/YYYY parsing */
 const parseMDY = (s: string): Date => {
@@ -257,10 +239,10 @@ const formatDateMDYLocal = (d: Date | string) => {
 	)}/${date.getFullYear()}`;
 };
 
-const toRequestDate = (input: Date | string): string => {
-	if (typeof input === "string") return input;
-	return formatDateMDY(input);
-};
+// const toRequestDate = (input: Date | string): string => {
+// 	if (typeof input === "string") return input;
+// 	return formatDateMDY(input);
+// };
 
 /* ========= Adapt /timesheet/user response → legacy TimesheetApiData ========= */
 
@@ -283,13 +265,6 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 	}
 
 	const first = rows[0];
-
-	const startDateStr = first.week_start
-		? formatDateMDY(new Date(first.week_start))
-		: "";
-	const endDateStr = first.week_end
-		? formatDateMDY(new Date(first.week_end))
-		: "";
 
 	const timesheets: TimesheetApiTimesheet[] = rows.map((row: any) => ({
 		costCenterId: row.project_code,
@@ -512,34 +487,34 @@ function HolidayConfirmModal({
 	);
 }
 
-function ApproveConfirmModal({
-	open,
-	title,
-	confirmLabel = "Approve",
-	onConfirm,
-	onCancel,
-}: {
-	open: boolean;
-	title: string;
-	message: string;
-	confirmLabel?: string;
-	onConfirm: () => void;
-	onCancel: () => void;
-}) {
-	return (
-		<Modal open={open}>
-			<h3 className={styles.modalTitle}>{title}</h3>
-			<div className={styles.modalActions}>
-				<button className={styles.secondary} onClick={onCancel} type="button">
-					Cancel
-				</button>
-				<button className={styles.submit} onClick={onConfirm} type="button">
-					{confirmLabel}
-				</button>
-			</div>
-		</Modal>
-	);
-}
+// function ApproveConfirmModal({
+// 	open,
+// 	title,
+// 	confirmLabel = "Approve",
+// 	onConfirm,
+// 	onCancel,
+// }: {
+// 	open: boolean;
+// 	title: string;
+// 	message: string;
+// 	confirmLabel?: string;
+// 	onConfirm: () => void;
+// 	onCancel: () => void;
+// }) {
+// 	return (
+// 		<Modal open={open}>
+// 			<h3 className={styles.modalTitle}>{title}</h3>
+// 			<div className={styles.modalActions}>
+// 				<button className={styles.secondary} onClick={onCancel} type="button">
+// 					Cancel
+// 				</button>
+// 				<button className={styles.submit} onClick={onConfirm} type="button">
+// 					{confirmLabel}
+// 				</button>
+// 			</div>
+// 		</Modal>
+// 	);
+// }
 
 /* ========= Component ========= */
 export default function Timesheet({
@@ -551,7 +526,7 @@ export default function Timesheet({
 }: TimesheetProps) {
 	const role = normalize(readRole());
 	const isCandidate = role === "employee";
-	const isAgency = role === "manager";
+	// const isAgency = role === "manager";
 	const { id } = useParams();
 
 	const [freq, setFreq] = useState<Frequency>(freqOverride ?? "BIWEEKLY");
@@ -576,11 +551,11 @@ export default function Timesheet({
 	const [candidateName, setCandidatename] = useState("");
 
 	const [loading, setLoading] = useState(false);
-	const [timesheetId, setTimesheetId] = useState<number | null>(null);
+	const [_timesheetId, setTimesheetId] = useState<number | null>(null);
 	const [prevTimesheetId, setPrevTimesheetId] = useState<number | null>(null);
 	const [nextTimesheetId, setNextTimesheetId] = useState<number | null>(null);
 	const [alignRight, setAlignRight] = useState(false);
-	const [alertMessage, setAlertMessage] = useState("");
+	// const [alertMessage, setAlertMessage] = useState("");
 	const [apiStartDate, setApiStartDate] = useState<any>("");
 	const [apiEndDate, setApiEndDate] = useState<any>("");
 
@@ -673,8 +648,8 @@ export default function Timesheet({
 		fromPopup: boolean
 	) => {
 		const date = days[dayIdx];
-		const isHol = holidayByDay[dayIdx];
-		const wknd = isWeekend(date);
+		// const isHol = holidayByDay[dayIdx];
+		// const wknd = isWeekend(date);
 		const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
 
 		const isOver8 = newHours > 8;
@@ -780,9 +755,9 @@ export default function Timesheet({
 			return;
 		}
 
-		const d = days[dayIdx];
-		const isHol = holidayByDay[dayIdx];
-		const wknd = isWeekend(d);
+		// const d = days[dayIdx];
+		// const isHol = holidayByDay[dayIdx];
+		// const wknd = isWeekend(d);
 		const isNonWorking = holidayByDay[dayIdx] || isWeekend(days[dayIdx]);
 
 		const isOver8 = parsedHours > 8;
@@ -969,7 +944,7 @@ export default function Timesheet({
 	const periodTotal = useMemo(
 		() =>
 			entries.reduce(
-				(s, e) => s + e.hours.reduce((ss, n) => ss + (n || 0), 0),
+				(s, e) => s + e.hours.reduce((ss:any, n:any) => ss + (n || 0), 0),
 				0
 			),
 		[entries]
@@ -1187,32 +1162,32 @@ export default function Timesheet({
 
 	const navigate = useNavigate();
 
-	const updateTimesheetCell = async (
-		entry: any,
-		dayIdx: number
-	) => {
-		try {
-			const payload = {
-				timesheets: [
-					{
-						timesheet_entry_code: entry.timesheet_entry_code,
-						comment: "",
-						time_records: [
-							{
-								date: formatDateMDY(days[dayIdx]),
-								hours: entry.hours[dayIdx] || 0,
-								note: (entry.comments?.[dayIdx] || "").trim(),
-							},
-						],
-					},
-				],
-			};
+	// const updateTimesheetCell = async (
+	// 	entry: any,
+	// 	dayIdx: number
+	// ) => {
+	// 	try {
+	// 		const payload = {
+	// 			timesheets: [
+	// 				{
+	// 					timesheet_entry_code: entry.timesheet_entry_code,
+	// 					comment: "",
+	// 					time_records: [
+	// 						{
+	// 							date: formatDateMDY(days[dayIdx]),
+	// 							hours: entry.hours[dayIdx] || 0,
+	// 							note: (entry.comments?.[dayIdx] || "").trim(),
+	// 						},
+	// 					],
+	// 				},
+	// 			],
+	// 		};
 
-			await Apiservice.putMethod(API_ENDPOINTS.TIMESHEET_UPDATE, payload);
-		} catch (e) {
-			toast.error("Failed to update hours");
-		}
-	};
+	// 		await Apiservice.putMethod(API_ENDPOINTS.TIMESHEET_UPDATE, payload);
+	// 	} catch (e) {
+	// 		toast.error("Failed to update hours");
+	// 	}
+	// };
 
 
 	const prevPeriod = () => {
@@ -1279,19 +1254,19 @@ export default function Timesheet({
 	const hasNonZeroHours = periodTotal > 0;
 	const canSubmit = emptyRequiredDays.length === 0 && hasNonZeroHours;
 
-	const rowTotal = (e: Entry) =>
-		e.hours.reduce((s, n) => s + (n || 0), 0);
+	const rowTotal = (e: any) =>
+		e.hours.reduce((s:any, n:any) => s + (n || 0), 0);
 
-	const formatDateTimeMDY = (d: string) => {
-		const [dd, mm, yyyy] = d.split("/");
-		const date = new Date(+yyyy, +mm - 1, +dd);
-		return `${formatDateMDYLocal(date)}`;
-	};
+	// const formatDateTimeMDY = (d: string) => {
+	// 	const [dd, mm, yyyy] = d.split("/");
+	// 	const date = new Date(+yyyy, +mm - 1, +dd);
+	// 	return `${formatDateMDYLocal(date)}`;
+	// };
 
 
-	const onApproveConfirm = () => {
-		apicall_approveReject(timesheetCode || id, "Approved", "");
-	};
+	// const onApproveConfirm = () => {
+	// 	apicall_approveReject(timesheetCode || id, "Approved", "");
+	// };
 
 	const handleConfirmReject = async () => {
 		if (!selectedEntryCode) {
@@ -1363,48 +1338,48 @@ export default function Timesheet({
 	};
 
 
-	const downloadTimesheet = async () => {
-		try {
-			setLoading(true);
+	// const downloadTimesheet = async () => {
+	// 	try {
+	// 		setLoading(true);
 
-			const identifier = timesheetCode || id;
-			if (!identifier) {
-				setLoading(false);
-				toast.error("Missing timesheet identifier");
-				return;
-			}
+	// 		const identifier = timesheetCode || id;
+	// 		if (!identifier) {
+	// 			setLoading(false);
+	// 			toast.error("Missing timesheet identifier");
+	// 			return;
+	// 		}
 
-			const url = API_ENDPOINTS.EXPORT_TIMESHEET + "/" + identifier + "/export";
+	// 		const url = API_ENDPOINTS.EXPORT_TIMESHEET + "/" + identifier + "/export";
 
-			const response = await Apiservice.getMethod(url);
+	// 		const response = await Apiservice.getMethod(url);
 
-			setLoading(false);
-			if (response?.data?.status !== "success") {
-				toast.error("Download failed");
-				return;
-			}
+	// 		setLoading(false);
+	// 		if (response?.data?.status !== "success") {
+	// 			toast.error("Download failed");
+	// 			return;
+	// 		}
 
-			const base64 = response.data.file;
-			const filename = response.data.filename;
+	// 		const base64 = response.data.file;
+	// 		const filename = response.data.filename;
 
-			const byteCharacters = atob(base64);
-			const byteNumbers = [...byteCharacters].map((c) =>
-				c.charCodeAt(0)
-			);
-			const byteArray = new Uint8Array(byteNumbers);
-			const blob = new Blob([byteArray], {
-				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-			});
+	// 		const byteCharacters = atob(base64);
+	// 		const byteNumbers = [...byteCharacters].map((c) =>
+	// 			c.charCodeAt(0)
+	// 		);
+	// 		const byteArray = new Uint8Array(byteNumbers);
+	// 		const blob = new Blob([byteArray], {
+	// 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	// 		});
 
-			const link = document.createElement("a");
-			link.href = URL.createObjectURL(blob);
-			link.download = filename;
-			link.click();
-		} catch (error) {
-			setLoading(false);
-			toast.error("Download failed");
-		}
-	};
+	// 		const link = document.createElement("a");
+	// 		link.href = URL.createObjectURL(blob);
+	// 		link.download = filename;
+	// 		link.click();
+	// 	} catch (error) {
+	// 		setLoading(false);
+	// 		toast.error("Download failed");
+	// 	}
+	// };
 
 	/* ===== Project & Task API helpers ===== */
 	const fetchProjects = async () => {
@@ -1668,7 +1643,7 @@ export default function Timesheet({
 							onClick={handleOpenAddEntry}
 						/>
 					)}
-					{timesheetStatus === "Approved" && (
+					{/* {timesheetStatus === "Approved" && (
 						<FiDownload
 							style={{
 								fontSize: "20px",
@@ -1678,7 +1653,7 @@ export default function Timesheet({
 							}}
 							onClick={downloadTimesheet}
 						/>
-					)}
+					)} */}
 				</div>
 			</div>
 
@@ -1958,7 +1933,7 @@ export default function Timesheet({
 												<div style={{ display: "flex", gap: 8, justifyContent: 'center' }}>
 													<Button
 														variant="success"
-														size="small"
+														// size="small"
 														onClick={() =>
 															apicall_approveReject(
 																e.timesheet_entry_code,
@@ -1973,7 +1948,7 @@ export default function Timesheet({
 
 													<Button
 														variant="danger"
-														size="small"
+														// size="small"
 														onClick={() => {
 															setSelectedEntryCode(e.timesheet_entry_code);
 															setShowRejectModal(true);
@@ -2405,37 +2380,37 @@ export default function Timesheet({
 }
 
 /* ===== Agency Approve/Reject controls with confirm ===== */
-function AgencyActions({
-	onApproveConfirm,
-	onReject,
-	alertMessage,
-}: {
-	onApproveConfirm: (note?: string) => void;
-	onReject: () => void;
-	alertMessage: any;
-}) {
-	const [approveOpen, setApproveOpen] = useState(false);
-	const title = alertMessage;
-	const message = "";
-	return (
-		<>
-			<Button variant="success" onClick={() => setApproveOpen(true)}>
-				Approve
-			</Button>
-			<Button variant="danger" onClick={onReject}>
-				Reject
-			</Button>
-			<ApproveConfirmModal
-				open={approveOpen}
-				title={title}
-				message={message}
-				confirmLabel="Approve"
-				onCancel={() => setApproveOpen(false)}
-				onConfirm={() => {
-					setApproveOpen(false);
-					onApproveConfirm();
-				}}
-			/>
-		</>
-	);
-}
+// function AgencyActions({
+// 	onApproveConfirm,
+// 	onReject,
+// 	alertMessage,
+// }: {
+// 	onApproveConfirm: (note?: string) => void;
+// 	onReject: () => void;
+// 	alertMessage: any;
+// }) {
+// 	const [approveOpen, setApproveOpen] = useState(false);
+// 	const title = alertMessage;
+// 	const message = "";
+// 	return (
+// 		<>
+// 			<Button variant="success" onClick={() => setApproveOpen(true)}>
+// 				Approve
+// 			</Button>
+// 			<Button variant="danger" onClick={onReject}>
+// 				Reject
+// 			</Button>
+// 			<ApproveConfirmModal
+// 				open={approveOpen}
+// 				title={title}
+// 				message={message}
+// 				confirmLabel="Approve"
+// 				onCancel={() => setApproveOpen(false)}
+// 				onConfirm={() => {
+// 					setApproveOpen(false);
+// 					onApproveConfirm();
+// 				}}
+// 			/>
+// 		</>
+// 	);
+// }
