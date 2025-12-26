@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 import ConfirmDialog, { type ConfirmDialogHandle } from "./shared/ConfirmDialogProvider/ConfirmDialogProvider";
 import { useRef } from "react";
 import CreateTaskScreen from "./pages/Projects/CreateTask";
+import ProjectDetailsScreen from "./pages/Projects/ProjectDetails";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -41,9 +42,20 @@ export default function App() {
           <Route path="timesheets" element={<CandidateTimesheet />} handle={{ title: 'My Timesheets' }} />
           <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
           <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
-          <Route path="projects" element={<Projects />} handle={{ title: 'Projects' }} />
-          <Route path="create-project" element={<CreateProjectScreen />} />
-          <Route path="create-task" element={<CreateTaskScreen />}/>
+          <Route path="projects" element={<Projects />} />
+
+          {/* <Route path="create-project" element={<CreateProjectScreen />} /> */}
+
+          <Route path="projects/create" element={<CreateProjectScreen />} />
+          <Route path="projects/:id" element={<CreateProjectScreen />} />
+
+          <Route path="create-task" element={<CreateTaskScreen />} />
+
+
+          
+          {/* <Route path="projects/:id" element={<ProjectDetailsScreen />} /> */}
+
+
         </Route>
 
 

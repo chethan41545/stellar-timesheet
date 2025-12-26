@@ -135,4 +135,41 @@ export const theme = createTheme({
             textTransform: 'uppercase',
         },
     },
+
+    components: {
+        MuiTextField: {
+            defaultProps: {
+                variant: 'outlined', // ensure all DatePickers and inputs use outlined
+            },
+            styleOverrides: {
+                root: {
+                    "& .MuiOutlinedInput-root:not(.MuiOutlinedInput-multiline)": {
+                        borderRadius: "4px",
+                        height: "40px",
+                        color: '#202224',
+                    },
+                    "& .MuiOutlinedInput-root:not(.MuiOutlinedInput-multiline) .MuiOutlinedInput-input": {
+                        padding: "8px 24px",
+                        fontSize: "14px",
+                    },
+                    "& .MuiInputLabel-outlined": {
+                        paddingLeft: "4px",
+                        paddingRight: "10px",
+                        color: "#565656",
+                        top: "-2px",
+                    },
+                },
+            },
+        },
+
+
+        // Example: override other inputs like Select / Autocomplete
+        MuiSelect: {
+            styleOverrides: {
+                root: {
+                    height: "40px",
+                },
+            },
+        },
+    },
 });

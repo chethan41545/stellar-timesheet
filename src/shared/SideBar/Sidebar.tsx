@@ -16,9 +16,10 @@ import {
 	CalendarMonth,
 	BarChart,
 	People,
-	Settings,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 
 interface SidebarItem {
 	id: string;
@@ -76,10 +77,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 			path: '/team',
 		},
 		{
-			id: 'settings',
-			label: 'Settings',
-			icon: <Settings />,
-			path: '/settings',
+			id: 'projects',
+			label: 'Projects',
+			icon: <DisplaySettingsIcon />,
+			path: '/projects',
 		},
 	];
 
