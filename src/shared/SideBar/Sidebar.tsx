@@ -10,6 +10,7 @@ import {
 	useTheme,
 	Tooltip,
 } from '@mui/material';
+import { RiLogoutBoxLine } from "react-icons/ri";
 import {
 	Dashboard,
 	Today,
@@ -123,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 							key={item.id}
 							disablePadding
 							sx={{
-								mb: 0.5,
+								mb: '20px',
 								px: collapsed ? 1 : 2
 							}}
 						>
@@ -135,21 +136,34 @@ const Sidebar: React.FC<SidebarProps> = ({
 									py: 1.25,
 									justifyContent: collapsed ? 'center' : 'flex-start',
 									minHeight: 48,
+
+									/* ACTIVE STATE */
 									'&.Mui-selected': {
-										backgroundColor: 'secondary.contrastText',
+										backgroundColor: '#edf7fa',
 										color: 'secondary.main',
-										'&:hover': {
-											backgroundColor: 'secondary.contrastText',
-										},
 										'& .MuiListItemIcon-root': {
-											color: 'secondary.main',
+											color: '#3c4856',
+										},
+										'&:hover': {
+											backgroundColor: '#edf7fa',
 										},
 									},
+
+									/* HOVER STATE */
 									'&:hover': {
-										backgroundColor: 'action.hover',
+										backgroundColor: '#edf7fa',
+
+										'& .MuiListItemIcon-root': {
+											color: '#3c4856',
+										},
+
+										'& .MuiTypography-root': {
+											color: '#3c4856',
+										},
 									},
 								}}
 							>
+
 
 								<Tooltip title={item.label} placement="right"
 									disableHoverListener={!collapsed} // Only active when collapsed
@@ -166,6 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 									>
 										{item.icon}
 									</ListItemIcon>
+
 								</Tooltip>
 
 								{!collapsed && (
@@ -194,9 +209,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 					borderColor: 'divider',
 					display: 'flex',
 					justifyContent: 'center',
+					
+							
+								
 				}}>
 					<ListItemButton
-						onClick={onToggleCollapse}
+						onClick={() => {localStorage.clear();sessionStorage.clear();navigate('/login')}}
 						sx={{
 							borderRadius: 1,
 							justifyContent: 'center',
@@ -205,29 +223,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 							width: collapsed ? 32 : 'auto',
 						}}
 					>
-						{collapsed ? (
-							<Box >
-								<Box sx={{
-									width: 24,
-									height: 24,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center'
-								}}>
-									→
-								</Box>
-							</Box>
-						) : (
+						<Box >
 							<Box sx={{
 								width: 24,
 								height: 24,
 								display: 'flex',
 								alignItems: 'center',
-								justifyContent: 'center'
+								justifyContent: 'center',
+								border: '1px solid #3c4856'
 							}}>
-								←
+								<RiLogoutBoxLine style={{ fontSize: 'larger',color :'#3c4856' }} />
 							</Box>
-						)}
+						</Box>
+
 					</ListItemButton>
 				</Box>
 			)}

@@ -31,8 +31,8 @@
 }
 
 .checkbox:checked+.customCheck {
-	background-color: #007bff;
-	border-color: #007bff;
+	background-color: #002e71;
+	border-color: #002e71;
 }
 
 .checkbox:checked+.customCheck::after {
@@ -62,8 +62,8 @@
 }
 
 .checkbox:checked+.customCheckdisabled {
-	background-color: #007bff;
-	border-color: #007bff;
+	background-color: #002e71;
+	border-color: #002e71;
 }
 
 

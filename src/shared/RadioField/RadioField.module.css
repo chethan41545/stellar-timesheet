@@ -75,7 +75,7 @@
 
 /* Outer circle changes color when checked */
 .radio:checked+.customRadio {
-	border-color: #007bff;
+	border-color: #002e71;
 }
 
 /* Inner dot — perfectly centered */
@@ -83,12 +83,12 @@
 	content: "";
 	width: 8px;
 	height: 8px;
-	background: #007bff;
+	background: #002e71;
 	border-radius: 50%;
 }
 
 .radio:checked+.customRadiodisabled {
-	border-color: #007bff;
+	border-color: #002e71;
 }
 
 /* Inner dot — perfectly centered */
@@ -96,7 +96,7 @@
 	content: "";
 	width: 8px;
 	height: 8px;
-	background: #007bff;
+	background: #002e71;
 	border-radius: 50%;
 }
 

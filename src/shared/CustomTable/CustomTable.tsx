@@ -123,7 +123,7 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 									disabled={loading}
 									sx={{ p: 0, opacity: loading ? 0.5 : 1 }}
 								>
-									<RefreshIcon sx={{ fontSize: 16 }} style={{ color: '#0954D5' }} />
+									<RefreshIcon sx={{ fontSize: 16 }} style={{ color: '#002e71' }} />
 								</IconButton>
 							</span>
 						</Tooltip>
@@ -225,9 +225,17 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 										width: column.width || 'auto',
 										minWidth: column.width || 'auto',
 										maxWidth: column.width || 'none',
-										borderLeft: "0px !important",
+
+										/* ✅ HEADER BACKGROUND */
+										backgroundColor: '#F3F4F6',
+
+										/* subtle bottom border */
+										borderBottom: '1px solid #E5E7EB',
+
+										fontWeight: 600,
 									}}
 								>
+
 									{column.sortable ? (
 										<TableSortLabel
 											active={orderBy === column.id}
@@ -380,7 +388,7 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 						setPage(1); // Reset to first page when page size changes
 						onPageChange?.(1, newSize);
 					}}
-					smallFont ={smallFont}
+					smallFont={smallFont}
 				/>
 			}
 		</>

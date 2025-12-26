@@ -2,7 +2,7 @@
 import styles from "./Login.module.css";
 import InputField from "../shared/InputField/InputField";
 import CheckboxField from "../shared/CheckboxField/CheckboxField";
-import loginBg from "../assets/login/login_page_image.png";
+import loginBg from "../assets/login/bg.png";
 import logo from "../assets/logos/main-logo.png";
 import { useForm, FormProvider } from "react-hook-form";
 import Button from "../shared/Button/Button";
@@ -167,102 +167,97 @@ const LoginPage = () => {
     };
 
     return (
-        <div className={styles.loginContainer}>
-            <div className={styles.leftSection}>
-                <img src={loginBg} alt="Login Background" className={styles.image} />
-            </div>
+  <div className={styles.page}>
+    {/* Background Image */}
+    <div className={styles.background} />
 
-            <div className={styles.rightSection}>
-                {!showMfa ? (
-                    <div className={styles.loginBox} key="login-form">
-                        <div className={styles.logoParent}>
-                            <img src={logo} alt="main logo" className={styles.logo} />
-                        </div>
-                        <p>Enter your login id and password to proceed</p>
+    {/* Overlay */}
+    <div className={styles.overlay} />
 
-                        <FormProvider {...loginMethods}>
-                            <form onSubmit={handleLoginSubmit(onLoginSubmit)}>
-                                <InputField
-                                    label="Email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    rules={{ required: "Email is required" }}
-                                    autoComplete="username"
-                                />
+    {/* Center Card */}
+    <div className={styles.centerWrapper}>
+      {!showMfa ? (
+        <div className={styles.card}>
+          <div className={styles.logoParent}>
+            <img src={logo} alt="main logo" className={styles.logo} />
+          </div>
 
-                                <InputField
-                                    label="Password"
-                                    name="password"
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    rules={{ required: "Password is required" }}
-                                    autoComplete="current-password"
-                                />
+          {/* <h2 className={styles.title}>Sign in to Timesheets</h2> */}
+          <p className={styles.subtitle}>
+            Submit timesheets. Stay compliant.
+          </p>
 
-                                <div className={styles.options}>
-                                    <div className={styles.parentForgotReset}>
-                                        <a className={styles.forgotPass}>Forgot password?</a>
-                                        <a className={styles.forgotPass} href={ROUTES.RESET_PASSWORD}>
-                                            Reset password
-                                        </a>
-                                    </div>
-                                </div>
+          <FormProvider {...loginMethods}>
+            <form onSubmit={handleLoginSubmit(onLoginSubmit)}>
+              <InputField
+                label="Email"
+                name="email"
+                type="email"
+                placeholder="employee@stellarit.com"
+                rules={{ required: "Email is required" }}
+              />
 
-                                {apiError && <div className={styles.errorBanner}>{apiError}</div>}
+              <InputField
+                label="Password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                rules={{ required: "Password is required" }}
+              />
 
-                                <Button
-                                    label={loading ? "Logging in..." : "Login"}
-                                    type="submit"
-                                    variant="primary"
-                                    fullWidth
-                                    disabled={loading}
-                                />
-                            </form>
-                        </FormProvider>
-                    </div>
-                ) : (
-                    <Paper
-                        elevation={3}
-                        sx={{
-                            maxWidth: 420,
-                            mx: "auto",
-                            mt: 4,
-                            p: 3,
-                            borderRadius: 3,
-                        }}
-                    >
-                        <div className={styles.logoParent}>
-                            <img src={logo} alt="main logo" className={styles.logo} />
-                        </div>
+              <div className={styles.options}>
+                <a className={styles.link} href={ROUTES.RESET_PASSWORD}>
+                  Forgot password?
+                </a>
+              </div>
 
-                        <FormProvider {...otpMethods}>
-                            <form onSubmit={handleOtpSubmit(onOtpSubmit)}>
-                                <p className={styles.verificationHeader}>Please complete an extra verification step.</p>
-                                {mfaImage && (
-                                    <div>
-                                        <p>Scan the QR code with your preferred authenticator app to configure MFA for your account.</p>
-                                        <div className={styles.mfaImageContainer}>
-                                            <img src={mfaImage} alt="MFA" className={styles.mfaImage} style={{ maxWidth: "140px" }} />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <p>For added security, please provide the MFA code from your registered device to finish signing in.</p>
-
-                                <InputField label="MFA Code" name="mfaOtp" type="mfa" placeholder="Enter MFA Code" rules={{ required: "OTP is required" }} />
-
-                                <Button label={loading ? "Verifying..." : "Verify Code"} type="submit" variant="primary" fullWidth disabled={loading} />
-                                <Box mt={2}>
-                                    <Button label={loading ? "Cancelling..." : "Cancel"} type="button" variant="secondary" fullWidth disabled={loading} onClick={handleMfaCancel} />
-                                </Box>
-                            </form>
-                        </FormProvider>
-                    </Paper>
-                )}
-            </div>
+              <Button
+                label={loading ? "Signing in..." : "Sign In"}
+                type="submit"
+                fullWidth
+                disabled={loading}
+              />
+            </form>
+          </FormProvider>
         </div>
-    );
+      ) : (
+        <div className={styles.card}>
+          <h2 className={styles.title}>MFA Verification</h2>
+          <p className={styles.subtitle}>
+            Enter the verification code from your authenticator app
+          </p>
+
+          <FormProvider {...otpMethods}>
+            <form onSubmit={handleOtpSubmit(onOtpSubmit)}>
+              <InputField
+                label="MFA Code"
+                name="mfaOtp"
+                placeholder="123 456"
+                rules={{ required: "OTP is required" }}
+              />
+
+              <Button
+                label={loading ? "Verifying..." : "Verify"}
+                type="submit"
+                fullWidth
+              />
+
+              <Button
+                label="Cancel"
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={handleMfaCancel}
+                style={{ marginTop: 12 }}
+              />
+            </form>
+          </FormProvider>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 };
 
 export default LoginPage;

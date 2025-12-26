@@ -3,9 +3,10 @@ import apiService from '../services/apiService';
 import { API_ENDPOINTS } from '../constants/apiUrls';
 import axios from 'axios';
 import CustomTable from '../shared/CustomTable/CustomTable';
-import { Box, Grid, Skeleton } from '@mui/material';
+import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import SearchField from '../shared/SearchField/SearchField';
 import { useDebouncedValue } from '../utils/commonUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface TimesheetResponse {
     timesheet: any;
@@ -49,13 +50,40 @@ const TimesheetList: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
     const [tableLoading, setTableLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const submitTimesheet = (row: any) => {
+		navigate(`/timesheets/${row.timesheet_code}`);
+	};
 
     const columns = [
         {
             id: 'user_name',
             label: 'User',
             width: '120px',
-            sortable: true
+            sortable: true,
+            format: (value: string, row: any) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+						<Typography
+							variant="body2"
+							fontSize="12px"
+							role="button"
+							tabIndex={0}
+							onClick={() => submitTimesheet(row)}
+							sx={{
+								cursor: 'pointer',
+								'&:hover': { textDecoration: 'underline', color: 'primary.main' },
+								whiteSpace: 'nowrap',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+							}}
+						>
+							{value}
+						</Typography>
+					</Box>
+				);
+			},
         },
         {
             id: 'timesheet_status',
@@ -99,6 +127,12 @@ const TimesheetList: React.FC = () => {
             width: '120px',
             sortable: true
         },
+          {
+            id: 'total_hours',
+            label: 'Total Hours',
+            width: '120px',
+            sortable: true
+        },
     ]
 
     useEffect(() => {
@@ -125,7 +159,7 @@ const TimesheetList: React.FC = () => {
 
         try {
 
-            const response = await apiService.postMethod(API_ENDPOINTS.CANDIDATE_TIMESHEET_SEARCH, payload);
+            const response = await apiService.postMethod(API_ENDPOINTS.ALL_CANDIDATE_TIMESHEET_SEARCH, payload);
 
             setData(response.data.data);
 

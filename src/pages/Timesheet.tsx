@@ -13,11 +13,15 @@ import Apiservice from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import CustomSkeleton from "../shared/CustomSkeleton/CustomSkeleton";
 import {
+	Autocomplete,
+	Box,
 	Dialog,
 	DialogActions,
 	DialogContent,
+	DialogTitle,
 	TextField,
 	Tooltip,
+	Typography,
 } from "@mui/material";
 import { LuTrash2 } from "react-icons/lu";
 
@@ -302,6 +306,7 @@ function adaptNewApiToLegacy(apiRaw: any): TimesheetApiData {
 			enabled: tr.is_editable,
 		})),
 		can_delete: row.can_delete,
+		can_approve: row.can_approve,
 		timesheet_entry_code: row.timesheet_entry_code
 	}));
 
@@ -341,6 +346,7 @@ function mapApiDataToState(api: any): {
 		const costCenterName: any = ts.costCenterName;
 		const chargeCodeName: any = ts.chargeCode;
 		const can_delete: any = ts.can_delete;
+		const can_approve: any = ts.can_approve;
 		const timesheet_entry_code: any = ts.timesheet_entry_code;
 
 
@@ -372,6 +378,7 @@ function mapApiDataToState(api: any): {
 			comments,
 			enabled,
 			can_delete,
+			can_approve,
 			timesheet_entry_code
 		});
 	});
@@ -544,7 +551,7 @@ export default function Timesheet({
 }: TimesheetProps) {
 	const role = normalize(readRole());
 	const isCandidate = role === "employee";
-	const isAgency = role === "agency";
+	const isAgency = role === "manager";
 	const { id } = useParams();
 
 	const [freq, setFreq] = useState<Frequency>(freqOverride ?? "BIWEEKLY");
@@ -587,6 +594,8 @@ export default function Timesheet({
 	const [taskList, setTaskList] = useState<TaskOption[]>([]);
 	const [projectLoading, setProjectLoading] = useState(false);
 	const [taskLoading, setTaskLoading] = useState(false);
+	const [selectedEntryCode, setSelectedEntryCode] = useState<string | null>(null);
+
 
 	/* sync freq if parent changes it */
 	useEffect(() => {
@@ -725,10 +734,6 @@ export default function Timesheet({
 			isOver8: false,
 		});
 		setPopupCell(null);
-		updateTimesheetCell(
-			entries.find((e) => e.id === entryId),
-			dayIdx
-		);
 
 	};
 
@@ -882,29 +887,28 @@ export default function Timesheet({
 			setPrevTimesheetId(null);
 			setNextTimesheetId(null);
 			setTimesheetStatus(adapted.status ?? null);
+			const history = (apiRaw.history || []).map((item: any) => ({
+				id: uid(),
+				status: item.new_status,
+				by: item.user,
+				at: item.date,
+				comment: null,
+				project: item.project_name,
+				prevStatus: item.old_status,
+				newStatus: item.new_status,
+				changeType: "StatusUpdate",
+			}))
+			setHistory(history);
 
 			setagencyName(apiRaw?.agencyName);
 			setCandidatename(apiRaw?.candidateName || "");
-			setAlertMessage(apiRaw?.alertMessage || "");
 
 			const mapped = mapApiDataToState(adapted);
 			setDays(mapped.days);
 			setEntries(mapped.entries);
 			setHolidayByDay(mapped.holidayByDay);
-			setHistory(mapped.history);
 		} catch (err: unknown) {
-			if (axios.isAxiosError(err)) {
-				console.error(
-					"API Error:",
-					err.response?.data?.message || err.message
-				);
-				toast.error(
-					err.response?.data?.message || "Unable to fetch timesheet data."
-				);
-			} else {
-				console.error("Unexpected Error:", err);
-				toast.error("Unexpected error while fetching timesheet.");
-			}
+
 			setDays([]);
 			setEntries([]);
 			setHistory([]);
@@ -915,10 +919,10 @@ export default function Timesheet({
 	};
 
 	const STATUS_COLORS: Record<string, string> = {
-		new: "#0954D5",
+		new: "#002e71",
 		"pending approval": "#FB8C00",
 		pending: "#FB8C00",
-		approved: "#5CD862",
+		approved: "#34ac51",
 		rejected: "#C62828",
 		default: "#7F7F7F",
 	};
@@ -1046,10 +1050,12 @@ export default function Timesheet({
 		return true;
 	};
 
-	
+
 
 	const savePeriod = async () => {
-		const isRejectedStatus = timesheetStatus === "Rejected";
+		debugger
+		const isRejectedStatus = timesheetStatus === "Rejected" ||
+			timesheetStatus === "Partially Rejected";
 		const canEditStatus =
 			!timesheetStatus ||
 			timesheetStatus === "Draft" ||
@@ -1093,49 +1099,50 @@ export default function Timesheet({
 
 
 	const Recall = async () => {
-  const effectiveTimesheetCode =
-    timesheetCode || (typeof id === "string" ? id : "");
+		const effectiveTimesheetCode =
+			timesheetCode || (typeof id === "string" ? id : "");
 
-  if (!effectiveTimesheetCode) {
-    toast.error("Missing timesheet code");
-    return;
-  }
+		if (!effectiveTimesheetCode) {
+			toast.error("Missing timesheet code");
+			return;
+		}
 
-  const firstEntry = entries.find(e => e.timesheet_entry_code);
-  if (!firstEntry) {
-    toast.error("No timesheet entries found");
-    return;
-  }
+		const firstEntry = entries.find(e => e.timesheet_entry_code);
+		if (!firstEntry) {
+			toast.error("No timesheet entries found");
+			return;
+		}
 
-  const payload = {
-    timesheet_code: effectiveTimesheetCode,
-    timesheet_entry_code: "",
-    action: "cancel",
-    comment: ""
-  };
+		const payload = {
+			timesheet_code: effectiveTimesheetCode,
+			timesheet_entry_code: "",
+			action: "cancel",
+			comment: ""
+		};
 
-  try {
-    const res = await Apiservice.postMethod(
-      API_ENDPOINTS.TIMESHEET_REVIEW,
-      payload
-    );
+		try {
+			const res = await Apiservice.postMethod(
+				API_ENDPOINTS.TIMESHEET_REVIEW,
+				payload
+			);
 
-    if (res?.data?.status === "success") {
-      toast.success(res.data.message || "Timesheet recalled successfully");
-      fetchTimesheet(""); // ✅ NOW it will run
-    } else {
-      toast.error(res?.data?.message || "Recall failed");
-    }
-  } catch (error) {
-    toast.error("Failed to recall timesheet");
-    console.error(error);
-  }
-};
+			if (res?.data?.status === "success") {
+				toast.success(res.data.message || "Timesheet recalled successfully");
+				fetchTimesheet(""); // ✅ NOW it will run
+			} else {
+				toast.error(res?.data?.message || "Recall failed");
+			}
+		} catch (error) {
+			toast.error("Failed to recall timesheet");
+			console.error(error);
+		}
+	};
 
 
 
 	const submitPeriod = async () => {
-		const isRejectedStatus = timesheetStatus === "Rejected";
+		const isRejectedStatus = timesheetStatus === "Rejected" ||
+			timesheetStatus === "Partially Rejected";
 		const canEditStatus =
 			!timesheetStatus ||
 			timesheetStatus === "Draft" ||
@@ -1232,9 +1239,11 @@ export default function Timesheet({
 		});
 	};
 
-	const isRejected = timesheetStatus === "Rejected";
+	const isRejected =
+		timesheetStatus === "Rejected" ||
+		timesheetStatus === "Partially Rejected";
+
 	const editable =
-		isCandidate &&
 		(!timesheetStatus ||
 			timesheetStatus === "Draft" ||
 			timesheetStatus === "New" ||
@@ -1285,43 +1294,74 @@ export default function Timesheet({
 	};
 
 	const handleConfirmReject = async () => {
+		if (!selectedEntryCode) {
+			toast.error("Missing timesheet entry code");
+			return;
+		}
+
 		setRejecting(true);
-		apicall_approveReject(timesheetCode || id, "Rejected", rejectReason);
+		apicall_approveReject(
+			selectedEntryCode, // ✅ correct entry code
+			"Reject",
+			rejectReason
+		);
 	};
 
-	const apicall_approveReject = (data: any, action: any, rejectReason: any) => {
-		let posturl = API_ENDPOINTS.APPROVE_TIMESHEET;
+
+	const apicall_approveReject = async (
+		timesheetEntryCode: string,
+		action: any,
+		rejectReason: string
+	) => {
+		const effectiveTimesheetCode =
+			timesheetCode || (typeof id === "string" ? id : "");
+
+		if (!effectiveTimesheetCode) {
+			toast.error("Missing timesheet code");
+			return;
+		}
+
+		if (!timesheetEntryCode) {
+			toast.error("Missing timesheet entry code");
+			return;
+		}
+
 		const payload = {
-			updates: {
-				timesheetId: [data],
-				status: action,
-				comment: rejectReason,
-			},
+			timesheet_code: effectiveTimesheetCode,
+			timesheet_entry_code: timesheetEntryCode,
+			action: action.toLowerCase(), // approved | rejected
+			comment: rejectReason || "",
 		};
 
-		setLoading(true);
-		Apiservice.postMethod(posturl, payload)
-			.then((response) => {
-				setLoading(false);
-				setRejecting(false);
-				setShowRejectModal(false);
-				setRejectReason("");
-				if (response?.data?.status === "success") {
-					let message =
-						action === "Approved"
-							? "Timesheet Approved."
-							: "Timesheet Rejected.";
-					fetchTimesheet("");
-					toast.success(message);
-				} else {
-					toast.error("Failure");
-				}
-			})
-			.catch((error) => {
-				console.error("There was an error!", error);
-				setLoading(false);
-			});
+		try {
+			setLoading(true);
+
+			const res = await Apiservice.postMethod(
+				API_ENDPOINTS.TIMESHEET_REVIEW,
+				payload
+			);
+
+			if (res?.data?.status === "success") {
+				toast.success(
+					action === "Approved"
+						? "Timesheet approved successfully"
+						: "Timesheet rejected successfully"
+				);
+				fetchTimesheet("");
+			} else {
+				toast.error(res?.data?.message || "Action failed");
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("Failed to update timesheet");
+		} finally {
+			setLoading(false);
+			setRejecting(false);
+			setShowRejectModal(false);
+			setRejectReason("");
+		}
 	};
+
 
 	const downloadTimesheet = async () => {
 		try {
@@ -1620,7 +1660,7 @@ export default function Timesheet({
 				</div>
 
 				<div className={styles.rightControls}>
-					{isCandidate && editable && (
+					{editable && (
 						<Button
 							variant="secondary"
 							type="button"
@@ -1697,6 +1737,11 @@ export default function Timesheet({
 									<br />
 									HRS
 								</th>
+								{entries.some(e => e.can_approve === true) && (
+									<th className={`${styles.th} `} style={{ width: '80px', textAlign: 'center' }}>
+										Actions
+									</th>
+								)}
 							</tr>
 						</thead>
 
@@ -1908,6 +1953,40 @@ export default function Timesheet({
 										>
 											{rowTotal(e).toFixed(2)}
 										</td>
+										{e.can_approve && (
+											<td className={`${styles.td} ${styles.lastCol}`}>
+												<div style={{ display: "flex", gap: 8, justifyContent: 'center' }}>
+													<Button
+														variant="success"
+														size="small"
+														onClick={() =>
+															apicall_approveReject(
+																e.timesheet_entry_code,
+																"Approve",
+																""
+															)
+														}
+														style={{ padding: '5px 10px', fontSize: 13, fontWeight: 600 }}
+													>
+														Approve
+													</Button>
+
+													<Button
+														variant="danger"
+														size="small"
+														onClick={() => {
+															setSelectedEntryCode(e.timesheet_entry_code);
+															setShowRejectModal(true);
+															setRejectReason("");
+														}}
+														style={{ padding: '5px 10px', fontSize: 13, fontWeight: 600 }}
+													>
+														Reject
+													</Button>
+												</div>
+											</td>
+										)}
+
 									</tr>
 								))
 							)}
@@ -1982,12 +2061,6 @@ export default function Timesheet({
 								type="button"
 							/>
 						</>
-					) : isAgency && timesheetStatus === "Pending Approval" ? (
-						<AgencyActions
-							alertMessage={alertMessage}
-							onApproveConfirm={() => onApproveConfirm()}
-							onReject={() => setShowRejectModal(true)}
-						/>
 					) : isCandidate && timesheetStatus === "Pending Approval" ? (
 						<Button
 							label="Recall"
@@ -2227,119 +2300,106 @@ export default function Timesheet({
 
 			{/* Add Entry Modal */}
 			<Dialog
-				open={showAddEntryModal}
-				onClose={() => setShowAddEntryModal(false)}
-				maxWidth={false}          // disable built-in breakpoints
-				PaperProps={{
-					sx: {
-						width: 350,           // your custom width
-						maxWidth: "calc(100% - 32px)", // keep it responsive on small screens
-						borderRadius: 2,
-					},
-				}}
-			>
+  open={showAddEntryModal}
+  onClose={() => !projectLoading && setShowAddEntryModal(false)}
+  maxWidth="xs"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+    },
+  }}
+>
+  {/* ===== Header ===== */}
+  <DialogTitle sx={{ pb: 0 }}>
+    <Typography fontSize={18} fontWeight={600}>
+      Add Timesheet Entry
+    </Typography>
+    <Typography fontSize={13} color="text.secondary" style={{margin : '10px 0'}}>
+      Select a project and task to log hours
+    </Typography>
+  </DialogTitle>
 
-				<DialogContent dividers>
-					<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-						<div>
-							<label
-								style={{
-									display: "block",
-									marginBottom: 4,
-									fontWeight: 500,
-									fontSize: 14,
-								}}
-							>
-								Project
-							</label>
-							<select
-								style={{
-									width: "100%",
-									padding: "8px 10px",
-									borderRadius: 4,
-									border: "1px solid #ccc",
-									background: 'white',
-									color: 'black'
-								}}
-								value={selectedProjectId}
-								onChange={(e) => handleProjectChange(e.target.value)}
-							>
-								<option value="">Select project</option>
-								{projectList.map((p) => (
-									<option key={p.id} value={p.id}>
-										{p.name}
-									</option>
-								))}
-							</select>
-							{projectLoading && (
-								<div style={{ fontSize: 12, marginTop: 4 }}>Loading projects…</div>
-							)}
-						</div>
+  {/* ===== Content ===== */}
+  <DialogContent sx={{ pt: 3 }}>
+    <Box display="flex" flexDirection="column" gap={2.5}>
+      {/* Project */}
+      <Autocomplete
+        options={projectList}
+        getOptionLabel={(option) => option.name}
+        value={projectList.find(p => p.id === selectedProjectId) || null}
+        onChange={(_, value) => handleProjectChange(value?.id || "")}
+        loading={projectLoading}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Project"
+            placeholder="Select project"
+            size="small"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {projectLoading ? (
+                    <Typography fontSize={12} mr={1}>
+                      Loading…
+                    </Typography>
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
 
-						<div>
-							<label
-								style={{
-									display: "block",
-									marginBottom: 4,
-									fontWeight: 500,
-									fontSize: 14,
-								}}
-							>
-								Task
-							</label>
-							<select
-								style={{
-									width: "100%",
-									padding: "8px 10px",
-									borderRadius: 4,
-									border: "1px solid #ccc",
-									background: 'white',
-									color: 'black'
-								}}
-								value={selectedTaskId}
-								onChange={(e) => handleTaskChange(e.target.value)}
-								disabled={!selectedProjectId}
-							>
-								<option value="">Select task</option>
-								{taskList.map((t) => (
-									<option key={t.id} value={t.id}>
-										{t.name}
-									</option>
-								))}
-							</select>
-							{taskLoading && (
-								<div style={{ fontSize: 12, marginTop: 4 }}>Loading tasks…</div>
-							)}
-						</div>
+      {/* Task */}
+      <Autocomplete
+        options={taskList}
+        getOptionLabel={(option) => option.name}
+        value={taskList.find(t => t.id === selectedTaskId) || null}
+        onChange={(_, value) => handleTaskChange(value?.id || "")}
+        disabled={!selectedProjectId}
+        loading={taskLoading}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Task"
+            placeholder={
+              selectedProjectId ? "Select task" : "Select project first"
+            }
+            size="small"
+          />
+        )}
+      />
 
-						{addEntryError && (
-							<div style={{ color: "#d32f2f", fontSize: 12 }}>
-								{addEntryError}
-							</div>
-						)}
-						{!projectLoading && !projectList.length && (
-							<div style={{ fontSize: 12 }}>
-								No projects available to add entries.
-							</div>
-						)}
-					</div>
-				</DialogContent>
-				<DialogActions>
-					<Button
-						variant="secondary"
-						onClick={() => setShowAddEntryModal(false)}
-					>
-						Cancel
-					</Button>
-					<Button
-						variant="primary"
-						onClick={handleConfirmAddEntry}
-						disabled={!selectedTaskId || !selectedProjectId}
-					>
-						Add
-					</Button>
-				</DialogActions>
-			</Dialog>
+      {/* Error */}
+      {addEntryError && (
+        <Typography fontSize={12} color="error">
+          {addEntryError}
+        </Typography>
+      )}
+    </Box>
+  </DialogContent>
+
+  {/* ===== Actions ===== */}
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button
+      variant="secondary"
+      onClick={() => setShowAddEntryModal(false)}
+    >
+      Cancel
+    </Button>
+    <Button
+      variant="primary"
+      onClick={handleConfirmAddEntry}
+      disabled={!selectedProjectId || !selectedTaskId}
+    >
+      Add Entry
+    </Button>
+  </DialogActions>
+</Dialog>
+
 		</div>
 	);
 }

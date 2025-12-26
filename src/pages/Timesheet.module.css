@@ -4,7 +4,7 @@
 	margin: 0 auto;
 	padding: 0;
 	color: #0f172a;
-	background: #EDF7FA;
+	background: #ffffff;
 }
 
 .wrap :where(input, select, textarea) {
@@ -298,7 +298,7 @@
 .addLink {
 	background: none;
 	border: none;
-	color: #0954d5;
+	color: #002e71;
 	cursor: pointer;
 	padding: 0;
 	font-weight: 500;
@@ -857,7 +857,7 @@
 }
 
 .submitted {
-	background: #5cd862;
+	background: #34ac51;
 	color: #fff;
 }
 
@@ -874,7 +874,7 @@
 	display: inline-flex;
 	gap: 8px;
 	align-items: center;
-	background: #0954d5;
+	background: #002e71;
 	color: #fff;
 	border: 0;
 	border-radius: 10px;

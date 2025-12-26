@@ -31,8 +31,9 @@ const CommonLayout: React.FC = () => {
             {/* Header - Fixed at top */}
             <Box position={"sticky"} top={0} zIndex={1000}>
                 <Header
-                    userName="John Doe"
+                    userName={localStorage.getItem('user_full_name')}
                     onLogout={handleLogout}
+                    userRole={localStorage.getItem('role')}
                 />
             </Box>
 
@@ -48,7 +49,7 @@ const CommonLayout: React.FC = () => {
                     flexShrink: 0,
                     borderRight: '1px solid',
                     borderColor: 'divider',
-                    backgroundColor: 'background.paper',
+                    backgroundColor: '#6f94bc',
                     overflowY: 'auto',
                     transition: 'width 0.3s ease'
                 }}>
@@ -87,22 +88,7 @@ const CommonLayout: React.FC = () => {
       {title}
     </Typography>
 
-    <Paper
-      sx={{
-        p: 3,
-        width: '100%',
-        maxWidth: '100%',
-        minHeight: '70vh',
-        borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        border: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: 'white',
-        boxSizing: 'border-box',
-      }}
-    >
       <Outlet />
-    </Paper>
   </Box>
 )}
 

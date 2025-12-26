@@ -36,7 +36,7 @@
 
   --bodyblack: #1F1F1F;
   --h3black: #202224;
-  --ctahighlight: #0954D5;
+  --ctahighlight: #002e71;
   --blackmenubar: #292929;
   --link: #1976D2;
   --bgdarker: #DAECEF;
@@ -86,9 +86,9 @@ button {
   transition: border-color 0.25s;
 }
 
-button:hover {
+/* button:hover {
   border-color: #646cff;
-}
+} */
 
 button:focus,
 button:focus-visible {

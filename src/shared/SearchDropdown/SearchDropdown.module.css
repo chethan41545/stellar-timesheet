@@ -36,7 +36,7 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  min-width: 260px;
+  min-width: 180px;
   background: #ffffff;              /* light popup */
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -81,7 +81,7 @@
   background-clip: padding-box;
 }
 .options:hover::-webkit-scrollbar-thumb{ background: #AEBBCC; }
-.options::-webkit-scrollbar-thumb:active{ background: #0954D5; }
+.options::-webkit-scrollbar-thumb:active{ background: #002e71; }
 
 /* (Optional) Smooth feel on iOS Safari */
 @supports (-webkit-overflow-scrolling: touch){
@@ -113,7 +113,7 @@
 .checkmark{
   margin-left: auto;
   font-size: 14px;
-  color: #0954D5;
+  color: #002e71;
   font-weight: 700;
 }
 
@@ -138,7 +138,7 @@
   background: #fff !important;
   border: 1.5px solid #A7B0B9 !important;
   border-radius: 4px;
-  accent-color: #0954D5;
+  accent-color: #002e71;
   box-shadow: none !important;
 }
 

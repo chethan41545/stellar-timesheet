@@ -204,8 +204,8 @@
 
 /* ✅ When checked — blue background with white tick */
 .checkbox:checked+.customCheck {
-	border-color: #007bff;
-	background-color: #007bff;
+	border-color: #002e71;
+	background-color: #002e71;
 }
 
 .checkbox:checked+.customCheck::after {
@@ -223,7 +223,7 @@
 
 /* Optional: small hover glow */
 .optionRow:hover .customCheck {
-	border-color: #007bff;
+	border-color: #002e71;
 }
 
 .optionLabel {

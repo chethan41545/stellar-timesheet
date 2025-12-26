@@ -60,7 +60,16 @@ export default function CandidateTimesheet() {
 
       setRows(list);
       setTotalPages(meta.total_pages || 1);
-      setSelectedCode(list[0]?.timesheet_code ?? null);
+      setSelectedCode((prev) => {
+  if (!prev) return list[0]?.timesheet_code ?? null;
+
+  const stillExists = list.some(
+    (r: any) => r.timesheet_code === prev
+  );
+
+  return stillExists ? prev : list[0]?.timesheet_code ?? null;
+});
+
     } catch (err: any) {
       console.error(
         "Timesheet fetch failed:",
@@ -77,16 +86,20 @@ export default function CandidateTimesheet() {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const activeRow = useMemo(
-    () => rows.find((r) => r.timesheet_code === selectedCode),
-    [rows, selectedCode]
-  );
+  const activeRow = useMemo(() => {
+  return rows.find(
+    (r) => r.timesheet_code === selectedCode
+  ) ?? rows[0] ?? null;
+}, [rows, selectedCode]);
+
 
   const STATUS_COLORS: any = {
   "pending approval": "#E19E20", // deeper amber (better contrast)
-  draft: "#3F51B5",              // indigo (calmer than pure blue)
+  draft: "#3F51B5",  
+  "partially approved": "#2E7D32",            // indigo (calmer than pure blue)
   approved: "#2E7D32",           // dark green (professional)
-  rejected: "#C62828",           // strong red
+  rejected: "#C62828",
+  "partially rejected": "#C62828",           // strong red
   default: "#6B7280",
 };
 
@@ -155,7 +168,7 @@ export default function CandidateTimesheet() {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "100%", background: "#EDF7FA" }}>
+    <Box sx={{ width: "100%", height: "100%", background: "#ffffff" }}>
       <Grid container sx={{ height: "100%" }}>
         {/* LEFT LIST */}
         <Grid sx={{ width: "25%", minWidth: 300, borderRight: "1px solid #ddd" }}>
@@ -165,7 +178,7 @@ export default function CandidateTimesheet() {
               Timesheets
             </Typography>
 
-            <SearchDropdown
+            {/* <SearchDropdown
               name="status"
               values={statusFilter}
               onChange={setStatusFilter}
@@ -173,7 +186,7 @@ export default function CandidateTimesheet() {
               options={STATUS_OPTIONS}
               placeholder="Status"
               allSelectedHeading="Status"
-            />
+            /> */}
             </Box>
 
             <Box mt={2}>

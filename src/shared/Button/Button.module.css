@@ -31,21 +31,21 @@
 
 /* Variants */
 .primary {
-  background-color: #0954D5;
+  background-color: #002e71;
   color: #ffffff;
   box-shadow: 0 2px 10px rgba(11, 98, 246, .2);
 }
-.primary:hover { background-color: #0a57db; }
+/* .primary:hover { background-color: #336895 } */
 
 .secondary {
   background-color: #f3f4f6;
-  color: #0954D5;
-  border: 1px solid #0954D5;
+  color: #002e71;
+  border: 1px solid #002e71;
 }
 
-.danger { background-color: #C62828; color: #fff; }
+.danger { background-color: #ffffff; color: #C62828;border: 1px solid #C62828; }
 .tertiary { border: 1px solid #606060; background-color: #f3f4f6; color: #606060; }
-.success { background-color: #5CD862; color: #fff; }
+.success { background-color: #ffffff; color: #34ac51;border: 1px solid #34ac51; }
 
 /* Optional: nice focus handling */
 .button:focus { outline: none; }
