@@ -210,9 +210,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 					borderColor: 'divider',
 					display: 'flex',
 					justifyContent: 'center',
-					
-							
-								
+
+
+
 				}}>
 					<ListItemButton
 						onClick={() => {localStorage.clear();sessionStorage.clear();navigate('/login')}}

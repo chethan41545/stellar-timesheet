@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography} from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../shared/Header/Header';
 import Sidebar from '../shared/SideBar/Sidebar';
