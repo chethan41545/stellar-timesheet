@@ -13,7 +13,10 @@ export const API_ENDPOINTS = {
   PROJECT_REPORTS:"/reports/projects",
 
   PROJECT_LIST:"/project/search",
+  GET_PROJECT_DETAILS:"/project/details",
   CREATE_PROJECT:"project/create-project",
-  CREATE_TASK:"project/create-task"
+  UPDATE_PROJECT:"project/update-project",
+  CREATE_TASK:"project/create-task",
+  ASSIGN_USER_PROJECT :"user/assign-project"
   // add other endpoints as needed
 };

@@ -15,7 +15,6 @@ import {
     Cell,
     ResponsiveContainer,
     Legend,
-    CartesianGrid,
 } from "recharts";
 import GraphTooltip from "../shared/GraphTooltip/GraphTooltip";
 import { customScrollbar } from "../shared/Styles/CommonStyles";
@@ -48,7 +47,7 @@ const ReportsScreen: React.FC = () => {
     const [users, setUsers] = useState<any>([]);
 
     const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState<any>("");
+    // const [selectedDate, setSelectedDate] = useState<any>("");
 
     // const options = [
     //     { label: 'Oliver Hansen', value: 'oliver' },

@@ -1,6 +1,6 @@
 // Button.tsx
 // Button.tsx
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode, CSSProperties } from "react";
 import styles from "./Button.module.css";
 
 type ButtonProps = {
@@ -13,6 +13,7 @@ type ButtonProps = {
   fullWidth?: boolean;
   leftIcon?: ReactNode;              // NEW
   rightIcon?: ReactNode;             // NEW
+  sx?: CSSProperties;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const Button = ({
@@ -25,12 +26,14 @@ const Button = ({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  sx,
    ...rest
 }: ButtonProps) => {
   return (
     <button
       type={type}
       className={`${styles.button} ${styles[variant]} ${fullWidth ? styles.full : ""}`} {...rest}
+      style={sx}
       disabled={disabled}
       onClick={onClick}
     >

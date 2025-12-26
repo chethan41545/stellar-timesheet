@@ -12,6 +12,10 @@ class ApiService {
     return http.get(url, config);
   }
 
+  getMethodParams(url: string, params: any) {
+    return http.get(url, { params });
+  }
+
   // PUT
   putMethod(url: string, data?: any, config?: any) {
     return http.put(url, data, config);

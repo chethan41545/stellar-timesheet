@@ -9,7 +9,7 @@ import Projects from "./pages/Projects";
 import CreateProjectScreen from "./pages/Projects/CreateProject";
 import { ToastContainer } from "react-toastify";
 import ConfirmDialog, { type ConfirmDialogHandle } from "./shared/ConfirmDialogProvider/ConfirmDialogProvider";
-import { useRef } from "react";
+import { useRef, type JSX } from "react";
 import CreateTaskScreen from "./pages/Projects/CreateTask";
 import Timesheet from "./pages/Timesheet";
 
@@ -31,33 +31,34 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route
-  path="/"
-  element={
-    <PrivateRoute>
-      <CommonLayout />
-    </PrivateRoute>
-  }
->
-  <Route index element={<Navigate to="timesheets" replace />} />
+          path="/"
+          element={
+            <PrivateRoute>
+              <CommonLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<Navigate to="timesheets" replace />} />
 
-  {/* TIMESHEETS */}
-  <Route path="timesheets" handle={{ title: 'My Timesheets' }}>
-    <Route
-      index
-      element={
-        <CandidateTimesheet
-        />
-      }
-    />
-    <Route path=":id" element={<Timesheet />} />
-  </Route>
+          {/* TIMESHEETS */}
+          <Route path="timesheets" handle={{ title: 'My Timesheets' }}>
+            <Route
+              index
+              element={
+                <CandidateTimesheet
+                />
+              }
+            />
+            <Route path=":id" element={<Timesheet />} />
+          </Route>
 
-  <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
-  <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
-  <Route path="projects" element={<Projects />} handle={{ title: 'Projects' }} />
-  <Route path="create-project" element={<CreateProjectScreen />} />
-  <Route path="create-task" element={<CreateTaskScreen />} />
-</Route>
+          <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
+          <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="projects/create" element={<CreateProjectScreen />} />
+          <Route path="projects/:id" element={<CreateProjectScreen />} />
+          <Route path="create-task" element={<CreateTaskScreen />} />
+        </Route>
 
 
 

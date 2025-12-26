@@ -3,11 +3,22 @@ import {
     Box,
     Typography,
     TextField,
-    Button,
     Grid,
     Alert,
-    CircularProgress,
     MenuItem,
+    Paper,
+    Switch,
+    Card,
+    CardContent,
+    Chip,
+    Avatar,
+    Divider,
+    Stack,
+    Tooltip,
+    alpha,
+    useTheme,
+    FormControlLabel,
+    Fade,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -18,6 +29,14 @@ import apiService from '../../services/apiService';
 import { API_ENDPOINTS } from '../../constants/apiUrls';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
+import Button from '../../shared/Button/Button';
+
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import GroupsIcon from '@mui/icons-material/Groups';
+
+import DescriptionIcon from '@mui/icons-material/Description';
+import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
 
 interface ProjectFormData {
     name: string;
@@ -27,76 +46,146 @@ interface ProjectFormData {
     manager_code: string;
 }
 
-
 const validationSchema = yup.object({
-    name: yup
-        .string()
-        .min(3, 'Project name must be at least 3 characters')
-        .max(100, 'Project name must be less than 100 characters')
-        .required('Project name is required'),
+    name: yup.string().min(3).max(100).required('Project name is required'),
     description: yup.string(),
-    start_date: yup
-        .date()
-        .nullable()
-        .required('Start date is required')
-        .typeError('Please enter a valid date'),
+    start_date: yup.date().nullable().required('Start date is required'),
     end_date: yup
         .date()
         .nullable()
-        .min(
-            yup.ref('start_date'),
-            'End date must be after start date'
-        )
-        .typeError('Please enter a valid date'),
+        .min(yup.ref('start_date'), 'End date must be after start date'),
     manager_code: yup.string(),
 });
 
 const CreateProjectScreen: React.FC = () => {
+    const { id } = useParams();
+
+    const navigate = useNavigate();
+
+    const isCreateMode = !id;
+    const theme = useTheme();
+
+    const [isEdit, setIsEdit] = useState(isCreateMode);
     const [isLoading, setIsLoading] = useState(false);
+    const [isAssigning, setIsAssigning] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const [managers, setManagers] = useState<any>([]);
+    // const [success, setSuccess] = useState<string | null>(null);
+    const [managers, setManagers] = useState<any[]>([]);
+    const [allEmployees, setAllEmployees] = useState<any[]>([]);
+    const [assignedEmployees, setAssignedEmployees] = useState<any[]>([]);
+    const [selectedUser, setSelectedUser] = useState("");
 
-    const fetchUsers = async () => {
+    /* ---------------- Fetch Managers ---------------- */
+    const fetchUsers = async (assigned: any[] = assignedEmployees) => {
         try {
-            const payload = { variant: "manager" }
-            const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST, payload);
+            const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST);
 
-            const usersList = response.data.data.map((user: any) => ({
-                label: user.name,
-                value: user.code,
-            }));
+            // Managers
+            setManagers(
+                response.data.data
+                    .filter((u: any) => u.role === "Manager")
+                    .map((u: any) => ({
+                        label: u.name,
+                        value: u.code,
+                        avatar: u.avatar || u.name.charAt(0)
+                    }))
+            );
 
-            setManagers(usersList);
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error("API Error:", error.response?.data);
-            } else {
-                console.error(error);
-            }
+            const assignedCodes = new Set(assigned.map(e => e.code));
+
+            const usersList = response.data.data
+                .filter((user: any) => !assignedCodes.has(user.code))
+                .map((user: any) => ({
+                    label: user.name,
+                    value: user.code,
+                    role: user.role,
+                    avatar: user.avatar || user.name.charAt(0)
+                }));
+
+            setAllEmployees(usersList);
+
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to load users');
+        }
+    };
+
+    /* ---------------- Fetch Project Details ---------------- */
+    const fetchProjectDetails = async () => {
+        if (!id) return;
+
+        setIsLoading(true);
+        try {
+            const response = await apiService.getMethodParams(
+                API_ENDPOINTS.GET_PROJECT_DETAILS, { "project_code": id }
+            );
+
+            const project = response.data.data;
+            await fetchUsers(project.user_list);
+
+            formik.setValues({
+                name: project.name,
+                description: project.description,
+                start_date: new Date(project.start_date),
+                end_date: project.end_date ? new Date(project.end_date) : null,
+                manager_code: project.manager_code,
+            });
+
+            setAssignedEmployees(project.user_list);
+
+        } catch (err) {
+            toast.error('Failed to load project details');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const createProject = async (payload: any) => {
-        setIsLoading(true); // start loading
-        try {
-            const response = await apiService.postMethod(API_ENDPOINTS.CREATE_PROJECT, payload);
-            console.log("Project created:", response.data);
+    const assignUser = async (userCode: string) => {
+        if (!userCode || !id) return;
 
-            toast.success(response.data.message)
-            return response.data;
+        setIsAssigning(true);
+        const payload = {
+            user_code: userCode,
+            project_code: id
+        };
+
+        try {
+            const response = await apiService.postMethod(
+                API_ENDPOINTS.ASSIGN_USER_PROJECT,
+                payload
+            );
+
+            if (response.status === 200) {
+                toast.success(response.data.message);
+                // Refresh the user list
+                await fetchProjectDetails();
+                setSelectedUser("");
+            }
+        } catch (err) {
+            toast.error('Failed to assign user');
         } finally {
-            setIsLoading(false); // stop loading
+            setIsAssigning(false);
         }
     };
 
+    const handleToggle = async (employee: any) => {
+        try {
+            const updated = assignedEmployees.map((emp) =>
+                emp.code === employee.code ? { ...emp, is_active: !emp.is_active } : emp
+            );
+            setAssignedEmployees(updated);
 
-    useEffect(() => {
-        fetchUsers()
-    }, [])
+        } catch (err) {
+            toast.error('Failed to update user status');
+            // Revert on error
+            const reverted = assignedEmployees.map((emp) =>
+                emp.code === employee.code ? { ...emp, is_active: employee.is_active } : emp
+            );
+            setAssignedEmployees(reverted);
+        }
+    };
 
+    /* ---------------- Formik ---------------- */
     const formik = useFormik<ProjectFormData>({
         initialValues: {
             name: '',
@@ -105,189 +194,432 @@ const CreateProjectScreen: React.FC = () => {
             end_date: null,
             manager_code: '',
         },
-        validationSchema: validationSchema,
+        validationSchema,
         onSubmit: async (values) => {
             setIsLoading(true);
             setError(null);
-            setSuccess(null);
+            // setSuccess(null);
 
-            const formattedData = {
+            const payload = {
                 ...values,
-                start_date: values.start_date?.toISOString().split('T')[0], // YYYY-MM-DD
+                project_code: id,
+                manager_code: values.manager_code,
+                start_date: values.start_date?.toISOString().split('T')[0],
                 end_date: values.end_date?.toISOString().split('T')[0],
             };
 
             try {
-                await createProject(formattedData);
-                setSuccess("Project created successfully!");
-                formik.resetForm();
-            } catch (error) {
-                // createProject already handles error logging/toast
+                if (isCreateMode) {
+                    const response = await apiService.postMethod(
+                        API_ENDPOINTS.CREATE_PROJECT,
+                        payload
+                    );
+                    navigate(`/projects/${response.data.data.code}`);
+                    toast.success('Project created successfully');
+                    formik.resetForm();
+                } else {
+                    await apiService.putMethod(
+                        API_ENDPOINTS.UPDATE_PROJECT,
+                        payload
+                    );
+                    toast.success('Project updated successfully');
+                    setIsEdit(false);
+                }
+            } catch (err) {
+                if (axios.isAxiosError(err)) {
+                    setError(err.response?.data?.message || 'Something went wrong');
+                    toast.error(err.response?.data?.message || 'Operation failed');
+                }
             } finally {
                 setIsLoading(false);
             }
         },
     });
 
+    /* ---------------- Effects ---------------- */
+    useEffect(() => {
+        if (id) {
+            fetchProjectDetails();
+        } else {
+            fetchUsers(); // call users API when no project id
+        }
+    }, [id]);
+
+
+    const isDisabled = isLoading || (!isEdit && !isCreateMode);
+
+    /* ---------------- UI ---------------- */
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Box sx={{ mt: 4, mb: 4 }}>
-                <Typography variant="body1" color="text.secondary" paragraph>
-                    Fill in the project details below. All required fields are marked with an asterisk (*).
-                </Typography>
+        <>
 
-                <form onSubmit={formik.handleSubmit}>
-                    <Grid container spacing={3}>
-                        {/* Error/Success Messages */}
-                        {error && (
-                            <Grid size={{ xs: 12 }}>
-                                <Alert severity="error" onClose={() => setError(null)}>
-                                    {error}
-                                </Alert>
-                            </Grid>
-                        )}
-                        {success && (
-                            <Grid size={{ xs: 12 }}>
-                                <Alert severity="success" onClose={() => setSuccess(null)}>
-                                    {success}
-                                </Alert>
-                            </Grid>
-                        )}
-
-                        {/* Project Name */}
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <TextField
-                                fullWidth
-                                id="name"
-                                name="name"
-                                label="Project Name *"
-                                value={formik.values.name}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                error={formik.touched.name && Boolean(formik.errors.name)}
-                                helperText={formik.touched.name && formik.errors.name}
-                                disabled={isLoading}
-                            />
-                        </Grid>
-
-                        {/* Start Date */}
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <DatePicker
-                                label="Start Date *"
-                                value={formik.values.start_date}
-                                onChange={(date) => formik.setFieldValue('start_date', date)}
-                                slotProps={{
-                                    textField: {
-                                        fullWidth: true,
-                                        id: 'start_date',
-                                        name: 'start_date',
-                                        error: formik.touched.start_date && Boolean(formik.errors.start_date),
-                                        helperText: formik.touched.start_date && formik.errors.start_date,
-                                        onBlur: formik.handleBlur,
-                                        disabled: isLoading,
-                                    },
-                                }}
-                            />
-                        </Grid>
-
-                        {/* End Date */}
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <DatePicker
-                                label="End Date"
-                                value={formik.values.end_date}
-                                onChange={(date) => formik.setFieldValue('end_date', date)}
-                                slotProps={{
-                                    textField: {
-                                        fullWidth: true,
-                                        id: 'end_date',
-                                        name: 'end_date',
-                                        error: formik.touched.end_date && Boolean(formik.errors.end_date),
-                                        helperText: formik.touched.end_date && formik.errors.end_date,
-                                        onBlur: formik.handleBlur,
-                                        disabled: isLoading,
-                                    },
-                                }}
-                            />
-                        </Grid>
-
-                        {/* Description */}
+            {
+                isLoading ? (
+                    <Grid container spacing={2}>
                         <Grid size={{ xs: 12 }}>
-                            <TextField
-                                fullWidth
-                                id="description"
-                                name="description"
-                                label="Description"
-                                multiline
-                                rows={4}
-                                value={formik.values.description}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                error={formik.touched.description && Boolean(formik.errors.description)}
-                                helperText={formik.touched.description && formik.errors.description}
-                                disabled={isLoading}
-                            />
+                            <CustomSkeleton height={90} />
+                        </Grid>
+
+                        <Grid size={{ xs: 8 }}>
+                            <CustomSkeleton height={320} />
+                        </Grid>
+
+                        <Grid size={{ xs: 4 }} >
+                            <Grid container spacing={2}>
+                                <Grid size={{ xs: 12 }}>
+                                    <CustomSkeleton height={120} />
+                                </Grid>
+                                <Grid size={{ xs: 12 }}>
+
+                                    <CustomSkeleton height={220} />
+                                </Grid>
+                            </Grid>
                         </Grid>
 
 
-
-                        {/* Manager Code */}
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <TextField
-                                fullWidth
-                                select
-                                id="manager_code"
-                                name="manager_code"
-                                label="Project Manager"
-                                value={formik.values.manager_code}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                error={formik.touched.manager_code && Boolean(formik.errors.manager_code)}
-                                helperText={formik.touched.manager_code && formik.errors.manager_code}
-                                disabled={isLoading}
-                            >
-                                <MenuItem value="">
-                                    <em>Select a manager</em>
-                                </MenuItem>
-                                {managers.map((manager: any) => (
-                                    <MenuItem key={manager.value} value={manager.value}>
-                                        {manager.label}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-
-                        {/* Submit Button */}
-                        <Grid size={{ xs: 12 }}>
-                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => formik.resetForm()}
-                                    disabled={isLoading}
-                                >
-                                    Reset
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    disabled={isLoading || !formik.isValid}
-                                    startIcon={isLoading && <CircularProgress size={20} />}
-                                >
-                                    {isLoading ? 'Creating...' : 'Create Project'}
-                                </Button>
-                            </Box>
-                        </Grid>
                     </Grid>
-                </form>
 
+                )
+                    :
+                    (
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <Box sx={{
+                                // mt: 4,
+                                // px: { xs: 2, sm: 3, md: 4 }
+                            }}>
+                                {/* Header */}
+                                <Card
+                                    elevation={0}
+                                    sx={{
+                                        mb: 4,
+                                        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+                                        border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                                        borderRadius: 2
+                                    }}
+                                >
+                                    <CardContent>
+                                        <Stack
+                                            direction={{ xs: 'column', sm: 'row' }}
+                                            alignItems={{ xs: 'stretch', sm: 'center' }}
+                                            justifyContent="space-between"
+                                            spacing={2}
+                                        >
+                                            <Box>
+                                                <Typography variant="h5" fontWeight="600" gutterBottom>
+                                                    {isCreateMode ? 'Create New Project' : 'Project Details'}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {isCreateMode
+                                                        ? 'Fill in the details below to create a new project'
+                                                        : 'View and manage project information and team members'}
+                                                </Typography>
+                                            </Box>
 
-                {/* Form Validation Summary */}
-                {!formik.isValid && formik.submitCount > 0 && (
-                    <Alert severity="warning" sx={{ mt: 2 }}>
-                        Please fix the errors in the form before submitting.
-                    </Alert>
-                )}
-            </Box>
-        </LocalizationProvider>
+                                            {!isCreateMode && (
+                                                <Stack direction="row" spacing={1}>
+                                                    {!isEdit ? (
+                                                        <Button
+                                                            variant="secondary"
+                                                            onClick={() => setIsEdit(true)}
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                    ) : (
+                                                        <>
+                                                            <Button
+                                                                variant="secondary"
+                                                                // startIcon={<CancelIcon />}
+                                                                onClick={() => {
+                                                                    fetchProjectDetails();
+                                                                    setIsEdit(false);
+                                                                }}
+                                                            // sx={{ minWidth: 100 }}
+                                                            >
+                                                                Cancel
+                                                            </Button>
+
+                                                        </>
+                                                    )}
+                                                </Stack>
+                                            )}
+                                        </Stack>
+                                    </CardContent>
+                                </Card>
+
+                                {error && (
+                                    <Alert
+                                        severity="error"
+                                        sx={{ mb: 3 }}
+                                        onClose={() => setError(null)}
+                                    >
+                                        {error}
+                                    </Alert>
+                                )}
+
+                                <Grid container spacing={3}>
+                                    {/* Left Column - Project Form */}
+                                    <Grid size={{ xs: 12, lg: 8 }}>
+                                        <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                            <CardContent>
+                                                <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <DescriptionIcon color="primary" />
+                                                    Project Information
+                                                </Typography>
+                                                <Divider sx={{ mb: 3 }} />
+
+                                                <form onSubmit={formik.handleSubmit}>
+                                                    <Grid container spacing={3}>
+                                                        <Grid size={{ xs: 12, sm: 6 }}>
+                                                            <TextField
+                                                                fullWidth
+                                                                label="Project Name *"
+                                                                {...formik.getFieldProps('name')}
+                                                                disabled={isDisabled}
+                                                                error={formik.touched.name && Boolean(formik.errors.name)}
+                                                                helperText={formik.touched.name && formik.errors.name}
+                                                                size="medium"
+                                                            />
+                                                        </Grid>
+
+                                                        <Grid size={{ xs: 12, sm: 6 }}>
+                                                            <TextField
+                                                                select
+                                                                fullWidth
+                                                                label="Project Manager"
+                                                                {...formik.getFieldProps('manager_code')}
+                                                                disabled={isDisabled}
+                                                                value={formik.values.manager_code || ""}
+                                                                size="medium"
+                                                            >
+                                                                <MenuItem value="">
+                                                                    <em>Select a manager</em>
+                                                                </MenuItem>
+                                                                {managers.map((m) => (
+                                                                    <MenuItem key={m.value} value={m.value}>
+                                                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                                                            <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                                                                                {m.avatar}
+                                                                            </Avatar>
+                                                                            <Typography>{m.label}</Typography>
+                                                                        </Stack>
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </TextField>
+                                                        </Grid>
+
+                                                        <Grid size={{ xs: 12, md: 4 }}>
+                                                            <DatePicker
+                                                                label="Start Date *"
+                                                                value={formik.values.start_date}
+                                                                onChange={(v) =>
+                                                                    formik.setFieldValue('start_date', v)
+                                                                }
+                                                                disabled={isDisabled}
+
+                                                            />
+                                                        </Grid>
+
+                                                        <Grid size={{ xs: 12, md: 4 }}>
+                                                            <DatePicker
+                                                                label="End Date"
+                                                                value={formik.values.end_date}
+                                                                onChange={(v) =>
+                                                                    formik.setFieldValue('end_date', v)
+                                                                }
+                                                                disabled={isDisabled}
+                                                            />
+                                                        </Grid>
+
+                                                        <Grid size={{ xs: 12 }}>
+                                                            <TextField
+                                                                fullWidth
+                                                                multiline
+                                                                rows={3}
+                                                                label="Description"
+                                                                {...formik.getFieldProps('description')}
+                                                                disabled={isDisabled}
+                                                                sx={{
+                                                                    "& .MuiOutlinedInput-root": {
+                                                                        borderRadius: "4px",
+                                                                        height: "100px !important",
+                                                                        color: '#202224',
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </Grid>
+
+                                                        {(isEdit || isCreateMode) && (
+                                                            <Grid size={{ xs: 12 }}>
+                                                                <Divider sx={{ my: 2 }} />
+                                                                <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                                                                    <Button
+                                                                        type="submit"
+                                                                        variant="primary"
+                                                                        disabled={isLoading || !formik.isValid}
+                                                                    >
+                                                                        {isLoading
+                                                                            ? 'Saving...'
+                                                                            : isCreateMode
+                                                                                ? 'Create Project'
+                                                                                : 'Save Changes'}
+                                                                    </Button>
+                                                                </Stack>
+                                                            </Grid>
+                                                        )}
+                                                    </Grid>
+                                                </form>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+
+                                    {/* Right Column - Team Management */}
+
+                                    {
+                                        !isCreateMode && (
+                                            <Grid size={{ xs: 12, lg: 4 }}>
+                                                <Stack spacing={3}>
+                                                    {/* Assign User Card */}
+                                                    <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                                        <CardContent>
+                                                            <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <PersonAddIcon color="primary" />
+                                                                Assign Team Member
+                                                            </Typography>
+
+                                                            <Stack spacing={2}>
+                                                                <TextField
+                                                                    select
+                                                                    fullWidth
+                                                                    label="Select User"
+                                                                    value={selectedUser}
+                                                                    onChange={(e) => setSelectedUser(e.target.value)}
+                                                                    disabled={isDisabled || isAssigning || allEmployees.length === 0}
+                                                                    size="small"
+                                                                >
+                                                                    <MenuItem value="">
+                                                                        <em>Choose a user to assign</em>
+                                                                    </MenuItem>
+                                                                    {allEmployees.map((employee) => (
+                                                                        <MenuItem key={employee.value} value={employee.value}>
+                                                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                                                <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                                                                                    {employee.avatar}
+                                                                                </Avatar>
+                                                                                <Box>
+                                                                                    <Typography variant="body2">{employee.label}</Typography>
+                                                                                    <Typography variant="caption" color="text.secondary">
+                                                                                        {employee.role}
+                                                                                    </Typography>
+                                                                                </Box>
+                                                                            </Stack>
+                                                                        </MenuItem>
+                                                                    ))}
+                                                                </TextField>
+
+                                                                <Button
+                                                                    onClick={() => assignUser(selectedUser)}
+                                                                    disabled={!selectedUser || isAssigning}
+                                                                    variant="primary"
+                                                                    // startIcon={isAssigning ? <CircularProgress size={20} /> : <AddIcon />}
+                                                                    fullWidth
+                                                                >
+                                                                    {isAssigning ? 'Assigning...' : 'Assign User'}
+                                                                </Button>
+                                                            </Stack>
+                                                        </CardContent>
+                                                    </Card>
+
+                                                    {/* Team Members Card */}
+                                                    <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                                        <CardContent>
+                                                            <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <GroupsIcon color="primary" />
+                                                                Team Members
+                                                                <Chip
+                                                                    label={assignedEmployees.length}
+                                                                    size="small"
+                                                                    color="primary"
+                                                                    variant="outlined"
+                                                                />
+                                                            </Typography>
+
+                                                            {assignedEmployees.length === 0 ? (
+                                                                <Box sx={{ textAlign: 'center', py: 4 }}>
+                                                                    <GroupsIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                                                                    <Typography color="text.secondary">
+                                                                        No team members assigned yet
+                                                                    </Typography>
+                                                                </Box>
+                                                            ) : (
+                                                                <Stack spacing={1}>
+                                                                    {assignedEmployees.map((employee) => (
+                                                                        <Fade in key={employee.code}>
+                                                                            <Paper
+                                                                                variant="outlined"
+                                                                                sx={{
+                                                                                    p: 2,
+                                                                                    borderRadius: 1,
+                                                                                    bgcolor: employee.is_active
+                                                                                        ? alpha(theme.palette.success.main, 0.05)
+                                                                                        : alpha(theme.palette.error.main, 0.05)
+                                                                                }}
+                                                                            >
+                                                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                                                                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                                                                                        <Avatar sx={{ width: 36, height: 36 }}>
+                                                                                            {employee.name.charAt(0)}
+                                                                                        </Avatar>
+                                                                                        <Box>
+                                                                                            <Typography variant="body2" fontWeight="500">
+                                                                                                {employee.name}
+                                                                                            </Typography>
+                                                                                            <Typography variant="caption" color="text.secondary">
+                                                                                                {employee.role || 'Team Member'}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                    </Stack>
+                                                                                    <Tooltip title={employee.is_active ? "Active - Click to deactivate" : "Inactive - Click to activate"}>
+                                                                                        <FormControlLabel
+                                                                                            control={
+                                                                                                <Switch
+                                                                                                    checked={employee.is_active}
+                                                                                                    onChange={() => handleToggle(employee)}
+                                                                                                    size="small"
+                                                                                                    color="success"
+                                                                                                />
+                                                                                            }
+                                                                                            label={
+                                                                                                <Chip
+                                                                                                    label={employee.is_active ? "Active" : "Inactive"}
+                                                                                                    size="small"
+                                                                                                    color={employee.is_active ? "success" : "error"}
+                                                                                                    variant="outlined"
+                                                                                                    sx={{ minWidth: 70 }}
+                                                                                                />
+                                                                                            }
+                                                                                            labelPlacement="start"
+                                                                                        />
+                                                                                    </Tooltip>
+                                                                                </Stack>
+                                                                            </Paper>
+                                                                        </Fade>
+                                                                    ))}
+                                                                </Stack>
+                                                            )}
+                                                        </CardContent>
+                                                    </Card>
+                                                </Stack>
+                                            </Grid>
+
+                                        )
+                                    }
+
+                                </Grid>
+                            </Box>
+                        </LocalizationProvider>
+                    )
+            }
+        </>
+
     );
 };
 

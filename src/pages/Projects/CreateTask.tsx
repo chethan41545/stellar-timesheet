@@ -64,13 +64,6 @@ const CreateTaskScreen: React.FC = () => {
             const response = await apiService.postMethod(API_ENDPOINTS.CREATE_TASK, payload);
             toast.success(response.data.message || 'Task created successfully!');
             return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                toast.error(error.response?.data?.message || 'Failed to create task');
-            } else {
-                toast.error('Failed to create task');
-            }
-            throw error;
         } finally {
             setIsLoading(false);
         }
@@ -112,7 +105,7 @@ const CreateTaskScreen: React.FC = () => {
                     {/* Error/Success Messages */}
                     {
                         error && (
-                            <Grid size={{xs:12}} >
+                            <Grid size={{ xs: 12 }} >
                                 <Alert severity="error" onClose={() => setError(null)
                                 }>
                                     {error}
@@ -121,7 +114,7 @@ const CreateTaskScreen: React.FC = () => {
                         )}
                     {
                         success && (
-                            <Grid size={{xs:12}} >
+                            <Grid size={{ xs: 12 }} >
                                 <Alert severity="success" onClose={() => setSuccess(null)
                                 }>
                                     {success}
@@ -130,12 +123,36 @@ const CreateTaskScreen: React.FC = () => {
                         )}
 
                     {/* Task Name */}
-                    <Grid size={{xs:12, md:4}}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <TextField
                             fullWidth
                             id="name"
                             name="name"
                             label="Task Name *"
+                            // sx={{
+                            //     "& .MuiOutlinedInput-root": {
+                            //         borderRadius: "4px",
+                            //         height: "40px",
+                            //         color: "var(--text)",
+                            //     },
+                            //     "& .MuiOutlinedInput-input": {
+                            //         padding: "8px 24px",
+                            //         fontSize: "14px",
+                            //         // height:"40px"
+                            //     },
+                            //     "& input::placeholder": {
+                            //         color: "#9e9e9e",
+                            //         opacity: 1,
+                            //     },
+                            //     "& .MuiInputLabel-outlined": {
+                            //         paddingLeft: "4px",
+                            //         paddingRight: "10px",
+                            //         color: "var(--label) !important",
+                            //         top:"-2"
+                            //     },
+
+
+                            // }}
                             value={formik.values.name}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -146,7 +163,7 @@ const CreateTaskScreen: React.FC = () => {
                     </Grid>
 
                     {/* Project Selection */}
-                    <Grid size={{xs:12, md:4}} >
+                    <Grid size={{ xs: 12, md: 4 }} >
                         <TextField
                             fullWidth
                             select
@@ -174,7 +191,7 @@ const CreateTaskScreen: React.FC = () => {
                     </Grid>
 
                     {/* Description */}
-                    <Grid size={{xs:12}} >
+                    <Grid size={{ xs: 12 }} >
                         <TextField
                             fullWidth
                             id="description"
@@ -182,6 +199,13 @@ const CreateTaskScreen: React.FC = () => {
                             label="Description"
                             multiline
                             rows={4}
+                            sx={{
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "4px",
+                                    height: "100px",
+                                    color: '#202224',
+                                },
+                            }}
                             value={formik.values.description}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -192,7 +216,7 @@ const CreateTaskScreen: React.FC = () => {
                     </Grid>
 
                     {/* Submit Button */}
-                    <Grid size={{xs:12}} >
+                    <Grid size={{ xs: 12 }} >
                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                             <Button variant="outlined" onClick={() => formik.resetForm()} disabled={isLoading} >
                                 Reset
