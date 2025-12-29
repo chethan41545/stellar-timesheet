@@ -19,12 +19,14 @@ import { RiLogoutBoxLine } from "react-icons/ri";
 // 	People,
 // } from '@mui/icons-material';
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import TodayIcon from "@mui/icons-material/Today";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import PeopleIcon from "@mui/icons-material/People";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline"; // Projects
+// import DashboardIcon from "@mui/icons-material/Dashboard";
+
+import { LuFileSpreadsheet } from "react-icons/lu";
+import { LuCalendarMinus } from "react-icons/lu";
+import { LuChartArea } from "react-icons/lu";
+import { LuUsers } from "react-icons/lu";
+import { LuBriefcaseBusiness } from "react-icons/lu";
+
 
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -68,35 +70,35 @@ const Sidebar: React.FC<SidebarProps> = ({
 		{
 			id: "timesheets",
 			label: "Timesheets",
-			icon: <TodayIcon />,
+			icon: <LuFileSpreadsheet />,
 			path: "/timesheets",
 			roles: ["all"],
 		},
 		{
 			id: "calendar",
 			label: "Calendar",
-			icon: <CalendarMonthIcon />,
+			icon: <LuCalendarMinus />,
 			path: "/users-timesheet",
 			roles: ["super admin", "manager", "hr"],
 		},
 		{
 			id: "reports",
 			label: "Reports",
-			icon: <BarChartIcon />,
+			icon: <LuChartArea />,
 			path: "/reports",
 			roles: ["super admin", "manager", "hr"],
 		},
 		{
 			id: "users",
 			label: "Users",
-			icon: <PeopleIcon />,
+			icon: <LuUsers />,
 			path: "/users",
 			roles: ["super admin", "manager", "hr"],
 		},
 		{
 			id: "projects",
 			label: "Projects",
-			icon: <WorkOutlineIcon />,
+			icon: <LuBriefcaseBusiness />,
 			path: "/projects",
 			roles: ["super admin", "manager", "hr"],
 		},
@@ -203,6 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											minWidth: 0,
 											mr: collapsed ? 0 : 2,
 											justifyContent: 'center',
+											fontSize:'20px',
 											color: isActive(item.path) ? 'primary.main' : '#effaff',
 										}}
 									>

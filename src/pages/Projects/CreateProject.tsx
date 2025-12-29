@@ -36,6 +36,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupsIcon from '@mui/icons-material/Groups';
 
 import DescriptionIcon from '@mui/icons-material/Description';
+import TaskAltIcon from '@mui/icons-material/Task';
 import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
 import TaskCreateDialog from './TaskCreateDialog';
 
@@ -504,7 +505,7 @@ const CreateProjectScreen: React.FC = () => {
                                                         <Card elevation={1} sx={{ borderRadius: 2, p: 2 }} >
                                                             <Box display={"flex"} justifyContent={"space-between"} sx={{ mb: 2 }}>
                                                                 <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    {/* <GroupsIcon color="primary" /> */}
+                                                                    <TaskAltIcon color="primary" />
                                                                     Tasks
 
                                                                 </Typography>
