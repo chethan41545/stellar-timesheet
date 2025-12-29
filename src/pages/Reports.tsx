@@ -175,7 +175,7 @@ const ReportsScreen: React.FC = () => {
                     <h3>Employee Hours</h3>
                     <Box sx={{ overflowX: "auto", ...customScrollbar }}>
                         {/* Make the inner chart wider than container */}
-                        <div style={{ width: `${data?.employee_summary?.length ? data.employee_summary.length * 110 : 800}px`, height: "400px" }}>
+                        <div style={{ width: `${data?.employee_summary?.length ? data.employee_summary.length * 150 : 800}px`, height: "400px" }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
                                     data={data?.employee_summary}

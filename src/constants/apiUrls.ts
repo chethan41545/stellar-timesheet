@@ -7,8 +7,14 @@ export const API_ENDPOINTS = {
   ALL_CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
   GET_TIMESHEET_USER: "/timesheet/details",
   GET_USER_LIST: "/user/search",
+  GET_USER_ROLES: "/user/roles",
+  GET_USER_DETAILS: "/user/details",
   TIMESHEET_UPDATE: "/timesheet/update",
   TIMESHEET_REVIEW: "/timesheet/review",
+
+  CREATE_USER:"/user/create-user",
+  UPDATE_USER:"",
+  DELETE_USER:"",
 
   PROJECT_REPORTS:"/reports/projects",
 

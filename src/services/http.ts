@@ -2,6 +2,12 @@
 import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 
+type ApiErrorResponse = {
+  errors?: string[];
+  message?: string;
+};
+
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const REFRESH_PATH = "/api/users/refresh-token";
 
@@ -106,11 +112,20 @@ client.interceptors.response.use(
   async (error: AxiosError & { config?: any }) => {
     const status = error.response?.status;
     const original: any = error.config || {};
+    // const apiErrorMessage =
+    //   (error.response?.data?.errors && Array.isArray((error.response?.data as any)?.errors) && (error.response?.data as any).errors[0]) ||
+    //   (error.response?.data as any)?.message ||
+    //   error.message ||
+    //   "Something went wrong";
+
+    const data = error.response?.data as ApiErrorResponse | undefined;
+
     const apiErrorMessage =
-      (error.response?.data?.errors && Array.isArray((error.response?.data as any)?.errors) && (error.response?.data as any).errors[0]) ||
-      (error.response?.data as any)?.message ||
+      (data?.errors && Array.isArray(data.errors) && data.errors[0]) ||
+      data?.message ||
       error.message ||
       "Something went wrong";
+
 
     if (status !== 401 || !original) {
       toast.error(apiErrorMessage);

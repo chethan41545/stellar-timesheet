@@ -13,8 +13,8 @@ export function readRole(): string {
 
     // fallback to array "roles"
     try {
-        const arr = JSON.parse(localStorage.getItem("roles") || "[]");
-        return Array.isArray(arr) ? (arr[0] || "") : "";
+        const role =localStorage.getItem("role");
+        return role || "";
     } catch {
         return "";
     }

@@ -37,6 +37,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 
 import DescriptionIcon from '@mui/icons-material/Description';
 import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
+import TaskCreateDialog from './TaskCreateDialog';
 
 interface ProjectFormData {
     name: string;
@@ -73,7 +74,28 @@ const CreateProjectScreen: React.FC = () => {
     const [managers, setManagers] = useState<any[]>([]);
     const [allEmployees, setAllEmployees] = useState<any[]>([]);
     const [assignedEmployees, setAssignedEmployees] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<any[]>([]);
     const [selectedUser, setSelectedUser] = useState("");
+
+    const [open, setOpen] = useState(false);
+
+    const handleCreateTask = async (name: string) => {
+        const payload = {
+            name,
+            description: '',
+            project_code: id,
+        }
+        try {
+            const response = await apiService.postMethod(API_ENDPOINTS.CREATE_TASK, payload);
+            setOpen(false);
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            console.error(err);
+            // toast.error('Failed to Create Task');
+        }
+
+    };
 
     /* ---------------- Fetch Managers ---------------- */
     const fetchUsers = async (assigned: any[] = assignedEmployees) => {
@@ -132,6 +154,7 @@ const CreateProjectScreen: React.FC = () => {
             });
 
             setAssignedEmployees(project.user_list);
+            setTasks(project.task_list);
 
         } catch (err) {
             toast.error('Failed to load project details');
@@ -357,118 +380,201 @@ const CreateProjectScreen: React.FC = () => {
 
                                 <Grid container spacing={3}>
                                     {/* Left Column - Project Form */}
+
                                     <Grid size={{ xs: 12, lg: 8 }}>
-                                        <Card elevation={1} sx={{ borderRadius: 2 }}>
-                                            <CardContent>
-                                                <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <DescriptionIcon color="primary" />
-                                                    Project Information
-                                                </Typography>
-                                                <Divider sx={{ mb: 3 }} />
+                                        <Grid container rowSpacing={2}>
+                                            <Grid size={{ xs: 12 }} >
+                                                <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                                    <CardContent>
+                                                        <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <DescriptionIcon color="primary" />
+                                                            Project Information
+                                                        </Typography>
+                                                        <Divider sx={{ mb: 3 }} />
 
-                                                <form onSubmit={formik.handleSubmit}>
-                                                    <Grid container spacing={3}>
-                                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                                            <TextField
-                                                                fullWidth
-                                                                label="Project Name *"
-                                                                {...formik.getFieldProps('name')}
-                                                                disabled={isDisabled}
-                                                                error={formik.touched.name && Boolean(formik.errors.name)}
-                                                                helperText={formik.touched.name && formik.errors.name}
-                                                                size="medium"
-                                                            />
-                                                        </Grid>
+                                                        <form onSubmit={formik.handleSubmit}>
+                                                            <Grid container spacing={3}>
+                                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        label="Project Name *"
+                                                                        {...formik.getFieldProps('name')}
+                                                                        disabled={isDisabled}
+                                                                        error={formik.touched.name && Boolean(formik.errors.name)}
+                                                                        helperText={formik.touched.name && formik.errors.name}
+                                                                        size="medium"
+                                                                    />
+                                                                </Grid>
 
-                                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                                            <TextField
-                                                                select
-                                                                fullWidth
-                                                                label="Project Manager"
-                                                                {...formik.getFieldProps('manager_code')}
-                                                                disabled={isDisabled}
-                                                                value={formik.values.manager_code || ""}
-                                                                size="medium"
-                                                            >
-                                                                <MenuItem value="">
-                                                                    <em>Select a manager</em>
-                                                                </MenuItem>
-                                                                {managers.map((m) => (
-                                                                    <MenuItem key={m.value} value={m.value}>
-                                                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                                                            <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                                                                                {m.avatar}
-                                                                            </Avatar>
-                                                                            <Typography>{m.label}</Typography>
-                                                                        </Stack>
-                                                                    </MenuItem>
-                                                                ))}
-                                                            </TextField>
-                                                        </Grid>
-
-                                                        <Grid size={{ xs: 12, md: 4 }}>
-                                                            <DatePicker
-                                                                label="Start Date *"
-                                                                value={formik.values.start_date}
-                                                                onChange={(v) =>
-                                                                    formik.setFieldValue('start_date', v)
-                                                                }
-                                                                disabled={isDisabled}
-
-                                                            />
-                                                        </Grid>
-
-                                                        <Grid size={{ xs: 12, md: 4 }}>
-                                                            <DatePicker
-                                                                label="End Date"
-                                                                value={formik.values.end_date}
-                                                                onChange={(v) =>
-                                                                    formik.setFieldValue('end_date', v)
-                                                                }
-                                                                disabled={isDisabled}
-                                                            />
-                                                        </Grid>
-
-                                                        <Grid size={{ xs: 12 }}>
-                                                            <TextField
-                                                                fullWidth
-                                                                multiline
-                                                                rows={3}
-                                                                label="Description"
-                                                                {...formik.getFieldProps('description')}
-                                                                disabled={isDisabled}
-                                                                sx={{
-                                                                    "& .MuiOutlinedInput-root": {
-                                                                        borderRadius: "4px",
-                                                                        height: "100px !important",
-                                                                        color: '#202224',
-                                                                    },
-                                                                }}
-                                                            />
-                                                        </Grid>
-
-                                                        {(isEdit || isCreateMode) && (
-                                                            <Grid size={{ xs: 12 }}>
-                                                                <Divider sx={{ my: 2 }} />
-                                                                <Stack direction="row" justifyContent="flex-end" spacing={2}>
-                                                                    <Button
-                                                                        type="submit"
-                                                                        variant="primary"
-                                                                        disabled={isLoading || !formik.isValid}
+                                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                                    <TextField
+                                                                        select
+                                                                        fullWidth
+                                                                        label="Project Manager"
+                                                                        {...formik.getFieldProps('manager_code')}
+                                                                        disabled={isDisabled}
+                                                                        value={formik.values.manager_code || ""}
+                                                                        size="medium"
                                                                     >
-                                                                        {isLoading
-                                                                            ? 'Saving...'
-                                                                            : isCreateMode
-                                                                                ? 'Create Project'
-                                                                                : 'Save Changes'}
-                                                                    </Button>
-                                                                </Stack>
+                                                                        <MenuItem value="">
+                                                                            <em>Select a manager</em>
+                                                                        </MenuItem>
+                                                                        {managers.map((m) => (
+                                                                            <MenuItem key={m.value} value={m.value}>
+                                                                                <Stack direction="row" alignItems="center" spacing={1}>
+                                                                                    <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                                                                                        {m.avatar}
+                                                                                    </Avatar>
+                                                                                    <Typography>{m.label}</Typography>
+                                                                                </Stack>
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </TextField>
+                                                                </Grid>
+
+                                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                                    <DatePicker
+                                                                        label="Start Date *"
+                                                                        value={formik.values.start_date}
+                                                                        onChange={(v) =>
+                                                                            formik.setFieldValue('start_date', v)
+                                                                        }
+                                                                        disabled={isDisabled}
+
+                                                                    />
+                                                                </Grid>
+
+                                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                                    <DatePicker
+                                                                        label="End Date"
+                                                                        value={formik.values.end_date}
+                                                                        onChange={(v) =>
+                                                                            formik.setFieldValue('end_date', v)
+                                                                        }
+                                                                        disabled={isDisabled}
+                                                                    />
+                                                                </Grid>
+
+                                                                <Grid size={{ xs: 12 }}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        multiline
+                                                                        rows={3}
+                                                                        label="Description"
+                                                                        {...formik.getFieldProps('description')}
+                                                                        disabled={isDisabled}
+                                                                        sx={{
+                                                                            "& .MuiOutlinedInput-root": {
+                                                                                borderRadius: "4px",
+                                                                                height: "100px !important",
+                                                                                color: '#202224',
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Grid>
+
+                                                                {(isEdit || isCreateMode) && (
+                                                                    <Grid size={{ xs: 12 }}>
+                                                                        <Divider sx={{ my: 2 }} />
+                                                                        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                                                                            <Button
+                                                                                type="submit"
+                                                                                variant="primary"
+                                                                                disabled={isLoading || !formik.isValid}
+                                                                            >
+                                                                                {isLoading
+                                                                                    ? 'Saving...'
+                                                                                    : isCreateMode
+                                                                                        ? 'Create Project'
+                                                                                        : 'Save Changes'}
+                                                                            </Button>
+                                                                        </Stack>
+                                                                    </Grid>
+                                                                )}
                                                             </Grid>
-                                                        )}
+                                                        </form>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            {/* Tasks */}
+                                            {
+                                                !isCreateMode && (
+                                                    <Grid size={{ xs: 12 }}>
+                                                        <Card elevation={1} sx={{ borderRadius: 2, p: 2 }} >
+                                                            <Box display={"flex"} justifyContent={"space-between"} sx={{ mb: 2 }}>
+                                                                <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    {/* <GroupsIcon color="primary" /> */}
+                                                                    Tasks
+
+                                                                </Typography>
+
+                                                                <Button
+                                                                    label="Create"
+                                                                    onClick={() => setOpen(true)} />
+                                                            </Box>
+
+                                                            <Grid container spacing={2}>
+
+                                                                {tasks.map((task) => (
+                                                                    <Fade in key={task.code}>
+                                                                        <Grid size={{ xs: 6 }}>
+                                                                            <Paper
+                                                                                variant="outlined"
+                                                                                sx={{
+                                                                                    p: 2,
+                                                                                    borderRadius: 1,
+                                                                                    bgcolor: task.is_active
+                                                                                        ? alpha(theme.palette.success.main, 0.05)
+                                                                                        : alpha(theme.palette.error.main, 0.05)
+                                                                                }}
+                                                                            >
+                                                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                                                                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                                                                                        <Avatar sx={{ width: 36, height: 36 }}>
+                                                                                            {task.name.charAt(0)}
+                                                                                        </Avatar>
+                                                                                        <Box>
+                                                                                            <Typography variant="body2" fontWeight="500">
+                                                                                                {task.name}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                    </Stack>
+                                                                                    <Tooltip title={task.is_active ? "Active - Click to deactivate" : "Inactive - Click to activate"}>
+                                                                                        <FormControlLabel
+                                                                                            control={
+                                                                                                <Switch
+                                                                                                    checked={task.is_active}
+                                                                                                    onChange={() => handleToggle(task)}
+                                                                                                    size="small"
+                                                                                                    color="success"
+                                                                                                />
+                                                                                            }
+                                                                                            label={
+                                                                                                <Chip
+                                                                                                    label={task.is_active ? "Active" : "Inactive"}
+                                                                                                    size="small"
+                                                                                                    color={task.is_active ? "success" : "error"}
+                                                                                                    variant="outlined"
+                                                                                                    sx={{ minWidth: 70 }}
+                                                                                                />
+                                                                                            }
+                                                                                            labelPlacement="start"
+                                                                                        />
+                                                                                    </Tooltip>
+                                                                                </Stack>
+                                                                            </Paper>
+                                                                        </Grid>
+                                                                    </Fade>
+                                                                ))}
+                                                            </Grid>
+                                                        </Card>
                                                     </Grid>
-                                                </form>
-                                            </CardContent>
-                                        </Card>
+                                                )
+                                            }
+
+                                        </Grid>
+
                                     </Grid>
 
                                     {/* Right Column - Team Management */}
@@ -492,7 +598,7 @@ const CreateProjectScreen: React.FC = () => {
                                                                     label="Select User"
                                                                     value={selectedUser}
                                                                     onChange={(e) => setSelectedUser(e.target.value)}
-                                                                    disabled={isDisabled || isAssigning || allEmployees.length === 0}
+                                                                    // disabled={isDisabled || isAssigning || allEmployees.length === 0}
                                                                     size="small"
                                                                 >
                                                                     <MenuItem value="">
@@ -614,6 +720,12 @@ const CreateProjectScreen: React.FC = () => {
                                     }
 
                                 </Grid>
+
+                                <TaskCreateDialog
+                                    open={open}
+                                    onClose={() => setOpen(false)}
+                                    onCreate={handleCreateTask}
+                                />
                             </Box>
                         </LocalizationProvider>
                     )
