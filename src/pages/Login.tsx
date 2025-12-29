@@ -82,7 +82,7 @@ const LoginPage = () => {
                     }
                 }
                 else if (status === "error") {
-                    toast.error(res?.data?.message || "Login failed");
+                    // toast.error(res?.data?.message || "Login failed");
                 } else {
                     // fallback: try to read tokens if backend returned quick success in a different shape
                     const fallbackToken = res?.data?.data?.access_token;
@@ -90,7 +90,7 @@ const LoginPage = () => {
                         localStorage.setItem("access_token", fallbackToken);
                         navigate("/dashboard");
                     } else {
-                        toast.error(res?.data?.message || "Login failed");
+                        // toast.error(res?.data?.message || "Login failed");
                     }
                 }
             })
@@ -202,7 +202,7 @@ const LoginPage = () => {
 
               <div className={styles.options}>
                 <a className={styles.link} href={ROUTES.RESET_PASSWORD}>
-                  Forgot password?
+                  Reset password
                 </a>
               </div>
 

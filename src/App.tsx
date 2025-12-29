@@ -15,6 +15,7 @@ import Timesheet from "./pages/Timesheet";
 import UserList from "./pages/Users/UserList";
 import UserForm from "./pages/Users/UserCreation";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import { ROUTES } from "./constants/routes";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -32,7 +33,7 @@ export default function App() {
     <div className="App">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
 
 
         <Route

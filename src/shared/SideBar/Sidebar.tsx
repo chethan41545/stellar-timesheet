@@ -58,13 +58,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 
 	const menuItems: SidebarItem[] = [
-		{
-			id: "dashboard",
-			label: "Dashboard",
-			icon: <DashboardIcon />,
-			path: "/dashboard",
-			roles: ["super admin", "manager", "hr"],
-		},
+		// {
+		// 	id: "dashboard",
+		// 	label: "Dashboard",
+		// 	icon: <DashboardIcon />,
+		// 	path: "/dashboard",
+		// 	roles: ["super admin", "manager", "hr"],
+		// },
 		{
 			id: "timesheets",
 			label: "Timesheets",
