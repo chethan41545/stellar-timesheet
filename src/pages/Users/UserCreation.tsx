@@ -19,6 +19,7 @@ import {
     Switch,
     FormControlLabel,
     FormHelperText,
+    IconButton,
 
 } from '@mui/material';
 import {
@@ -30,6 +31,8 @@ import {
     History,
 
 } from '@mui/icons-material';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -37,6 +40,7 @@ import apiService from '../../services/apiService';
 import { API_ENDPOINTS } from '../../constants/apiUrls';
 import Button from '../../shared/Button/Button';
 import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
+import CustomSwitch from '../../shared/Switch/CustomSwitch';
 
 const UserForm = () => {
     const { id } = useParams();
@@ -145,7 +149,6 @@ const UserForm = () => {
         setSaving(true);
         setError('');
         setSuccess('');
-        debugger;
 
         console.log(values);
 
@@ -225,102 +228,47 @@ const UserForm = () => {
 
     return (
         <Box sx={{ margin: '0 auto' }}>
-            {/* Breadcrumbs */}
-            {/* <Breadcrumbs sx={{ mb: 3 }}>
-                <Link component={RouterLink} to="/" color="inherit" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Home sx={{ mr: 0.5, fontSize: 20 }} />
-                    Home
-                </Link>
-                <Link component={RouterLink} to="/users" color="inherit" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Person sx={{ mr: 0.5, fontSize: 20 }} />
-                    Users
-                </Link>
-                <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {mode === 'create' ? (
-                        <>
-                            <PersonAdd sx={{ mr: 0.5, fontSize: 20 }} />
-                            Create User
-                        </>
-                    ) : mode === 'edit' ? (
-                        <>
-                            <ModeEdit sx={{ mr: 0.5, fontSize: 20 }} />
-                            Edit User
-                        </>
-                    ) : (
-                        <>
-                            <Visibility sx={{ mr: 0.5, fontSize: 20 }} />
-                            User Details
-                        </>
-                    )}
-                </Typography>
-            </Breadcrumbs> */}
 
             {/* Header */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                <Box>
-                    <Typography variant="h4" fontWeight={700}>
-                        {mode === 'create' ? 'Create New User' : userData?.name || 'User Details'}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                        {mode === 'create'
-                            ? 'Add a new user to your organization'
-                            : mode === 'edit'
-                                ? 'Edit user information and permissions'
-                                : 'View user details and information'
-                        }
-                    </Typography>
-                </Box>
-
                 <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="secondary"
-                        onClick={() => navigate('/users')}
-                    >
-                        Back
-                    </Button>
+                    <IconButton onClick={() => navigate("/users")}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Box>
 
-                    {mode === 'view' && (
-                        <Button
-                            variant="primary"
-                            onClick={handleEditToggle}
-                        >
-                            Edit
-                        </Button>
-                    )}
+                        <Typography variant="h4" fontWeight={700}>
+                            {mode === 'create' ? 'Create New User' : userData?.name || 'User Details'}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            {mode === 'create'
+                                ? 'Add a new user to your organization'
+                                : mode === 'edit'
+                                    ? 'Edit user information and permissions'
+                                    : 'View user details and information'
+                            }
+                        </Typography>
 
-                    {mode === 'edit' && (
-                        <>
-                            <Button
-                                variant="secondary"
-                                onClick={handleEditToggle}
-                                disabled={saving}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={() => formik.handleSubmit}
-                                disabled={saving || !formik.isValid}
-                            >
-                                {saving ? 'Saving...' : 'Save Changes'}
-                            </Button>
-                        </>
-                    )}
+                    </Box>
                 </Stack>
             </Stack>
 
             {/* Status Messages */}
-            {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                    {error}
-                </Alert>
-            )}
+            {
+                error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )
+            }
 
-            {success && (
-                <Alert severity="success" sx={{ mb: 3 }}>
-                    {success}
-                </Alert>
-            )}
+            {
+                success && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        {success}
+                    </Alert>
+                )
+            }
 
             <Grid container spacing={3}>
                 {/* Left Column - Form/Details */}
@@ -422,26 +370,15 @@ const UserForm = () => {
 
                                     <FormControlLabel
                                         control={
-                                            <Switch
-                                                id="is_active"
-                                                name="is_active"
+                                            <CustomSwitch
                                                 checked={formik.values.is_active}
-                                                onChange={formik.handleChange}
-                                                disabled={saving}
-                                                color="primary"
+                                                onChange={()=>formik.handleChange}
                                             />
                                         }
                                         label={
-                                            <Stack direction="row" alignItems="center" spacing={1}>
-                                                {formik.values.is_active ? (
-                                                    <CheckCircle sx={{ color: 'success.main' }} />
-                                                ) : (
-                                                    <CancelIcon sx={{ color: 'error.main' }} />
-                                                )}
                                                 <Typography>
                                                     {formik.values.is_active ? 'Active User' : 'Inactive User'}
                                                 </Typography>
-                                            </Stack>
                                         }
                                         sx={{ mt: 1 }}
                                     />
@@ -605,7 +542,7 @@ const UserForm = () => {
                                         fullWidth
                                         onClick={handleEditToggle}
                                     >
-                                        Edit User
+                                        Edit
                                     </Button>
 
                                     <Button
@@ -613,7 +550,7 @@ const UserForm = () => {
                                         fullWidth
                                         onClick={fetchUserData}
                                     >
-                                        Refresh Data
+                                        Refresh
                                     </Button>
 
                                     <Button
@@ -622,7 +559,7 @@ const UserForm = () => {
                                         onClick={handleDelete}
                                         sx={{ color: 'error.main', borderColor: 'error.main' }}
                                     >
-                                        Delete User
+                                        Delete
                                     </Button>
                                 </>
                             )}
@@ -644,7 +581,7 @@ const UserForm = () => {
                                         onClick={handleEditToggle}
                                         disabled={saving}
                                     >
-                                        Cancel Edit
+                                        Cancel
                                     </Button>
                                 </>
                             )}
@@ -663,68 +600,6 @@ const UserForm = () => {
                         </Stack>
                     </Paper>
 
-                    {/* Role Information */}
-                    {/* <Paper
-                        elevation={0}
-                        sx={{
-                            p: 3,
-                            mt: 3,
-                            borderRadius: 3,
-                            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                        }}
-                    >
-                        <Typography variant="h6" fontWeight={600} gutterBottom>
-                            Role Information
-                        </Typography>
-                        <Stack spacing={2}>
-                            {roles.map((role) => (
-                                <Card
-                                    key={role.value}
-                                    elevation={0}
-                                    sx={{
-                                        border: `1px solid ${alpha(
-                                            formik.values.role === role.value
-                                                ? theme.palette.primary.main
-                                                : theme.palette.divider,
-                                            0.2
-                                        )}`,
-                                        bgcolor: formik.values.role === role.value
-                                            ? alpha(theme.palette.primary.main, 0.05)
-                                            : 'transparent',
-                                        transition: 'all 0.2s',
-                                    }}
-                                >
-                                    <CardContent sx={{ p: 2 }}>
-                                        <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar
-                                                sx={{
-                                                    bgcolor: alpha(
-                                                        formik.values.role === role.value
-                                                            ? theme.palette.primary.main
-                                                            : theme.palette.action.disabled,
-                                                        0.1
-                                                    ),
-                                                    color: formik.values.role === role.value
-                                                        ? theme.palette.primary.main
-                                                        : theme.palette.action.disabled,
-                                                }}
-                                            >
-                                                {role.icon}
-                                            </Avatar>
-                                            <Box>
-                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                    {role.label}
-                                                </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {role.description}
-                                                </Typography>
-                                            </Box>
-                                        </Stack>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </Stack>
-                    </Paper> */}
 
                     {/* Quick Stats for View Mode */}
                     {mode === 'view' && (
@@ -742,20 +617,6 @@ const UserForm = () => {
                             </Typography>
                             <Stack spacing={2}>
                                 <Box>
-                                    {/* <Typography variant="body2" color="text.secondary">
-                                        Account Age
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        {(() => {
-                                            const created = new Date(userData?.created_at);
-                                            const now = new Date();
-                                            const diff = Math.floor((now - created) / (1000 * 60 * 60 * 24));
-                                            return `${diff} days`;
-                                        })()}
-                                    </Typography> */}
-                                </Box>
-
-                                <Box>
                                     <Typography variant="body2" color="text.secondary">
                                         Last Activity
                                     </Typography>
@@ -768,7 +629,7 @@ const UserForm = () => {
                     )}
                 </Grid>
             </Grid>
-        </Box>
+        </Box >
     );
 };
 

@@ -30,7 +30,7 @@ interface Column<T extends Record<string, any>> {
 interface CustomTableProps<T extends Record<string, any>> {
 	columns: Column<T>[];
 	data: T[];
-	totalRows: number;
+	totalRows?: number;
 	isAction?: boolean;
 	loading?: boolean;
 	defaultSortBy?: any;
@@ -60,7 +60,7 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 	const {
 		columns,
 		data,
-		totalRows,
+		totalRows=0,
 		isAction = false,
 		loading = false,
 		defaultSortBy,
@@ -317,12 +317,12 @@ function CustomTable<T extends Record<string, any> & { id: string | number }>(pr
 								</TableCell>
 							</TableRow>
 						) : (
-							data?.map((row) => {
+							data?.map((row, index) => {
 								const highlighted = isRowHighlighted(row);
 								const rowProps = getRowProps?.(row) ?? {};
 								return (
 									<TableRow
-										key={String(row.id)}
+										key={String(index)}
 										hover
 										{...rowProps}
 										sx={{

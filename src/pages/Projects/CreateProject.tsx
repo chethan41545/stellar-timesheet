@@ -39,6 +39,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import TaskAltIcon from '@mui/icons-material/Task';
 import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
 import TaskCreateDialog from './TaskCreateDialog';
+import CustomSwitch from '../../shared/Switch/CustomSwitch';
 
 interface ProjectFormData {
     name: string;
@@ -170,12 +171,13 @@ const CreateProjectScreen: React.FC = () => {
         setIsAssigning(true);
         const payload = {
             user_code: userCode,
-            project_code: id
+            project_code: id,
+            action: "assign"
         };
 
         try {
             const response = await apiService.postMethod(
-                API_ENDPOINTS.ASSIGN_USER_PROJECT,
+                API_ENDPOINTS.MANAGE_USER_PROJECT,
                 payload
             );
 
@@ -194,10 +196,23 @@ const CreateProjectScreen: React.FC = () => {
 
     const handleToggle = async (employee: any) => {
         try {
+            setIsLoading(true);
             const updated = assignedEmployees.map((emp) =>
                 emp.code === employee.code ? { ...emp, is_active: !emp.is_active } : emp
             );
+
+
+            const payload = {
+                project_code: id,
+                user_code: employee.code,
+                is_active: !employee.is_active,
+                action: "status_change"
+
+            }
+
+            const response = await apiService.postMethod(API_ENDPOINTS.MANAGE_USER_PROJECT, payload)
             setAssignedEmployees(updated);
+            toast.success(response.data.message);
 
         } catch (err) {
             toast.error('Failed to update user status');
@@ -206,6 +221,9 @@ const CreateProjectScreen: React.FC = () => {
                 emp.code === employee.code ? { ...emp, is_active: employee.is_active } : emp
             );
             setAssignedEmployees(reverted);
+        }
+        finally {
+            setIsLoading(false);
         }
     };
 
@@ -338,33 +356,7 @@ const CreateProjectScreen: React.FC = () => {
                                                 </Typography>
                                             </Box>
 
-                                            {!isCreateMode && (
-                                                <Stack direction="row" spacing={1}>
-                                                    {!isEdit ? (
-                                                        <Button
-                                                            variant="secondary"
-                                                            onClick={() => setIsEdit(true)}
-                                                        >
-                                                            Edit
-                                                        </Button>
-                                                    ) : (
-                                                        <>
-                                                            <Button
-                                                                variant="secondary"
-                                                                // startIcon={<CancelIcon />}
-                                                                onClick={() => {
-                                                                    fetchProjectDetails();
-                                                                    setIsEdit(false);
-                                                                }}
-                                                            // sx={{ minWidth: 100 }}
-                                                            >
-                                                                Cancel
-                                                            </Button>
 
-                                                        </>
-                                                    )}
-                                                </Stack>
-                                            )}
                                         </Stack>
                                     </CardContent>
                                 </Card>
@@ -474,24 +466,52 @@ const CreateProjectScreen: React.FC = () => {
                                                                     />
                                                                 </Grid>
 
-                                                                {(isEdit || isCreateMode) && (
-                                                                    <Grid size={{ xs: 12 }}>
-                                                                        <Divider sx={{ my: 2 }} />
-                                                                        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                                                                {!isCreateMode && (
+                                                                    // <Stack display={'flex'} justifyContent={'flex-end'}>
+                                                                    <Stack direction="row" >
+                                                                        {!isEdit ? (
                                                                             <Button
-                                                                                type="submit"
-                                                                                variant="primary"
-                                                                                disabled={isLoading || !formik.isValid}
+                                                                                variant="secondary"
+                                                                                onClick={() => setIsEdit(true)}
                                                                             >
-                                                                                {isLoading
-                                                                                    ? 'Saving...'
-                                                                                    : isCreateMode
-                                                                                        ? 'Create Project'
-                                                                                        : 'Save Changes'}
+                                                                                Edit
                                                                             </Button>
-                                                                        </Stack>
-                                                                    </Grid>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Button
+                                                                                    variant="secondary"
+                                                                                    // startIcon={<CancelIcon />}
+                                                                                    onClick={() => {
+                                                                                        fetchProjectDetails();
+                                                                                        setIsEdit(false);
+                                                                                    }}
+                                                                                // sx={{ minWidth: 100 }}
+                                                                                >
+                                                                                    Cancel
+                                                                                </Button>
+
+
+
+                                                                            </>
+                                                                        )}
+                                                                    </Stack>
                                                                 )}
+
+                                                                {(isEdit || isCreateMode) && (
+                                                                    <Button
+                                                                        type="submit"
+                                                                        variant="primary"
+                                                                        disabled={isLoading || !formik.isValid}
+                                                                    >
+                                                                        {isLoading
+                                                                            ? 'Saving...'
+                                                                            : isCreateMode
+                                                                                ? 'Create Project'
+                                                                                : 'Save Changes'}
+                                                                    </Button>
+                                                                )}
+
+
                                                             </Grid>
                                                         </form>
                                                     </CardContent>
@@ -542,7 +562,7 @@ const CreateProjectScreen: React.FC = () => {
                                                                                         </Box>
                                                                                     </Stack>
                                                                                     <Tooltip title={task.is_active ? "Active - Click to deactivate" : "Inactive - Click to activate"}>
-                                                                                        <FormControlLabel
+                                                                                        {/* <FormControlLabel
                                                                                             control={
                                                                                                 <Switch
                                                                                                     checked={task.is_active}
@@ -561,6 +581,15 @@ const CreateProjectScreen: React.FC = () => {
                                                                                                 />
                                                                                             }
                                                                                             labelPlacement="start"
+                                                                                        /> */}
+                                                                                        {/* <Switch
+                                                                                            checked={task.is_active}
+                                                                                            onChange={() => handleToggle(task)}
+                                                                                        /> */}
+
+                                                                                        <CustomSwitch
+                                                                                            checked={task.is_active}
+                                                                                            onChange={() => handleToggle(task)}
                                                                                         />
                                                                                     </Tooltip>
                                                                                 </Stack>
@@ -658,58 +687,46 @@ const CreateProjectScreen: React.FC = () => {
                                                                 </Box>
                                                             ) : (
                                                                 <Stack spacing={1}>
-                                                                    {assignedEmployees.map((employee) => (
-                                                                        <Fade in key={employee.code}>
-                                                                            <Paper
-                                                                                variant="outlined"
-                                                                                sx={{
-                                                                                    p: 2,
-                                                                                    borderRadius: 1,
-                                                                                    bgcolor: employee.is_active
-                                                                                        ? alpha(theme.palette.success.main, 0.05)
-                                                                                        : alpha(theme.palette.error.main, 0.05)
-                                                                                }}
-                                                                            >
-                                                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                                                                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                                                                                        <Avatar sx={{ width: 36, height: 36 }}>
-                                                                                            {employee.name.charAt(0)}
-                                                                                        </Avatar>
-                                                                                        <Box>
-                                                                                            <Typography variant="body2" fontWeight="500">
-                                                                                                {employee.name}
-                                                                                            </Typography>
-                                                                                            <Typography variant="caption" color="text.secondary">
-                                                                                                {employee.role || 'Team Member'}
-                                                                                            </Typography>
-                                                                                        </Box>
-                                                                                    </Stack>
-                                                                                    <Tooltip title={employee.is_active ? "Active - Click to deactivate" : "Inactive - Click to activate"}>
-                                                                                        <FormControlLabel
-                                                                                            control={
-                                                                                                <Switch
+                                                                    <Grid container spacing={2}>
+                                                                        {assignedEmployees.map((employee) => (
+                                                                            <Grid size={{xs:12, md:6, lg:12}}>
+                                                                                <Fade in key={employee.code}>
+                                                                                    <Paper
+                                                                                        variant="outlined"
+                                                                                        sx={{
+                                                                                            p: 2,
+                                                                                            borderRadius: 1,
+                                                                                            bgcolor: employee.is_active
+                                                                                                ? alpha(theme.palette.success.main, 0.05)
+                                                                                                : alpha(theme.palette.error.main, 0.05)
+                                                                                        }}
+                                                                                    >
+                                                                                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                                                                            <Stack direction="row" alignItems="center" spacing={1.5}>
+                                                                                                <Avatar sx={{ width: 36, height: 36 }}>
+                                                                                                    {employee.name.charAt(0)}
+                                                                                                </Avatar>
+                                                                                                <Box>
+                                                                                                    <Typography variant="body2" fontWeight="500">
+                                                                                                        {employee.name}
+                                                                                                    </Typography>
+                                                                                                    <Typography variant="caption" color="text.secondary">
+                                                                                                        {employee.role || 'Team Member'}
+                                                                                                    </Typography>
+                                                                                                </Box>
+                                                                                            </Stack>
+                                                                                            <Tooltip title={employee.is_active ? "Active - Click to deactivate" : "Inactive - Click to activate"}>
+                                                                                                <CustomSwitch
                                                                                                     checked={employee.is_active}
                                                                                                     onChange={() => handleToggle(employee)}
-                                                                                                    size="small"
-                                                                                                    color="success"
                                                                                                 />
-                                                                                            }
-                                                                                            label={
-                                                                                                <Chip
-                                                                                                    label={employee.is_active ? "Active" : "Inactive"}
-                                                                                                    size="small"
-                                                                                                    color={employee.is_active ? "success" : "error"}
-                                                                                                    variant="outlined"
-                                                                                                    sx={{ minWidth: 70 }}
-                                                                                                />
-                                                                                            }
-                                                                                            labelPlacement="start"
-                                                                                        />
-                                                                                    </Tooltip>
-                                                                                </Stack>
-                                                                            </Paper>
-                                                                        </Fade>
-                                                                    ))}
+                                                                                            </Tooltip>
+                                                                                        </Stack>
+                                                                                    </Paper>
+                                                                                </Fade>
+                                                                            </Grid>
+                                                                        ))}
+                                                                    </Grid>
                                                                 </Stack>
                                                             )}
                                                         </CardContent>

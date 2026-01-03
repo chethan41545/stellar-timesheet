@@ -12,12 +12,17 @@ import {
     Avatar,
     alpha,
     useTheme,
+    Paper,
+    InputBase,
 } from "@mui/material";
 import {
     CalendarToday,
     EventAvailable,
-    MoreVert
+    MoreVert,
+    Search
 } from "@mui/icons-material";
+import GridViewIcon from "@mui/icons-material/GridView";
+import ViewListIcon from "@mui/icons-material/ViewList";
 import apiService from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import axios from "axios";
@@ -31,7 +36,15 @@ const Projects = () => {
 
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+        const [mode, setMode] = useState('grid');
+
+
     const theme = useTheme();
+
+    const handleSearch = (event: any) => {
+        setSearchQuery(event.target.value);
+    };
 
     // const projects = [
     //     {
@@ -113,36 +126,88 @@ const Projects = () => {
     return (
         <Box
             sx={{
-                minHeight: "100vh",
-                p: 3,
-                display: "flex",
-                flexDirection: "column",
+                minHeight: "100vh"
             }}
         >
 
-            <Button
-                variant="primary"
+            <Paper
+                elevation={0}
                 sx={{
-                    position: "fixed",
-                    bottom: 24,
-                    right: 48,
-                    zIndex: 1300, // keeps it above other content
+                    // mb: 3,
+                    borderRadius: 3,
                 }}
-                onClick={()=>navigate("/projects/create")}
             >
-                Create
-            </Button>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="center">
+                    {/* Search */}
+                    <Paper
+                        component="form"
+                        sx={{
+                            p: '2px 4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: { xs: '100%', md: 400 },
+                            borderRadius: 2,
+                            // border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                        }}
+                    >
+                        <IconButton sx={{ p: '10px' }} aria-label="search">
+                            <Search />
+                        </IconButton>
+                        <InputBase
+                            sx={{ ml: 1, flex: 1 }}
+                            placeholder="Search users by name or email"
+                            value={searchQuery}
+                            onChange={handleSearch}
+                        />
+                    </Paper>
+
+
+
+                    {/* Refresh Button */}
+                    {/* <Button
+                        variant="secondary"
+                        onClick={() => fetchData()}
+                    >
+                        Refresh
+                    </Button> */}
+
+                    <Button
+                        variant="primary"
+                        label="Create"
+                        onClick={() => navigate("/projects/create")}
+                    />
+                </Stack>
+            </Paper>
+
+            <Box display={'flex'} justifyContent={'flex-end'} px={2} pb={2}>
+                <IconButton
+                    color={mode === "grid" ? "primary" : "default"}
+                    onClick={() => setMode("grid")}
+                >
+                    <GridViewIcon />
+                </IconButton>
+
+                <IconButton
+                    color={mode === "list" ? "primary" : "default"}
+                    onClick={() => setMode("list")}
+                >
+                    <ViewListIcon />
+                </IconButton>
+            </Box>
 
             {
                 loading ? (
                     <Grid container spacing={3} >
-                        <Grid size={{ xs: 12, md: 6, lg: 4 }} >
+                        <Grid size={{ xs: 12, md: 3, }} >
                             <CustomSkeleton height={200} />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6, lg: 4 }} >
+                        <Grid size={{ xs: 12, md: 3, }} >
                             <CustomSkeleton height={200} />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6, lg: 4 }} >
+                        <Grid size={{ xs: 12, md: 3, }} >
+                            <CustomSkeleton height={200} />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 3, }} >
                             <CustomSkeleton height={200} />
                         </Grid>
                     </Grid>
@@ -151,7 +216,7 @@ const Projects = () => {
                     : (
                         <Grid container spacing={3}>
                             {projects.map((project: any) => (
-                                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={project.code}>
+                                <Grid size={{ xs: 12, md: 3, }} key={project.code}>
                                     <Card
                                         elevation={0}
                                         sx={{

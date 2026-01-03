@@ -1,102 +1,105 @@
 import React, { useState } from 'react';
-import { Box, Typography} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../shared/Header/Header';
 import Sidebar from '../shared/SideBar/Sidebar';
 
 
 const routeTitles: Record<string, string> = {
-    '/timesheets': 'My Timesheets',
-    '/users-timesheet': 'Users Timesheet',
-    '/create-project': 'Create Project',
-    '/projects': 'Projects',
+  '/users-timesheet': 'Users Timesheet',
 };
 
 
 const CommonLayout: React.FC = () => {
 
-    const location = useLocation();
-    const title = routeTitles[location.pathname] || 'Default Title';
+  const location = useLocation();
+  const title = routeTitles[location.pathname] || null;
 
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
-    const handleLogout = () => {
-        console.log('Logging out...');
-    };
+  const handleLogout = () => {
+    console.log('Logging out...');
+  };
 
-    const isTimesheetsPage = location.pathname === "/timesheets";
-
-
-    return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            {/* Header - Fixed at top */}
-            <Box position={"sticky"} top={0} zIndex={1000}>
-                <Header
-                    userName={localStorage.getItem('user_full_name')}
-                    onLogout={handleLogout}
-                    userRole={localStorage.getItem('role')}
-                />
-            </Box>
-
-            {/* Main content area with sidebar and page content */}
-            <Box sx={{
-                display: 'flex',
-                flex: 1,
-                overflow: 'hidden'
-            }}>
-                {/* Sidebar */}
-                <Box sx={{
-                    width: sidebarCollapsed ? 72 : 190,
-                    flexShrink: 0,
-                    borderRight: '1px solid',
-                    borderColor: 'divider',
-                    backgroundColor: '#6f94bc',
-                    overflowY: 'auto',
-                    transition: 'width 0.3s ease'
-                }}>
-                    <Sidebar
-                        collapsed={sidebarCollapsed}
-                        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    />
-                </Box>
-
-                {/* Page Content */}
-                {/* Page Content */}
-{isTimesheetsPage ? (
-  // 🔹 Timesheets: ONLY outlet
-  <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
-    <Outlet />
-  </Box>
-) : (
-  // 🔹 Other pages: full layout
-  <Box
-    sx={(theme) => ({
-      flex: 1,
-      p: 3,
-      minWidth: 0,
-      overflow: 'auto',
-      backgroundColor: theme.customColors.surfaceDark,
-    })}
-  >
-    <Typography
-      variant="h5"
-      sx={{
-        fontWeight: 600,
-        color: 'text.main',
-        mb: 3,
-      }}
-    >
-      {title}
-    </Typography>
-
-      <Outlet />
-  </Box>
-)}
+  const isTimesheetsPage = location.pathname === "/timesheets";
 
 
-            </Box>
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Header - Fixed at top */}
+      <Box position={"sticky"} top={0} zIndex={1000}>
+        <Header
+          userName={localStorage.getItem('user_full_name')}
+          onLogout={handleLogout}
+          userRole={localStorage.getItem('role')}
+        />
+      </Box>
+
+      {/* Main content area with sidebar and page content */}
+      <Box sx={{
+        display: 'flex',
+        flex: 1,
+        overflow: 'hidden'
+      }}>
+        {/* Sidebar */}
+        <Box sx={{
+          width: sidebarCollapsed ? 72 : 190,
+          flexShrink: 0,
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: '#6f94bc',
+          overflowY: 'auto',
+          transition: 'width 0.3s ease'
+        }}>
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
         </Box>
-    );
+
+        {/* Page Content */}
+        {/* Page Content */}
+        {isTimesheetsPage ? (
+          // 🔹 Timesheets: ONLY outlet
+          <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
+            <Outlet />
+          </Box>
+        ) : (
+          // 🔹 Other pages: full layout
+          <Box
+            sx={(theme) => ({
+              flex: 1,
+              p: 3,
+              minWidth: 0,
+              overflow: 'auto',
+              backgroundColor: theme.customColors.surfaceDark,
+            })}
+          >
+            {
+              title && (
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 600,
+                    color: 'text.main',
+                    mb: 3,
+                  }}
+                >
+                  {title}
+                </Typography>
+
+              )
+            }
+
+
+            <Outlet />
+          </Box>
+        )}
+
+
+      </Box>
+    </Box>
+  );
 };
 
 export default CommonLayout;

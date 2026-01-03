@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   CREATE_PROJECT:"project/create-project",
   UPDATE_PROJECT:"project/update-project",
   CREATE_TASK:"project/create-task",
-  ASSIGN_USER_PROJECT :"user/assign-project"
+  MANAGE_USER_PROJECT :"user/manage-user-project",
+  UN_ASSIGN_USER_PROJECT :"user/un-assign-project"
   // add other endpoints as needed
 };
