@@ -76,7 +76,7 @@ const CreateProjectScreen: React.FC = () => {
     const [allEmployees, setAllEmployees] = useState<any[]>([]);
     const [assignedEmployees, setAssignedEmployees] = useState<any[]>([]);
     const [tasks, setTasks] = useState<any[]>([]);
-    const [selectedUser, setSelectedUser] = useState("");
+    const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
 
     const [open, setOpen] = useState(false);
 
@@ -165,7 +165,7 @@ const CreateProjectScreen: React.FC = () => {
         }
     };
 
-    const assignUser = async (userCode: string) => {
+    const assignUser = async (userCode: any) => {
         if (!userCode || !id) return;
 
         setIsAssigning(true);
@@ -185,7 +185,7 @@ const CreateProjectScreen: React.FC = () => {
                 toast.success(response.data.message);
                 // Refresh the user list
                 await fetchProjectDetails();
-                setSelectedUser("");
+                setSelectedUsers([]);
             }
         } catch (err) {
             toast.error('Failed to assign user');
@@ -204,7 +204,7 @@ const CreateProjectScreen: React.FC = () => {
 
             const payload = {
                 project_code: id,
-                user_code: employee.code,
+                user_code: [employee.code],
                 is_active: !employee.is_active,
                 action: "status_change"
 
@@ -452,7 +452,7 @@ const CreateProjectScreen: React.FC = () => {
                                                                     <DatePicker
                                                                         label="End Date"
                                                                         value={formik.values.end_date}
-                                                                        onChange={(v) =>{
+                                                                        onChange={(v) => {
                                                                             formik.setFieldValue('end_date', v)
                                                                         }
                                                                         }
@@ -658,35 +658,57 @@ const CreateProjectScreen: React.FC = () => {
                                                                 <TextField
                                                                     select
                                                                     fullWidth
-                                                                    label="Select User"
-                                                                    value={selectedUser}
-                                                                    onChange={(e) => setSelectedUser(e.target.value)}
-                                                                    // disabled={isDisabled || isAssigning || allEmployees.length === 0}
+                                                                    label="Select Users"
+                                                                    value={selectedUsers} // now an array
+                                                                    // onChange={(e) => setSelectedUsers(e.target.value)}
+                                                                    onChange={(e) => setSelectedUsers(e.target.value as unknown as string[])}
+
                                                                     size="small"
+                                                                    SelectProps={{
+                                                                        multiple: true, // allow multiple selections
+                                                                        renderValue: (selected:any) => selected
+                                                                            .map((val:any) => {
+                                                                                const emp = allEmployees.find((emp) => emp.value === val);
+                                                                                return emp ? emp.label : val;
+                                                                            })
+                                                                            .join(", "),
+                                                                    }}
                                                                 >
-                                                                    <MenuItem value="">
-                                                                        <em>Choose a user to assign</em>
-                                                                    </MenuItem>
-                                                                    {allEmployees.map((employee) => (
-                                                                        <MenuItem key={employee.value} value={employee.value}>
-                                                                            <Stack direction="row" alignItems="center" spacing={1}>
-                                                                                <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                                                                                    {employee.avatar}
-                                                                                </Avatar>
-                                                                                <Box>
-                                                                                    <Typography variant="body2">{employee.label}</Typography>
-                                                                                    <Typography variant="caption" color="text.secondary">
-                                                                                        {employee.role}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                            </Stack>
-                                                                        </MenuItem>
-                                                                    ))}
+                                                                    {allEmployees.map((employee) => {
+                                                                        const isSelected = selectedUsers.includes(employee.value);
+
+                                                                        return (
+                                                                            <MenuItem key={employee.value} value={employee.value}
+                                                                                sx={{
+                                                                                    backgroundColor: isSelected ? "rgba(3, 51, 124, 0.2) !important" : "transparent", // light blue
+                                                                                    "&:hover": {
+                                                                                        backgroundColor: isSelected
+                                                                                            ? "rgba(3, 51, 124, 0.2)" // slightly darker on hover
+                                                                                            : "rgba(0, 0, 0, 0.1)", // light hover for unselected
+                                                                                    },
+                                                                                }}
+
+                                                                            >
+                                                                                <Stack direction="row" alignItems="center" spacing={1}>
+                                                                                    <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                                                                                        {employee.avatar}
+                                                                                    </Avatar>
+                                                                                    <Box>
+                                                                                        <Typography variant="body2">{employee.label}</Typography>
+                                                                                        <Typography variant="caption" color="text.secondary">
+                                                                                            {employee.role}
+                                                                                        </Typography>
+                                                                                    </Box>
+                                                                                </Stack>
+                                                                            </MenuItem>
+                                                                        )
+                                                                    })}
                                                                 </TextField>
 
+
                                                                 <Button
-                                                                    onClick={() => assignUser(selectedUser)}
-                                                                    disabled={!selectedUser || isAssigning}
+                                                                    onClick={() => assignUser(selectedUsers)}
+                                                                    disabled={!selectedUsers || isAssigning}
                                                                     variant="primary"
                                                                     // startIcon={isAssigning ? <CircularProgress size={20} /> : <AddIcon />}
                                                                     fullWidth
