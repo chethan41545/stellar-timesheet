@@ -46,6 +46,7 @@ interface ProjectFormData {
     description: string;
     start_date: Date | null;
     end_date: Date | null;
+    active: boolean;
     manager_code: string;
 }
 
@@ -153,6 +154,7 @@ const CreateProjectScreen: React.FC = () => {
                 start_date: new Date(project.start_date),
                 end_date: project.end_date ? new Date(project.end_date) : null,
                 manager_code: project.manager_code,
+                active: project.active
             });
 
             setAssignedEmployees(project.user_list);
@@ -235,6 +237,7 @@ const CreateProjectScreen: React.FC = () => {
             start_date: null,
             end_date: null,
             manager_code: '',
+            active: false
         },
         validationSchema,
         onSubmit: async (values) => {
@@ -425,7 +428,7 @@ const CreateProjectScreen: React.FC = () => {
                                                                     </TextField>
                                                                 </Grid>
 
-                                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                                <Grid size={{ xs: 12, md: 3 }}>
                                                                     <DatePicker
                                                                         label="Start Date *"
                                                                         value={formik.values.start_date}
@@ -434,17 +437,49 @@ const CreateProjectScreen: React.FC = () => {
                                                                         }
                                                                         disabled={isDisabled}
 
+                                                                        slotProps={{
+                                                                            textField: {
+                                                                                sx: {
+                                                                                    "& .MuiPickersSectionList-root": {
+                                                                                        padding: "11px 6px",
+                                                                                    },
+                                                                                },
+                                                                            },
+                                                                        }}
+
                                                                     />
                                                                 </Grid>
 
-                                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                                <Grid size={{ xs: 12, md: 3 }}>
                                                                     <DatePicker
                                                                         label="End Date"
                                                                         value={formik.values.end_date}
-                                                                        onChange={(v) =>
+                                                                        onChange={(v) =>{
                                                                             formik.setFieldValue('end_date', v)
                                                                         }
+                                                                        }
                                                                         disabled={isDisabled}
+
+                                                                        slotProps={{
+                                                                            textField: {
+                                                                                sx: {
+                                                                                    "& .MuiPickersSectionList-root": {
+                                                                                        padding: "11px 6px",
+                                                                                    },
+                                                                                },
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Grid>
+
+                                                                <Grid size={{ xs: 12, md: 3 }}>
+                                                                    <CustomSwitch
+                                                                        checked={formik.values.active}
+                                                                        onChange={(v) => {
+                                                                            formik.setFieldValue('active', v.target.checked)
+                                                                        }
+
+                                                                        }
                                                                     />
                                                                 </Grid>
 
@@ -689,7 +724,7 @@ const CreateProjectScreen: React.FC = () => {
                                                                 <Stack spacing={1}>
                                                                     <Grid container spacing={2}>
                                                                         {assignedEmployees.map((employee) => (
-                                                                            <Grid size={{xs:12, md:6, lg:12}}>
+                                                                            <Grid size={{ xs: 12, md: 6, lg: 12 }}>
                                                                                 <Fade in key={employee.code}>
                                                                                     <Paper
                                                                                         variant="outlined"

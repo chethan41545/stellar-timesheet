@@ -129,6 +129,7 @@ client.interceptors.response.use(
 
     if (status !== 401 || !original) {
       toast.error(apiErrorMessage);
+      hardLogout();
       return Promise.reject(error.response?.data ?? error);
     }
 

@@ -368,7 +368,7 @@ const UserForm = () => {
                                         </Grid>
                                     </Grid>
 
-                                    <FormControlLabel
+                                    {/* <FormControlLabel
                                         control={
                                             <CustomSwitch
                                                 checked={formik.values.is_active}
@@ -381,6 +381,13 @@ const UserForm = () => {
                                                 </Typography>
                                         }
                                         sx={{ mt: 1 }}
+                                    /> */}
+                                    <CustomSwitch
+                                        checked={formik.values.is_active}
+                                        // onChange={() => formik.handleChange}
+                                        onChange={(v) => {
+                                            formik.setFieldValue('is_active', v.target.checked)
+                                        }}
                                     />
 
                                     <Typography variant="caption" color="text.secondary">

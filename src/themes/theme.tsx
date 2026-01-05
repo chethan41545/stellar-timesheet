@@ -23,9 +23,9 @@ export const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#009ef1',
-            light: '#51a9d8ff',
-            dark: '#007fc4ff',
+            main: '#002e71',
+            light: '#03337cff',
+            dark: '#02265eff',
             contrastText: '#ffffff',
         },
         secondary: {

@@ -304,19 +304,10 @@ const UserList = () => {
                         </Select>
                     </FormControl> */}
 
-                    {/* Refresh Button */}
-                    <Button
-                        variant="secondary"
-                        // startIcon={<Refresh />}
-                        onClick={() => fetchData()}
-                    // sx={{ ml: 'auto' }}
-                    >
-                        Refresh
-                    </Button>
 
                     <Button
                         variant="primary"
-                        label="Create User"
+                        label="Create"
                         onClick={() => navigate("/users/create")}
                     />
                 </Stack>
@@ -342,7 +333,7 @@ const UserList = () => {
             {loading ? (
                 <Grid container spacing={3}>
                     {[1, 2, 3,4].map((item) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={item}>
                             <CustomSkeleton height={250} />
                         </Grid>
                     ))}
@@ -356,7 +347,7 @@ const UserList = () => {
                             <>
                                 <Grid container spacing={3}>
                                     {filteredUsers.map((user: any) => (
-                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={user.code}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={user.code}>
                                             <Card
                                                 elevation={0}
                                                 sx={{
