@@ -10,7 +10,7 @@ interface SwitchProps {
 const CustomSwitch: React.FC<SwitchProps> = ({
     checked,
     onChange,
-    id = "ios-switch",
+    // id = "ios-switch",
 }) => {
     return (
         <label className={styles.root}>

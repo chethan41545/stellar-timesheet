@@ -16,6 +16,7 @@ import UserList from "./pages/Users/UserList";
 import UserForm from "./pages/Users/UserCreation";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./constants/routes";
+import HolidayScreen from "./pages/Dashboard/HolidayList";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -58,6 +59,7 @@ export default function App() {
             <Route path=":id" element={<Timesheet />} />
           </Route>
 
+          <Route path="dashboard" element={<HolidayScreen />} />
           <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
           <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
           {/* <Route path="projects" element={<Projects />} /> */}
