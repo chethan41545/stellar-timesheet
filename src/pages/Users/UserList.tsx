@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import {
     Box,
@@ -25,9 +24,9 @@ import {
     Email,
     Business,
     Person,
-    AdminPanelSettings,
-    ManageAccounts,
-    Badge,
+    // AdminPanelSettings,
+    // ManageAccounts,
+    // Badge,
     CheckCircle,
     Cancel,
     Edit,
@@ -52,14 +51,14 @@ const UserList = () => {
     const [mode, setMode] = useState('grid');
     const [sortBy, setSortBy] = useState('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-    const [page, setPage] = useState(1);
-    const [size, setSize] = useState(10);
-    const [totalRows, setTotalRows] = useState(0);
+    const [_page, setPage] = useState(1);
+    const [_size, _setSize] = useState(10);
+    const [_totalRows, setTotalRows] = useState(0);
 
     const [users, setUsers] = useState<any>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [filterRole, setFilterRole] = useState("all");
+    const [filterRole, _setFilterRole] = useState("all");
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [pagination, setPagination] = useState({
@@ -72,12 +71,12 @@ const UserList = () => {
     // const [totalRows, setTotalRows] = useState(0);
 
 
-    const roles = [
-        { value: "all", label: "All Roles", icon: <Person /> },
-        { value: "Super Admin", label: "Super Admin", icon: <AdminPanelSettings /> },
-        { value: "Manager", label: "Manager", icon: <ManageAccounts /> },
-        { value: "Employee", label: "Employee", icon: <Badge /> },
-    ];
+    // const roles = [
+    //     { value: "all", label: "All Roles", icon: <Person /> },
+    //     { value: "Super Admin", label: "Super Admin", icon: <AdminPanelSettings /> },
+    //     { value: "Manager", label: "Manager", icon: <ManageAccounts /> },
+    //     { value: "Employee", label: "Employee", icon: <Badge /> },
+    // ];
 
     const fetchData = async (page = 1, per_page = 10) => {
         setLoading(true);
@@ -138,9 +137,9 @@ const UserList = () => {
         setSearchQuery(event.target.value);
     };
 
-    const handleFilterChange = (event: any) => {
-        setFilterRole(event.target.value);
-    };
+    // const handleFilterChange = (event: any) => {
+    //     setFilterRole(event.target.value);
+    // };
 
     const getRoleColor = (role: string) => {
         switch (role) {
@@ -186,14 +185,14 @@ const UserList = () => {
             width: '100px',
             visibleFor: ['all'],
             sortable: true,
-            format: (value: string, row: any) => {
+            format: (_value: string, row: any) => {
                 return (
                     <Typography
                         sx={{
                             cursor: 'pointer',
                             '&:hover': { textDecoration: 'underline', color: 'primary.main' },
                         }}
-                        onClick={(e) => {
+                        onClick={() => {
                             navigate(`/users/${row.code}`);
                         }}
                     >

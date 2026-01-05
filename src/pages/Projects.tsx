@@ -18,7 +18,6 @@ import {
 import {
     CalendarToday,
     EventAvailable,
-    MoreVert,
     Search
 } from "@mui/icons-material";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -63,14 +62,14 @@ const Projects = () => {
             width: '100px',
             visibleFor: ['all'],
             sortable: true,
-            format: (value: string, row: any) => {
+            format: (_value: string, row: any) => {
                 return (
                     <Typography
                         sx={{
                             cursor: 'pointer',
                             '&:hover': { textDecoration: 'underline', color: 'primary.main' },
                         }}
-                        onClick={(e) => {
+                        onClick={() => {
                             navigate(`/users/${row.code}`);
                         }}
                     >
