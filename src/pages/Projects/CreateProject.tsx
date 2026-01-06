@@ -38,6 +38,7 @@ import TaskAltIcon from '@mui/icons-material/Task';
 import CustomSkeleton from '../../shared/CustomSkeleton/CustomSkeleton';
 import TaskCreateDialog from './TaskCreateDialog';
 import CustomSwitch from '../../shared/Switch/CustomSwitch';
+import MultiSelect from '../../shared/MultiSelect/MultiSelectWithoutController';
 
 interface ProjectFormData {
     name: string;
@@ -655,7 +656,7 @@ const CreateProjectScreen: React.FC = () => {
                                                             </Typography>
 
                                                             <Stack spacing={2}>
-                                                                <TextField
+                                                                {/* <TextField
                                                                     select
                                                                     fullWidth
                                                                     label="Select Users"
@@ -703,7 +704,15 @@ const CreateProjectScreen: React.FC = () => {
                                                                             </MenuItem>
                                                                         )
                                                                     })}
-                                                                </TextField>
+                                                                </TextField> */}
+
+                                                                <MultiSelect
+                                                                    label="Users"
+                                                                    options={allEmployees}
+                                                                    value={selectedUsers}
+                                                                    onChange={setSelectedUsers}
+                                                                    selectAllByDefault={false}
+                                                                />
 
 
                                                                 <Button
@@ -720,7 +729,7 @@ const CreateProjectScreen: React.FC = () => {
                                                     </Card>
 
                                                     {/* Team Members Card */}
-                                                    <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                                    <Card elevation={1} sx={{ borderRadius: 2 }} >
                                                         <CardContent>
                                                             <Typography variant="h6" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                 <GroupsIcon color="primary" />

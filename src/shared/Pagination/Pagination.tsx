@@ -40,6 +40,7 @@ export default function PaginationBar({
       alignItems="center"
       px={!smallFont ? 2 : 0}
       py={1}
+      width={"100%"}  
     >
       {/* Left: Rows per page */}
       <Box display="flex" alignItems="center" gap={1}>

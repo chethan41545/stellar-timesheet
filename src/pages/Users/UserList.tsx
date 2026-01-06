@@ -17,7 +17,6 @@ import {
     InputBase,
     Menu,
     MenuItem,
-    Pagination,
 } from "@mui/material";
 import {
     Search,
@@ -43,6 +42,7 @@ import { API_ENDPOINTS } from "../../constants/apiUrls";
 import Button from "../../shared/Button/Button";
 import CustomSkeleton from "../../shared/CustomSkeleton/CustomSkeleton";
 import CustomTable from "../../shared/CustomTable/CustomTable";
+import PaginationBar from "../../shared/Pagination/Pagination";
 
 const UserList = () => {
     const navigate = useNavigate();
@@ -114,9 +114,10 @@ const UserList = () => {
         setSortDirection(sd);
     };
 
-    const handlePageChange = (_event: any, value: any) => {
-        fetchData(value, pagination.per_page);
+    const handlePageChange = (newPage:any, perPage:any) => {
+        fetchData(newPage, perPage);
     };
+
 
     // const handleTablePageChange = (newPage: number, newPageSize: number) => {
     //     setPage(newPage);
@@ -331,8 +332,8 @@ const UserList = () => {
             {/* Loading State */}
             {loading ? (
                 <Grid container spacing={3}>
-                    {[1, 2, 3,4].map((item) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={item}>
+                    {[1, 2, 3, 4].map((item) => (
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item}>
                             <CustomSkeleton height={250} />
                         </Grid>
                     ))}
@@ -346,7 +347,7 @@ const UserList = () => {
                             <>
                                 <Grid container spacing={3}>
                                     {filteredUsers.map((user: any) => (
-                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={user.code}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={user.code}>
                                             <Card
                                                 elevation={0}
                                                 sx={{
@@ -493,20 +494,40 @@ const UserList = () => {
                             )
                     }
 
-                    {/* Pagination */}
-                    {/* {pagination.total_pages > 1 && ( */}
-                    <Box sx={{ display: 'flex', justifyContent: 'end', mt: 4 }}>
-                        <Pagination
-                            count={pagination.total_pages}
+
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 2,
+                            mt: 4,
+                            width:"100%"
+                        }}
+                    >
+
+
+                        <PaginationBar
                             page={pagination.page}
-                            onChange={handlePageChange}
-                            color="primary"
-                            shape="rounded"
-                            showFirstButton
-                            showLastButton
+                            pageSize={pagination.per_page}
+                            totalRows={pagination.total}
+                            pageSizeOptions={[10, 20, 50]}
+                            onPageChange={(newPage) => {
+
+                                handlePageChange(newPage, pagination.per_page);
+                            }}
+                            onPageSizeChange={(newSize) => {
+                                setPagination((prev) => ({
+                                    ...prev,
+                                    per_page: newSize,
+                                    page: 1, // reset to first page when page size changes
+                                }));
+                                handlePageChange(1, newSize);
+                            }}
+                        // smallFont={"12px"}
                         />
                     </Box>
-                    {/* )} */}
+
 
 
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import apiService from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import axios from "axios";
-import { Skeleton, Card, CardContent, Box } from "@mui/material";
+import { Skeleton, Card, CardContent, Box, Grid } from "@mui/material";
 
 import {
     BarChart,
@@ -125,7 +125,7 @@ const ReportsScreen: React.FC = () => {
     // task_summary is already grouped by project with tasks as keys
     const taskNames = Object.keys(data?.task_summary[0] || {}).filter((k) => k !== "project_name");
 
-    
+
 
 
     return (
@@ -134,13 +134,17 @@ const ReportsScreen: React.FC = () => {
 
             {
                 users && (
-                    <MultiSelect
-                        label="Users"
-                        options={users}
-                        value={selected}
-                        onChange={setSelected}
-                        selectAllByDefault={true}
-                    />
+                    <Grid container>
+                        <Grid size={{ xs: 12, md: 3 }}>
+                            <MultiSelect
+                                label="Users"
+                                options={users}
+                                value={selected}
+                                onChange={setSelected}
+                                selectAllByDefault={true}
+                            />
+                        </Grid>
+                    </Grid>
                 )
             }
 
@@ -184,11 +188,11 @@ const ReportsScreen: React.FC = () => {
                                     barGap={6}
                                 >
                                     {/* <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" /> */}
-                                    <XAxis 
-                                    dataKey="user_full_name" 
-                                    angle={-45} 
-                                    textAnchor="end" 
-                                    interval={0} />
+                                    <XAxis
+                                        dataKey="user_full_name"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        interval={0} />
                                     <YAxis />
                                     <Tooltip
                                         content={

@@ -7,15 +7,17 @@ import Select, { type SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import { styled } from '@mui/material/styles';
+import { customScrollbar } from '../Styles/CommonStyles';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 24;
 
 const MenuProps = {
   PaperProps: {
-    style: {
+    sx: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
       width: 250,
+      ...customScrollbar,
     },
   },
 };
@@ -48,7 +50,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   options,
   value,
   onChange,
-  width = 300,
+  width = "100%",
   selectAllByDefault = false,
 }) => {
   // ✅ Fix: Only initialize once on mount if selectAllByDefault is true
@@ -81,7 +83,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
     if (isAllSelected) {
       return 'All';
     }
-    
+
     if (value.length === 0) {
       return '';
     }
@@ -94,7 +96,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   };
 
   return (
-    <FormControl sx={{ m: 1, width }}>
+    <FormControl sx={{ m: 1, width, }} >
       <InputLabel>{label}</InputLabel>
       <Select
         multiple
@@ -103,6 +105,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         input={<OutlinedInput label={label} />}
         renderValue={getDisplayText}
         MenuProps={MenuProps}
+        // sx={{...customScrollbar}}
       >
         {/* "All" option - using a special value that won't conflict with actual option values */}
         <StyledMenuItem value="select-all">
