@@ -13,12 +13,10 @@ import {
     alpha,
     useTheme,
     Paper,
-    InputBase,
 } from "@mui/material";
 import {
     CalendarToday,
     EventAvailable,
-    Search
 } from "@mui/icons-material";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
@@ -29,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import CustomSkeleton from "../shared/CustomSkeleton/CustomSkeleton";
 import Button from "../shared/Button/Button";
 import CustomTable from "../shared/CustomTable/CustomTable";
+import SearchField from "../shared/SearchField/SearchField";
 
 const Projects = () => {
 
@@ -37,7 +36,9 @@ const Projects = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [mode, setMode] = useState('grid');
+    const [mode, setMode] = useState('list');
+
+    const [_page, setPage] = useState(1);
 
     const [sortBy, setSortBy] = useState('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -50,9 +51,9 @@ const Projects = () => {
 
     const theme = useTheme();
 
-    const handleSearch = (event: any) => {
-        setSearchQuery(event.target.value);
-    };
+    // const handleSearch = (event: any) => {
+    //     setSearchQuery(event.target.value);
+    // };
 
     const ALL_COLUMNS: any[] = [
 
@@ -61,7 +62,7 @@ const Projects = () => {
             label: 'Name',
             width: '100px',
             visibleFor: ['all'],
-            sortable: true,
+            // sortable: true,
             format: (_value: string, row: any) => {
                 return (
                     <Typography
@@ -174,7 +175,7 @@ const Projects = () => {
             >
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="center">
                     {/* Search */}
-                    <Paper
+                    {/* <Paper
                         component="form"
                         sx={{
                             p: '2px 4px',
@@ -194,7 +195,21 @@ const Projects = () => {
                             value={searchQuery}
                             onChange={handleSearch}
                         />
-                    </Paper>
+                    </Paper> */}
+
+                    <Box minWidth="180px">
+                        <SearchField
+                            // sx={{ ml: 1, flex: 1 }}
+                            name="searchProjacr"
+                            placeholder="Search Project by name"
+                            value={searchQuery}
+                            // onChange={handleSearch}
+                            onChange={(v) => {
+                                setSearchQuery(v);
+                                setPage(1);
+                            }}
+                        />
+                    </Box>
 
 
 
@@ -232,13 +247,15 @@ const Projects = () => {
 
             {
                 loading ? (
-                    <Grid container spacing={3}>
-                    {[1, 2, 3,4].map((item) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={item}>
-                            <CustomSkeleton height={250} />
-                        </Grid>
-                    ))}
-                </Grid>
+                    //     <Grid container spacing={3}>
+                    //     {[1, 2, 3,4].map((item) => (
+                    //         <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={item}>
+                    //             <CustomSkeleton height={250} />
+                    //         </Grid>
+                    //     ))}
+                    // </Grid>
+
+                    <CustomSkeleton height={300} />
 
                 )
                     : (
@@ -247,7 +264,7 @@ const Projects = () => {
                                 (mode === "grid") ? (
                                     <Grid container spacing={3}>
                                         {projects.map((project: any) => (
-                                            <Grid size={{ xs: 12, sm: 6, md: 4, lg:3}} key={project.code}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={project.code}>
                                                 <Card
                                                     elevation={0}
                                                     sx={{

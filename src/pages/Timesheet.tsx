@@ -2004,7 +2004,7 @@ export default function Timesheet({
 
 			<div className={styles.footerBar}>
 				<div className={styles.footerActions}>
-					{isCandidate && editable && entries[0]?.costCenterName ? (
+					{!id && editable && entries[0]?.costCenterName ? (
 						<>
 							<Button
 								label={

@@ -14,12 +14,10 @@ import {
     alpha,
     useTheme,
     Paper,
-    InputBase,
     Menu,
     MenuItem,
 } from "@mui/material";
 import {
-    Search,
     Email,
     Business,
     Person,
@@ -43,12 +41,14 @@ import Button from "../../shared/Button/Button";
 import CustomSkeleton from "../../shared/CustomSkeleton/CustomSkeleton";
 import CustomTable from "../../shared/CustomTable/CustomTable";
 import PaginationBar from "../../shared/Pagination/Pagination";
+import SearchField from "../../shared/SearchField/SearchField";
+import { useDebouncedValue } from "../../utils/commonUtils";
 
 const UserList = () => {
     const navigate = useNavigate();
     const theme = useTheme();
 
-    const [mode, setMode] = useState('grid');
+    const [mode, setMode] = useState('list');
     const [sortBy, setSortBy] = useState('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
     const [_page, setPage] = useState(1);
@@ -58,6 +58,9 @@ const UserList = () => {
     const [users, setUsers] = useState<any>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+
+    const debouncedSearch = useDebouncedValue(searchQuery, 350);
+
     const [filterRole, _setFilterRole] = useState("all");
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -78,12 +81,13 @@ const UserList = () => {
     //     { value: "Employee", label: "Employee", icon: <Badge /> },
     // ];
 
-    const fetchData = async (page = 1, per_page = 10) => {
+    const fetchData = async (page = 1, per_page = 10,) => {
         setLoading(true);
         try {
             const payload = {
                 page,
                 per_page,
+                search: searchQuery,
                 variant: "paginated"
             };
             const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST, payload);
@@ -106,7 +110,7 @@ const UserList = () => {
 
     useEffect(() => {
         fetchData(pagination.page, pagination.per_page);
-    }, [
+    }, [debouncedSearch
     ]);
 
     const handleSortChange = (sb: any, sd: 'asc' | 'desc') => {
@@ -114,7 +118,7 @@ const UserList = () => {
         setSortDirection(sd);
     };
 
-    const handlePageChange = (newPage:any, perPage:any) => {
+    const handlePageChange = (newPage: any, perPage: any) => {
         fetchData(newPage, perPage);
     };
 
@@ -132,10 +136,6 @@ const UserList = () => {
     const handleMenuClose = () => {
         setAnchorEl(null);
         setSelectedUser(null);
-    };
-
-    const handleSearch = (event: any) => {
-        setSearchQuery(event.target.value);
     };
 
     // const handleFilterChange = (event: any) => {
@@ -164,8 +164,10 @@ const UserList = () => {
     };
 
     const filteredUsers = users.filter((user: any) => {
-        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        // const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        //     user.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesSearch = user
         const matchesRole = filterRole === "all" || user.role === filterRole;
         return matchesSearch && matchesRole;
     });
@@ -262,27 +264,22 @@ const UserList = () => {
             >
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="center">
                     {/* Search */}
-                    <Paper
-                        component="form"
-                        sx={{
-                            p: '2px 4px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            width: { xs: '100%', md: 400 },
-                            borderRadius: 2,
-                            // border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                        }}
-                    >
-                        <IconButton sx={{ p: '10px' }} aria-label="search">
+                    <Box minWidth="180px">
+                        {/* <IconButton sx={{ p: '10px' }} aria-label="search">
                             <Search />
-                        </IconButton>
-                        <InputBase
-                            sx={{ ml: 1, flex: 1 }}
+                        </IconButton> */}
+                        <SearchField
+                            // sx={{ ml: 1, flex: 1 }}
+                            name="searchEmployee"
                             placeholder="Search users by name or email"
                             value={searchQuery}
-                            onChange={handleSearch}
+                            // onChange={handleSearch}
+                            onChange={(v) => {
+                                setSearchQuery(v);
+                                setPage(1);
+                            }}
                         />
-                    </Paper>
+                    </Box>
 
                     {/* Role Filter */}
                     {/* <FormControl sx={{ minWidth: 200 }}>
@@ -331,13 +328,14 @@ const UserList = () => {
 
             {/* Loading State */}
             {loading ? (
-                <Grid container spacing={3}>
-                    {[1, 2, 3, 4].map((item) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item}>
-                            <CustomSkeleton height={250} />
-                        </Grid>
-                    ))}
-                </Grid>
+                // <Grid container spacing={3}>
+                //     {[1, 2, 3, 4].map((item) => (
+                //         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item}>
+                //             <CustomSkeleton height={250} />
+                //         </Grid>
+                //     ))}
+                // </Grid>
+                <CustomSkeleton height={300} />
             ) : (
                 <>
                     {/* User Cards Grid */}
@@ -502,7 +500,7 @@ const UserList = () => {
                             alignItems: "center",
                             gap: 2,
                             mt: 4,
-                            width:"100%"
+                            width: "100%"
                         }}
                     >
 
