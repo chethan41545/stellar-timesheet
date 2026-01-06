@@ -525,7 +525,7 @@ export default function Timesheet({
 	timesheetCode,
 }: TimesheetProps) {
 	const role = normalize(readRole());
-	const isCandidate = role === "employee";
+	// const isCandidate = role === "employee";
 	// const isAgency = role === "manager";
 	const { id } = useParams();
 
@@ -833,14 +833,16 @@ export default function Timesheet({
 				return;
 			}
 
-			const payload: any = { timesheet_code: effectiveTimesheetCode };
+			const payload: any = { timesheet_code: effectiveTimesheetCode, action :  id? 'review' : 'view'};
 			if (type === "Recall") {
 				payload.recall = true;
 			}
 
-			const response = await Apiservice.getMethod(
-				API_ENDPOINTS.GET_TIMESHEET_USER + `?timesheet_code=${effectiveTimesheetCode}`
-			);
+			// const response = await Apiservice.getMethod(
+			// 	API_ENDPOINTS.GET_TIMESHEET_USER + `?timesheet_code=${effectiveTimesheetCode}`
+			// );
+
+			const response = await Apiservice.getMethodParams(API_ENDPOINTS.GET_TIMESHEET_USER, payload)
 
 			const apiRaw: any | null = response?.data?.data ?? null;
 
@@ -1036,7 +1038,7 @@ export default function Timesheet({
 			timesheetStatus === "New" ||
 			isRejectedStatus;
 
-		if (!isCandidate || !canEditStatus) return;
+		if (id || !canEditStatus) return;
 		if (!validateTimesheet("save")) return;
 
 		try {
@@ -1123,7 +1125,7 @@ export default function Timesheet({
 			timesheetStatus === "New" ||
 			isRejectedStatus;
 
-		if (!isCandidate || !canEditStatus) return;
+		if (id || !canEditStatus) return;
 		if (!validateTimesheet("submit")) return;
 
 		try {
@@ -1538,7 +1540,6 @@ export default function Timesheet({
 		} catch (err) {
 			console.error("Error creating timesheet entry", err);
 			setAddEntryError("Something went wrong while adding entry.");
-			toast.error("Unable to add entry.");
 		}
 	};
 
@@ -1585,7 +1586,7 @@ export default function Timesheet({
 
 			<div className={styles.topbar}>
 				<div className={styles.leftControls}>
-					{!isCandidate && (
+					{id && (
 						<button
 							type="button"
 							className={styles.iconBtn}
@@ -1601,7 +1602,7 @@ export default function Timesheet({
 							? `${periodStartOverride} - ${periodEndOverride}`
 							: `${apiStartDate} - ${apiEndDate}`}
 					</div>
-					{!isCandidate && (
+					{id && (
 						<button
 							type="button"
 							className={styles.iconBtn}
@@ -2035,7 +2036,7 @@ export default function Timesheet({
 								type="button"
 							/>
 						</>
-					) : isCandidate && timesheetStatus === "Pending Approval" ? (
+					) : !id && timesheetStatus === "Pending Approval" ? (
 						<Button
 							label="Recall"
 							variant="primary"
