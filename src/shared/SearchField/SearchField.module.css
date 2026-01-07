@@ -2,7 +2,7 @@
   position: relative;
   display: inline-flex;
   width: 320px;                /* matches the figma scale */
-  min-width: 260px;
+  min-width: 200px;
 }
 
 .full { width: 100%; }

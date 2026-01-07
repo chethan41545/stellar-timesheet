@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   LOOKUP: "/user/lookup",
   CANDIDATE_TIMESHEET_SEARCH: "/timesheet/user/search",
   ALL_CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
+  DOWNLOAD_TIMESHEET: "/timesheet/download",
   GET_TIMESHEET_USER: "/timesheet/details",
   GET_USER_LIST: "/user/search",
   GET_USER_ROLES: "/user/roles",
