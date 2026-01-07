@@ -4,7 +4,7 @@ import LoginPage from "./pages/Login";
 import CandidateTimesheet from "./pages/CandidateTimesheet";
 import TimesheetList from "./pages/TimesheetList";
 import CommonLayout from "./Layout/Common";
-import ReportsScreen from "./pages/Reports";
+import ReportsScreen from "./pages/Reports/WeeklyReports";
 import Projects from "./pages/Projects";
 import CreateProjectScreen from "./pages/Projects/CreateProject";
 import { ToastContainer } from "react-toastify";
@@ -17,6 +17,7 @@ import UserForm from "./pages/Users/UserCreation";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./constants/routes";
 import HolidayScreen from "./pages/Dashboard/HolidayList";
+import ReportTab from "./pages/Reports/ReportsTab";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -60,8 +61,8 @@ export default function App() {
           </Route>
 
           <Route path="dashboard" element={<HolidayScreen />} />
-          <Route path="users-timesheet" element={<TimesheetList />} handle={{ title: 'Users Timesheet' }} />
-          <Route path="reports" element={<ReportsScreen />} handle={{ title: 'Reports' }} />
+          <Route path="users-timesheet" element={<TimesheetList />}/>
+          <Route path="reports" element={<ReportTab />}/>
           {/* <Route path="projects" element={<Projects />} /> */}
 
           <Route path="projects">

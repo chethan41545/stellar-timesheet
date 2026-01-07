@@ -1,0 +1,81 @@
+/* Bar */
+.tabsBar {
+    display: flex;
+    border-bottom: 1px solid #D9D9D9;
+    margin-bottom: 18px;
+    width: 100%;
+}
+
+/* Tab button */
+.tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px 6px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #606060;
+    font-weight: 200;
+    outline: none;
+    font-size: 13px;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* hover = slightly darker */
+.tab:hover {
+    color: #374151;
+}
+
+/* gray-700 */
+
+/* active = bold + darker */
+.active {
+    color: #202224;
+    font-weight: 700;
+}
+
+/* UNDERLINE — left-aligned short ink bar under ACTIVE tab only */
+.tab::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 3px;
+    width: 0;
+    background: #2563eb;
+    border-radius: 2px;
+    transition: width 180ms ease;
+}
+
+/* Show a short underline under the active label */
+.active::after {
+    /* 70% of the label width looks like your screenshot; adjust if needed */
+    width: 100%;
+}
+
+/* Accessibility */
+.tab:focus {
+    outline: none;
+}
+
+.tab:focus-visible {
+    outline: 2px solid #bfdbfe;
+    outline-offset: 2px;
+}
+
+/* Optional: smaller gaps on small screens */
+@media (max-width: 640px) {
+    .tabsBar {
+        gap: 20px;
+    }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .tab::after {
+        transition: none;
+    }
+}
