@@ -70,13 +70,14 @@ const WeeklyReports: React.FC = () => {
     const theme = useTheme();
 
     useEffect(() => {
-        fetchReports();
         fetchUsers();
     }, []);
 
     useEffect(() => {
+    if (selected.length > 0) {
         fetchReports();
-    }, [selected]);
+    }
+}, [selected]);
 
     const fetchUsers = async () => {
         try {
@@ -92,6 +93,9 @@ const WeeklyReports: React.FC = () => {
             }));
 
             setUsers(usersList);
+
+            setSelected(usersList.map((s: any) => s.value));
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 console.error("API Error:", error.response?.data);
@@ -128,9 +132,9 @@ const WeeklyReports: React.FC = () => {
         return (
             <Grid container>
                 <Skeleton variant="rectangular" width="100%" height={150} sx={{ mb: 3, borderRadius: 2 }} />
-                <Grid size={{ xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                     <Grid container spacing={3} sx={{ mb: 4 }}>
-                        {[1, 2, 3,4].map((i) => (
+                        {[1, 2, 3, 4].map((i) => (
                             <Grid size={{ xs: 12, sm: 6, md: 2.5 }} key={i}>
                                 <Skeleton variant="rectangular" height={140} sx={{ borderRadius: 3 }} />
                             </Grid>

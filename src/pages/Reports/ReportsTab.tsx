@@ -5,16 +5,17 @@ import {
 
 import styles from "./ReportsTab.module.css";
 import WeeklyReports from "./WeeklyReports";
+import TimesheetList from "./TimesheetList";
 
 
 
 const ReportTab = () => {
 
-    const [active, setActive] = useState("weekly");
+    const [active, setActive] = useState("timesheet");
 
     const tabs = [
-        { key: "weekly", label: "Weekly Report" },
         { key: "timesheet", label: "Timesheet Report" },
+        { key: "weekly", label: "Weekly Report" },        
         { key: "approvalAudit", label: "Approval audit report" },
     ];
 
@@ -36,6 +37,7 @@ const ReportTab = () => {
 
             <Grid sx={{width:"100%"}}>
                 {active === "weekly" && <WeeklyReports />}
+                {active === "timesheet" && <TimesheetList />}
 
             </Grid>
         </Grid>

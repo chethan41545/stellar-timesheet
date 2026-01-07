@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import apiService from '../services/apiService';
-import { API_ENDPOINTS } from '../constants/apiUrls';
+import apiService from '../../services/apiService';
+import { API_ENDPOINTS } from '../../constants/apiUrls';
 import axios from 'axios';
-import CustomTable from '../shared/CustomTable/CustomTable';
+import CustomTable from '../../shared/CustomTable/CustomTable';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
-import SearchField from '../shared/SearchField/SearchField';
-import { useDebouncedValue } from '../utils/commonUtils';
+import SearchField from '../../shared/SearchField/SearchField';
+import { useDebouncedValue } from '../../utils/commonUtils';
 import { useNavigate } from 'react-router-dom';
+import MultiSelect from '../../shared/MultiSelect/MultiSelectWithoutController';
 
 interface TimesheetResponse {
     timesheet: any;
@@ -25,13 +26,21 @@ const TimesheetList: React.FC = () => {
     // const [data, setData] = useState<TimesheetResponse[]>([]);
     const [data, setData] = useState<TimesheetResponse | null>(null);
 
+    const lookUpData = JSON.parse(
+        localStorage.getItem("lookup") || "{}"
+    );
+
+    const timesheetStatus = lookUpData?.timesheet_status ?? [];
+
+    const [selectedTimesheetStatus, setSelectedTimesheetStatus] = React.useState<string[]>(
+        timesheetStatus.map((s: any) => s.value)
+    );
+
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [search, setSearch] = useState<any>('');
 
     const debouncedSearch = useDebouncedValue(search, 350);
-
-
 
     const [sortBy, setSortBy] = useState('week_start');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -53,8 +62,8 @@ const TimesheetList: React.FC = () => {
     const navigate = useNavigate();
 
     const submitTimesheet = (row: any) => {
-		navigate(`/timesheets/${row.timesheet_code}`);
-	};
+        navigate(`/timesheets/${row.timesheet_code}`);
+    };
 
     const columns = [
         {
@@ -63,27 +72,27 @@ const TimesheetList: React.FC = () => {
             width: '120px',
             sortable: true,
             format: (value: string, row: any) => {
-				return (
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-						<Typography
-							variant="body2"
-							fontSize="12px"
-							role="button"
-							tabIndex={0}
-							onClick={() => submitTimesheet(row)}
-							sx={{
-								cursor: 'pointer',
-								'&:hover': { textDecoration: 'underline', color: 'primary.main' },
-								whiteSpace: 'nowrap',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-							}}
-						>
-							{value}
-						</Typography>
-					</Box>
-				);
-			},
+                return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                        <Typography
+                            variant="body2"
+                            fontSize="12px"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => submitTimesheet(row)}
+                            sx={{
+                                cursor: 'pointer',
+                                '&:hover': { textDecoration: 'underline', color: 'primary.main' },
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}
+                        >
+                            {value}
+                        </Typography>
+                    </Box>
+                );
+            },
         },
         {
             id: 'timesheet_status',
@@ -127,7 +136,7 @@ const TimesheetList: React.FC = () => {
             width: '120px',
             sortable: true
         },
-          {
+        {
             id: 'total_hours',
             label: 'Total Hours',
             width: '120px',
@@ -142,7 +151,8 @@ const TimesheetList: React.FC = () => {
         size,
         sortBy,
         sortDirection,
-        debouncedSearch
+        debouncedSearch,
+        selectedTimesheetStatus
     ])
 
     const fetchData = async () => {
@@ -154,7 +164,8 @@ const TimesheetList: React.FC = () => {
             'per_page': size,
             'sort_by': sortBy,
             'sort_direction': sortDirection,
-            'search' : debouncedSearch
+            'search': debouncedSearch,
+            "timesheet_status": selectedTimesheetStatus
         }
 
         try {
@@ -187,9 +198,9 @@ const TimesheetList: React.FC = () => {
                 ) : (
 
                     <Grid container>
-                        <Grid size={{ md: 4 }}>
+                        <Grid size={{ xs: 12, md: 3 }} sx={{ margin: "8px" }}>
                             <SearchField
-                                name="searchJob"
+                                name="searchUser"
                                 value={search}
                                 onChange={(v) => {
                                     setSearch(v);
@@ -197,6 +208,22 @@ const TimesheetList: React.FC = () => {
                                 }}
                                 placeholder="Search by Employee"
                             />
+
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 3 }}>
+
+                            {
+                                timesheetStatus && (
+                                    <MultiSelect
+                                        label="Timesheet Status"
+                                        options={timesheetStatus}
+                                        value={selectedTimesheetStatus}
+                                        onChange={setSelectedTimesheetStatus}
+                                        selectAllByDefault={true}
+                                    />
+
+                                )
+                            }
 
                         </Grid>
                         <Grid mt={2} size={{ xs: 12 }}>
@@ -224,12 +251,6 @@ const TimesheetList: React.FC = () => {
                             }
 
                         </Grid>
-
-
-
-
-
-
                     </Grid>
                 )
             }

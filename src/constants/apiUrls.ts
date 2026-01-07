@@ -3,7 +3,7 @@ export const API_ENDPOINTS = {
   LOGIN: "/user/login",           // adjust path if your real endpoint differs
   VERIFY_OTP: "/auth/verify-otp",
   RESET_PASSWORD: "/user/reset-password",
-  LOOKUP: "/lookup",
+  LOOKUP: "/user/lookup",
   CANDIDATE_TIMESHEET_SEARCH: "/timesheet/user/search",
   ALL_CANDIDATE_TIMESHEET_SEARCH: "/timesheet/search",
   GET_TIMESHEET_USER: "/timesheet/details",

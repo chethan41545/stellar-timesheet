@@ -2,9 +2,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import CandidateTimesheet from "./pages/CandidateTimesheet";
-import TimesheetList from "./pages/TimesheetList";
 import CommonLayout from "./Layout/Common";
-import ReportsScreen from "./pages/Reports/WeeklyReports";
 import Projects from "./pages/Projects";
 import CreateProjectScreen from "./pages/Projects/CreateProject";
 import { ToastContainer } from "react-toastify";
@@ -61,7 +59,6 @@ export default function App() {
           </Route>
 
           <Route path="dashboard" element={<HolidayScreen />} />
-          <Route path="users-timesheet" element={<TimesheetList />}/>
           <Route path="reports" element={<ReportTab />}/>
           {/* <Route path="projects" element={<Projects />} /> */}
 

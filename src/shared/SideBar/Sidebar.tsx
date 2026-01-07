@@ -22,7 +22,6 @@ import { RiLogoutBoxLine } from "react-icons/ri";
 // import DashboardIcon from "@mui/icons-material/Dashboard";
 
 import { LuFileSpreadsheet } from "react-icons/lu";
-import { LuCalendarMinus } from "react-icons/lu";
 import { LuChartArea } from "react-icons/lu";
 import { LuUsers } from "react-icons/lu";
 import { LuBriefcaseBusiness } from "react-icons/lu";
@@ -73,13 +72,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 			icon: <LuFileSpreadsheet />,
 			path: "/timesheets",
 			roles: ["all"],
-		},
-		{
-			id: "calendar",
-			label: "Calendar",
-			icon: <LuCalendarMinus />,
-			path: "/users-timesheet",
-			roles: ["super admin", "manager", "hr"],
 		},
 		{
 			id: "reports",

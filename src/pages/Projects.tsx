@@ -71,7 +71,7 @@ const Projects = () => {
                             '&:hover': { textDecoration: 'underline', color: 'primary.main' },
                         }}
                         onClick={() => {
-                            navigate(`/users/${row.code}`);
+                            navigate(`/projects/${row.code}`);
                         }}
                     >
                         {row.name}
