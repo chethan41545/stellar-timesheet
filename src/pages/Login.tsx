@@ -10,6 +10,7 @@ import Apiservice from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
 import { toast } from "react-toastify";
 import { ROUTES } from "../constants/routes";
+import { subscribeUser } from "../push";
 
 type LoginFormValues = {
   email: string;
@@ -76,6 +77,7 @@ const LoginPage = () => {
           } catch (e: any) {
             console.error("Failed to fetch lookup:", e?.response?.data || e?.message || e);
           }
+          subscribeUser();
 
           navigate("/timesheets", { replace: true });
 
