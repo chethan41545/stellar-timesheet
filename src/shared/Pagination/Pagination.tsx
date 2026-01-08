@@ -38,8 +38,9 @@ export default function PaginationBar({
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      px={!smallFont ? 2 : 0}
-      py={1}
+      // px={!smallFont ? 2 : 0}
+      // py={1}
+      p={0}
       width={"100%"}  
     >
       {/* Left: Rows per page */}

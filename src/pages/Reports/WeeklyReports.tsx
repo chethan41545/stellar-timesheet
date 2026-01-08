@@ -7,7 +7,6 @@ import {
     Box,
     Grid,
     Typography,
-    Chip,
     Paper,
     useTheme,
     alpha,
@@ -35,6 +34,14 @@ import {
     BarChart as BarChartIcon,
     StackedBarChart,
 } from "@mui/icons-material";
+import { useFormik } from "formik";
+import * as yup from 'yup';
+import { formatDate, getCurrentWeekDates } from "../../utils/dateUtils";
+import Button from "../../shared/Button/Button";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+
 
 interface ReportResponse {
     employee_summary: { user_full_name: string; total_hours: number }[];
@@ -74,10 +81,37 @@ const WeeklyReports: React.FC = () => {
     }, []);
 
     useEffect(() => {
-    if (selected.length > 0) {
-        fetchReports();
+        if (selected.length > 0) {
+            fetchReports();
+        }
+    }, [selected]);
+
+    const { monday, sunday } = getCurrentWeekDates();
+
+
+    const validationSchema = yup.object({
+        start_date: yup.date().nullable().required('Start date is required'),
+        end_date: yup
+            .date()
+            .nullable()
+            .min(yup.ref('start_date'), 'End date must be after start date'),
+    });
+
+    const formik = useFormik<any>({
+        initialValues: {
+            start_date: monday,
+            end_date: sunday
+        },
+        validationSchema,
+        onSubmit: async () => {
+            fetchReports();
+        }
+    })
+
+    const handleSubmit = () => {
+        formik.handleSubmit();
+
     }
-}, [selected]);
 
     const fetchUsers = async () => {
         try {
@@ -111,6 +145,8 @@ const WeeklyReports: React.FC = () => {
         try {
             const payload = {
                 user_codes: selected,
+                "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
+                "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
             };
             const response = await apiService.postMethod(
                 API_ENDPOINTS.PROJECT_REPORTS,
@@ -210,15 +246,12 @@ const WeeklyReports: React.FC = () => {
                     }}
                 >
                     <Grid container spacing={2} alignItems="center">
-                        <Grid size={{ xs: 12, md: 4 }}>
+                        {/* <Grid size={{ xs: 12, md: 3 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                                 Filter by Employees
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Select employee to view their contribution reports
-                            </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 4 }}>
+                        </Grid> */}
+                        <Grid size={{ xs: 12, md: 2.5 }}>
                             {users && (
                                 <MultiSelect
                                     label="Users"
@@ -228,7 +261,7 @@ const WeeklyReports: React.FC = () => {
                                     selectAllByDefault={true}
                                 />
                             )}
-                            {selected.length > 0 && (
+                            {/* {selected.length > 0 && (
                                 <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
                                     <Chip
                                         label={`${selected.length} user${selected.length > 1 ? "s" : ""} selected`}
@@ -237,8 +270,63 @@ const WeeklyReports: React.FC = () => {
                                         variant="outlined"
                                     />
                                 </Box>
-                            )}
+                            )} */}
                         </Grid>
+
+                        <LocalizationProvider dateAdapter={AdapterDateFns}
+                        >
+
+                            <Grid size={{ xs: 12, md: 2.5 }}>
+                                <DatePicker
+                                    label="Start Date *"
+                                    value={formik.values.start_date}
+                                    onChange={(v) => formik.setFieldValue('start_date', v)}
+                                    format="dd/MM/yyyy"  // Indian date format
+                                    slotProps={{
+                                        textField: {
+                                            sx: {
+                                                "& .MuiPickersSectionList-root": {
+                                                    padding: "9px 6px",
+                                                },
+                                            },
+                                        },
+                                    }}
+
+                                />
+                            </Grid>
+
+                            <Grid size={{ xs: 12, md: 2.5 }}>
+                                <DatePicker
+                                    label="End Date *"
+                                    value={formik.values.end_date}
+                                    onChange={(v) =>
+                                        formik.setFieldValue('end_date', v)
+                                    }
+                                    format="dd/MM/yyyy"
+
+                                    slotProps={{
+                                        textField: {
+                                            sx: {
+                                                "& .MuiPickersSectionList-root": {
+                                                    padding: "9px 6px",
+                                                },
+                                            },
+                                        },
+                                    }}
+
+                                />
+                            </Grid>
+
+                            <Grid size={{ xs: 4, md: 1 }}>
+
+                                <Button
+                                    type="submit"
+                                    onClick={handleSubmit}
+
+                                    label='Submit' />
+
+                            </Grid>
+                        </LocalizationProvider>
                     </Grid>
                 </Paper>
             </Grid>
@@ -404,8 +492,25 @@ const WeeklyReports: React.FC = () => {
                                             }}
                                         />
 
-                                        <Tooltip
+                                        {/* <Tooltip
                                             formatter={(value) => [`${value} hours`, "Total Hours"]}
+                                            contentStyle={{
+                                                borderRadius: 8,
+                                                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                                                boxShadow: theme.shadows[3],
+                                            }}
+                                        /> */}
+                                        <Tooltip
+                                            formatter={(_value, _name, props) => {
+                                                // props.payload contains the original data point
+                                                const { project_name, total_hours } = props.payload;
+                                                return [
+                                                    <div key="tooltip-content">
+                                                        <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{project_name}</div>
+                                                        <div>Total Hours: <strong>{total_hours}</strong></div>
+                                                    </div>
+                                                ];
+                                            }}
                                             contentStyle={{
                                                 borderRadius: 8,
                                                 border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,

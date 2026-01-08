@@ -10,6 +10,16 @@ import SearchField from '../../shared/SearchField/SearchField';
 import { useDebouncedValue } from '../../utils/commonUtils';
 import { useNavigate } from 'react-router-dom';
 import MultiSelect from '../../shared/MultiSelect/MultiSelectWithoutController';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
+import Button from '../../shared/Button/Button';
+// import { enGB } from 'date-fns/locale/en-GB';
+
+
 
 interface TimesheetResponse {
     timesheet: any;
@@ -37,6 +47,28 @@ const TimesheetList: React.FC = () => {
     const [selectedTimesheetStatus, setSelectedTimesheetStatus] = React.useState<string[]>(
         timesheetStatus.map((s: any) => s.value)
     );
+
+    const validationSchema = yup.object({
+        start_date: yup.date().nullable().required('Start date is required'),
+        end_date: yup
+            .date()
+            .nullable()
+            .min(yup.ref('start_date'), 'End date must be after start date'),
+    });
+
+    const { monday, sunday } = getCurrentWeekDates();
+
+
+    const formik = useFormik<any>({
+        initialValues: {
+            start_date: monday,
+            end_date: sunday
+        },
+        validationSchema,
+        onSubmit: async () => {
+            fetchData();
+        }
+    })
 
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
@@ -167,7 +199,9 @@ const TimesheetList: React.FC = () => {
             'sort_by': sortBy,
             'sort_direction': sortDirection,
             'search': debouncedSearch,
-            "timesheet_status": selectedTimesheetStatus
+            "timesheet_status": selectedTimesheetStatus,
+            "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
+            "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
         }
 
         try {
@@ -196,7 +230,9 @@ const TimesheetList: React.FC = () => {
             'sort_by': sortBy,
             'sort_direction': sortDirection,
             'search': debouncedSearch,
-            "timesheet_status": selectedTimesheetStatus
+            "timesheet_status": selectedTimesheetStatus,
+            "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
+            "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
         }
 
         try {
@@ -236,6 +272,11 @@ const TimesheetList: React.FC = () => {
         }
     }
 
+    const handleSubmit = () => {
+        formik.handleSubmit();
+
+    }
+
 
     return (
         <>
@@ -250,10 +291,9 @@ const TimesheetList: React.FC = () => {
                     <Grid container justifyContent={"space-between"}>
 
                         <Grid size={{ xs: 12, md: 11 }}>
-                            <Grid container >
+                            <Grid container columnSpacing={2}>
 
-
-                                <Grid size={{ xs: 12, md: 3 }} sx={{ margin: "8px" }}>
+                                <Grid size={{ xs: 12, md: 3 }} sx={{ margin: "8px", marginLeft: 0 }}>
                                     <SearchField
                                         name="searchUser"
                                         value={search}
@@ -265,8 +305,8 @@ const TimesheetList: React.FC = () => {
                                     />
 
                                 </Grid>
-                                <Grid size={{ xs: 12, md: 3 }}>
 
+                                <Grid size={{ xs: 12, md: 2.5 }}>
                                     {
                                         timesheetStatus && (
                                             <MultiSelect
@@ -275,11 +315,67 @@ const TimesheetList: React.FC = () => {
                                                 value={selectedTimesheetStatus}
                                                 onChange={setSelectedTimesheetStatus}
                                                 selectAllByDefault={true}
+                                                width={"96%"}
                                             />
 
                                         )
                                     }
                                 </Grid>
+
+                                <LocalizationProvider dateAdapter={AdapterDateFns}
+                                >
+
+                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                        <DatePicker
+                                            label="Start Date *"
+                                            value={formik.values.start_date}
+                                            onChange={(v) => formik.setFieldValue('start_date', v)}
+                                            format="dd/MM/yyyy"  // Indian date format
+                                            slotProps={{
+                                                textField: {
+                                                    sx: {
+                                                        "& .MuiPickersSectionList-root": {
+                                                            padding: "9px 6px",
+                                                        },
+                                                    },
+                                                },
+                                            }}
+
+                                        />
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                        <DatePicker
+                                            label="End Date *"
+                                            value={formik.values.end_date}
+                                            onChange={(v) =>
+                                                formik.setFieldValue('end_date', v)
+                                            }
+                                            format="dd/MM/yyyy"
+
+                                            slotProps={{
+                                                textField: {
+                                                    sx: {
+                                                        "& .MuiPickersSectionList-root": {
+                                                            padding: "9px 6px",
+                                                        },
+                                                    },
+                                                },
+                                            }}
+
+                                        />
+                                    </Grid>
+
+                                    <Grid size={{ xs: 4, md: 1 }} mt={1}>
+
+                                        <Button
+                                            type="submit"
+                                            onClick={handleSubmit}
+
+                                            label='Submit' />
+
+                                    </Grid>
+                                </LocalizationProvider>
                             </Grid>
                         </Grid>
 
@@ -300,6 +396,8 @@ const TimesheetList: React.FC = () => {
                                 </IconButton>
                             </Tooltip>
                         </Grid>
+
+
 
                         <Grid mt={2} size={{ xs: 12 }}>
                             {

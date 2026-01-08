@@ -42,3 +42,39 @@ export function formatDate(dateInput: Date | string, formatString: string): stri
         (match) => replacements[match] || match
     );
 }
+
+
+
+export const getCurrentWeekDates = () => {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // Calculate Monday (start of week)
+    const monday = new Date(now);
+    const diff = currentDay === 0 ? -6 : 1 - currentDay; // Adjust for Sunday being day 0
+    monday.setDate(now.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+
+    // Calculate Sunday (end of week)
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    return { monday, sunday };
+};
+
+
+export const getMonday = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diff = day === 0 ? -6 : 1 - day; // Adjust for Monday start
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+};
+
+export const addDays = (date: Date, days: number) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+};

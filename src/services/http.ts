@@ -126,6 +126,11 @@ client.interceptors.response.use(
       error.message ||
       "Something went wrong";
 
+      if (status === 401){
+        hardLogout();
+        return
+      }
+
 
     if (status !== 401 || !original) {
       toast.error(apiErrorMessage);

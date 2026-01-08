@@ -195,25 +195,30 @@ const CreateProjectScreen: React.FC = () => {
         }
     };
 
-    const handleToggle = async (employee: any) => {
+    const handleToggle = async (employee: any, variant = "employee") => {
         try {
             setIsLoading(true);
             const updated = assignedEmployees.map((emp) =>
                 emp.code === employee.code ? { ...emp, is_active: !emp.is_active } : emp
             );
 
+            if (variant === "employee") {
+                const payload = {
+                    project_code: id,
+                    user_code: [employee.code],
+                    is_active: !employee.is_active,
+                    action: "status_change"
 
-            const payload = {
-                project_code: id,
-                user_code: [employee.code],
-                is_active: !employee.is_active,
-                action: "status_change"
+                }
+
+                const response = await apiService.postMethod(API_ENDPOINTS.MANAGE_USER_PROJECT, payload)
+                setAssignedEmployees(updated);
+                toast.success(response.data.message);
 
             }
 
-            const response = await apiService.postMethod(API_ENDPOINTS.MANAGE_USER_PROJECT, payload)
-            setAssignedEmployees(updated);
-            toast.success(response.data.message);
+
+
 
         } catch (err) {
             toast.error('Failed to update user status');
@@ -623,7 +628,7 @@ const CreateProjectScreen: React.FC = () => {
 
                                                                                         <CustomSwitch
                                                                                             checked={task.is_active}
-                                                                                            onChange={() => handleToggle(task)}
+                                                                                            onChange={() => handleToggle(task, "task")}
                                                                                         />
                                                                                     </Tooltip>
                                                                                 </Stack>

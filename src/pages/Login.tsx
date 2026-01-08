@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Apiservice from "../services/apiService";
 import { API_ENDPOINTS } from "../constants/apiUrls";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { ROUTES } from "../constants/routes";
 
 type LoginFormValues = {
@@ -93,13 +93,13 @@ const LoginPage = () => {
           }
         }
       })
-      .catch((error: any) => {
-        const status = error?.response?.status;
-        const msg =
-          status === 401
-            ? "Invalid email or password"
-            : error?.response?.data?.message || "Something went wrong";
-        toast.error(msg);
+      .catch((_error: any) => {
+        // const status = error?.response?.status;
+        // const msg =
+        //   status === 401
+        //     ? "Invalid email or password"
+        //     : error?.response?.data?.message || "Something went wrong";
+        // toast.error(msg);
       })
       .finally(() => setLoading(false));
   };
