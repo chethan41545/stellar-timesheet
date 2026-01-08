@@ -24,6 +24,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { LuTrash2 } from "react-icons/lu";
+import { subscribeUser } from "../push";
 
 /* ========= Types ========= */
 
@@ -957,6 +958,8 @@ export default function Timesheet({
 			toast.error("No timesheet period loaded.");
 			return false;
 		}
+
+		subscribeUser();
 
 		let hasPositive = false;
 

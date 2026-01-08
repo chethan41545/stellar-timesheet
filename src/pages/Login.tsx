@@ -77,7 +77,7 @@ const LoginPage = () => {
           } catch (e: any) {
             console.error("Failed to fetch lookup:", e?.response?.data || e?.message || e);
           }
-          subscribeUser();
+          // subscribeUser();
 
           navigate("/timesheets", { replace: true });
 
