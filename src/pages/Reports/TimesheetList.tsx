@@ -17,6 +17,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
 import Button from '../../shared/Button/Button';
+import { getStatusColor } from '../../constants/constants';
 // import { enGB } from 'date-fns/locale/en-GB';
 
 
@@ -133,30 +134,21 @@ const TimesheetList: React.FC = () => {
             label: 'Status',
             width: '120px',
             // sortable: true,
-            // format: (value: string) => {
-            //     const colorMap: Record<string, string> = {
-            //         "Approved": '#4caf50',
-            //         Draft: '#ff9800',
-            //         "Partial Approved": '#81c946ff',
-            //         Rejected: '#f44336',
-            //     };
+            format: (value: string) => {
 
-            //     return (
-            //         <span
-            //             style={{
-            //                 padding: '4px 8px',
-            //                 borderRadius: '6px',
-            //                 background: `${colorMap[value]}`,
-            //                 // color: `${colorMap[value]}`,
-            //                 // color: colorMap[value],
-            //                 fontWeight: 600,
-            //                 fontSize: '12px',
-            //             }}
-            //         >
-            //             {value}
-            //         </span>
-            //     );
-            // }
+                return (
+                    <span
+                        style={{
+                            background: 'transparent',
+                            fontWeight: 500,
+                            borderRadius: '999px',
+                            color: getStatusColor(value),
+                        }}
+                    >
+                        {value}
+                    </span>
+                );
+            }
         },
         {
             id: 'week_start',

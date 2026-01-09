@@ -22,7 +22,7 @@ import {
     Cell,
     ResponsiveContainer,
     Legend,
-    CartesianGrid,
+    // CartesianGrid,
 } from "recharts";
 import MultiSelect from "../../shared/MultiSelect/MultiSelectWithoutController";
 import {
@@ -259,6 +259,7 @@ const WeeklyReports: React.FC = () => {
                                     value={selected}
                                     onChange={setSelected}
                                     selectAllByDefault={true}
+                                    width={"94%"}
                                 />
                             )}
                             {/* {selected.length > 0 && (
@@ -399,7 +400,7 @@ const WeeklyReports: React.FC = () => {
                                         barGap={8}
                                         barCategoryGap="15%"
                                     >
-                                        <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} />
+                                        {/* <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} /> */}
                                         <XAxis
                                             dataKey="user_full_name"
                                             angle={-45}
@@ -549,7 +550,7 @@ const WeeklyReports: React.FC = () => {
                                         barGap={4}
                                         barCategoryGap="15%"
                                     >
-                                        <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} />
+                                        {/* <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} /> */}
                                         <XAxis
                                             dataKey="project_name"
                                             // angle={-45}
