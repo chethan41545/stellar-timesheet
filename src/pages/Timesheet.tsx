@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Timesheet.module.css";
 import { toast } from "react-toastify";
 import { normalize, readRole } from "../utils/userUtils";
-import { FiAlertTriangle} from "react-icons/fi";
+import { FiAlertTriangle } from "react-icons/fi";
 import Button from "../shared/Button/Button";
 import { BiCommentDetail } from "react-icons/bi";
 import axios from "axios";
@@ -24,6 +24,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { LuTrash2 } from "react-icons/lu";
+import { CustomLoader } from "../shared/CustomLoader/CustomLoader";
 
 /* ========= Types ========= */
 
@@ -551,6 +552,7 @@ export default function Timesheet({
 	const [candidateName, setCandidatename] = useState("");
 
 	const [loading, setLoading] = useState(false);
+	const [pageLoading, setPageLoading] = useState(false);
 	const [_timesheetId, setTimesheetId] = useState<number | null>(null);
 	const [prevTimesheetId, setPrevTimesheetId] = useState<number | null>(null);
 	const [nextTimesheetId, setNextTimesheetId] = useState<number | null>(null);
@@ -833,7 +835,7 @@ export default function Timesheet({
 				return;
 			}
 
-			const payload: any = { timesheet_code: effectiveTimesheetCode, action :  id? 'review' : 'view'};
+			const payload: any = { timesheet_code: effectiveTimesheetCode, action: id ? 'review' : 'view' };
 			if (type === "Recall") {
 				payload.recall = true;
 			}
@@ -946,7 +948,7 @@ export default function Timesheet({
 	const periodTotal = useMemo(
 		() =>
 			entries.reduce(
-				(s, e) => s + e.hours.reduce((ss:any, n:any) => ss + (n || 0), 0),
+				(s, e) => s + e.hours.reduce((ss: any, n: any) => ss + (n || 0), 0),
 				0
 			),
 		[entries]
@@ -1030,6 +1032,7 @@ export default function Timesheet({
 
 
 	const savePeriod = async () => {
+		setPageLoading(true);
 		const isRejectedStatus = timesheetStatus === "Rejected" ||
 			timesheetStatus === "Partially Rejected";
 		const canEditStatus =
@@ -1068,6 +1071,7 @@ export default function Timesheet({
 				toast.error("Unexpected error while updating timesheet.");
 			}
 		} finally {
+			setPageLoading(false);
 			setSaving(false);
 		}
 	};
@@ -1256,7 +1260,7 @@ export default function Timesheet({
 	const canSubmit = emptyRequiredDays.length === 0 && hasNonZeroHours;
 
 	const rowTotal = (e: any) =>
-		e.hours.reduce((s:any, n:any) => s + (n || 0), 0);
+		e.hours.reduce((s: any, n: any) => s + (n || 0), 0);
 
 	// const formatDateTimeMDY = (d: string) => {
 	// 	const [dd, mm, yyyy] = d.split("/");
@@ -2275,105 +2279,107 @@ export default function Timesheet({
 
 			{/* Add Entry Modal */}
 			<Dialog
-  open={showAddEntryModal}
-  onClose={() => !projectLoading && setShowAddEntryModal(false)}
-  maxWidth="xs"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-    },
-  }}
->
-  {/* ===== Header ===== */}
-  <DialogTitle sx={{ pb: 0 }}>
-    <Typography fontSize={18} fontWeight={600}>
-      Add Timesheet Entry
-    </Typography>
-    <Typography fontSize={13} color="text.secondary" style={{margin : '10px 0'}}>
-      Select a project and task to log hours
-    </Typography>
-  </DialogTitle>
+				open={showAddEntryModal}
+				onClose={() => !projectLoading && setShowAddEntryModal(false)}
+				maxWidth="xs"
+				fullWidth
+				PaperProps={{
+					sx: {
+						borderRadius: 3,
+					},
+				}}
+			>
+				{/* ===== Header ===== */}
+				<DialogTitle sx={{ pb: 0 }}>
+					<Typography fontSize={18} fontWeight={600}>
+						Add Timesheet Entry
+					</Typography>
+					<Typography fontSize={13} color="text.secondary" style={{ margin: '10px 0' }}>
+						Select a project and task to log hours
+					</Typography>
+				</DialogTitle>
 
-  {/* ===== Content ===== */}
-  <DialogContent sx={{ pt: 3 }}>
-    <Box display="flex" flexDirection="column" gap={2.5}>
-      {/* Project */}
-      <Autocomplete
-        options={projectList}
-        getOptionLabel={(option) => option.name}
-        value={projectList.find(p => p.id === selectedProjectId) || null}
-        onChange={(_, value) => handleProjectChange(value?.id || "")}
-        loading={projectLoading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Project"
-            placeholder="Select project"
-            size="small"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {projectLoading ? (
-                    <Typography fontSize={12} mr={1}>
-                      Loading…
-                    </Typography>
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
-      />
+				{/* ===== Content ===== */}
+				<DialogContent sx={{ pt: 3 }}>
+					<Box display="flex" flexDirection="column" gap={2.5}>
+						{/* Project */}
+						<Autocomplete
+							options={projectList}
+							getOptionLabel={(option) => option.name}
+							value={projectList.find(p => p.id === selectedProjectId) || null}
+							onChange={(_, value) => handleProjectChange(value?.id || "")}
+							loading={projectLoading}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label="Project"
+									placeholder="Select project"
+									size="small"
+									InputProps={{
+										...params.InputProps,
+										endAdornment: (
+											<>
+												{projectLoading ? (
+													<Typography fontSize={12} mr={1}>
+														Loading…
+													</Typography>
+												) : null}
+												{params.InputProps.endAdornment}
+											</>
+										),
+									}}
+								/>
+							)}
+						/>
 
-      {/* Task */}
-      <Autocomplete
-        options={taskList}
-        getOptionLabel={(option) => option.name}
-        value={taskList.find(t => t.id === selectedTaskId) || null}
-        onChange={(_, value) => handleTaskChange(value?.id || "")}
-        disabled={!selectedProjectId}
-        loading={taskLoading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Task"
-            placeholder={
-              selectedProjectId ? "Select task" : "Select project first"
-            }
-            size="small"
-          />
-        )}
-      />
+						{/* Task */}
+						<Autocomplete
+							options={taskList}
+							getOptionLabel={(option) => option.name}
+							value={taskList.find(t => t.id === selectedTaskId) || null}
+							onChange={(_, value) => handleTaskChange(value?.id || "")}
+							disabled={!selectedProjectId}
+							loading={taskLoading}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label="Task"
+									placeholder={
+										selectedProjectId ? "Select task" : "Select project first"
+									}
+									size="small"
+								/>
+							)}
+						/>
 
-      {/* Error */}
-      {addEntryError && (
-        <Typography fontSize={12} color="error">
-          {addEntryError}
-        </Typography>
-      )}
-    </Box>
-  </DialogContent>
+						{/* Error */}
+						{addEntryError && (
+							<Typography fontSize={12} color="error">
+								{addEntryError}
+							</Typography>
+						)}
+					</Box>
+				</DialogContent>
 
-  {/* ===== Actions ===== */}
-  <DialogActions sx={{ px: 3, pb: 2 }}>
-    <Button
-      variant="secondary"
-      onClick={() => setShowAddEntryModal(false)}
-    >
-      Cancel
-    </Button>
-    <Button
-      variant="primary"
-      onClick={handleConfirmAddEntry}
-      disabled={!selectedProjectId || !selectedTaskId}
-    >
-      Add Entry
-    </Button>
-  </DialogActions>
-</Dialog>
+				{/* ===== Actions ===== */}
+				<DialogActions sx={{ px: 3, pb: 2 }}>
+					<Button
+						variant="secondary"
+						onClick={() => setShowAddEntryModal(false)}
+					>
+						Cancel
+					</Button>
+					<Button
+						variant="primary"
+						onClick={handleConfirmAddEntry}
+						disabled={!selectedProjectId || !selectedTaskId}
+					>
+						Add Entry
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<CustomLoader open={pageLoading} message="" />
 
 		</div>
 	);
