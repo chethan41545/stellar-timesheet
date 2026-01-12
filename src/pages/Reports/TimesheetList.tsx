@@ -45,9 +45,32 @@ const TimesheetList: React.FC = () => {
 
     const timesheetStatus = lookUpData?.timesheet_status ?? [];
 
-    const [selectedTimesheetStatus, setSelectedTimesheetStatus] = React.useState<string[]>(
-        timesheetStatus.map((s: any) => s.value)
-    );
+    const getInitialTimesheetStatus = () => {
+
+        const saved = localStorage.getItem("selected_timesheet_status");
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            } catch {
+                // ignore invalid storage
+            }
+        }
+
+        // fallback → select all
+        return timesheetStatus.map((s: any) => s.value);
+    };
+
+    const [selectedTimesheetStatus, setSelectedTimesheetStatus] =
+        React.useState<string[]>(getInitialTimesheetStatus);
+
+
+    // const [selectedTimesheetStatus, setSelectedTimesheetStatus] = React.useState<string[]>(
+    //     timesheetStatus.map((s: any) => s.value)
+    // );
 
     const validationSchema = yup.object({
         start_date: yup.date().nullable().required('Start date is required'),
@@ -57,19 +80,47 @@ const TimesheetList: React.FC = () => {
             .min(yup.ref('start_date'), 'End date must be after start date'),
     });
 
-    const { monday, sunday } = getCurrentWeekDates();
+    // const { monday, sunday } = getCurrentWeekDates();
+
+    const getInitialDates = () => {
+        const savedStart = localStorage.getItem("start_date");
+        const savedEnd = localStorage.getItem("end_date");
+
+        const { monday, sunday } = getCurrentWeekDates();
+
+        return {
+            start_date: savedStart ? new Date(savedStart) : monday,
+            end_date: savedEnd ? new Date(savedEnd) : sunday,
+        };
+    };
 
 
-    const formik = useFormik<any>({
+    const initialDates = getInitialDates();
+
+    const formik = useFormik({
         initialValues: {
-            start_date: monday,
-            end_date: sunday
+            start_date: initialDates.start_date,
+            end_date: initialDates.end_date,
         },
         validationSchema,
         onSubmit: async () => {
             fetchData();
-        }
-    })
+        },
+    });
+
+
+
+
+    // const formik = useFormik<any>({
+    //     initialValues: {
+    //         start_date: monday,
+    //         end_date: sunday
+    //     },
+    //     validationSchema,
+    //     onSubmit: async () => {
+    //         fetchData();
+    //     }
+    // })
 
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
@@ -305,8 +356,15 @@ const TimesheetList: React.FC = () => {
                                                 label="Timesheet Status"
                                                 options={timesheetStatus}
                                                 value={selectedTimesheetStatus}
-                                                onChange={setSelectedTimesheetStatus}
-                                                selectAllByDefault={true}
+                                                // onChange={setSelectedTimesheetStatus}
+                                                onChange={(values) => {
+                                                    setSelectedTimesheetStatus(values);
+                                                    localStorage.setItem(
+                                                        "selected_timesheet_status",
+                                                        JSON.stringify(values)
+                                                    );
+                                                }}
+                                                selectAllByDefault={selectedTimesheetStatus.length > 0 ? false : true}
                                                 width={"96%"}
                                             />
 
@@ -321,7 +379,11 @@ const TimesheetList: React.FC = () => {
                                         <DatePicker
                                             label="Start Date *"
                                             value={formik.values.start_date}
-                                            onChange={(v) => formik.setFieldValue('start_date', v)}
+                                            // onChange={(v) => formik.setFieldValue('start_date', v)}
+                                            onChange={(v) => {
+                                                formik.setFieldValue("start_date", v);
+                                                localStorage.setItem("start_date", v?.toISOString() ?? "");
+                                            }}
                                             format="dd/MM/yyyy"  // Indian date format
                                             slotProps={{
                                                 textField: {
@@ -340,8 +402,10 @@ const TimesheetList: React.FC = () => {
                                         <DatePicker
                                             label="End Date *"
                                             value={formik.values.end_date}
-                                            onChange={(v) =>
-                                                formik.setFieldValue('end_date', v)
+                                            onChange={(v) => {
+                                                formik.setFieldValue('end_date', v);
+                                                localStorage.setItem("end_date", v?.toISOString() ?? "");
+                                            }
                                             }
                                             format="dd/MM/yyyy"
 

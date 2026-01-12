@@ -822,6 +822,7 @@ export default function Timesheet({
 		periodStartOverride,
 		periodEndOverride,
 		timesheetCode,
+		id
 	]);
 
 	const fetchTimesheet = async (type: any) => {
@@ -863,8 +864,8 @@ export default function Timesheet({
 			setTimesheetId(adapted.timesheetId ?? null);
 			setApiStartDate(apiRaw.week_start);
 			setApiEndDate(apiRaw.week_end);
-			setPrevTimesheetId(null);
-			setNextTimesheetId(null);
+			setPrevTimesheetId(apiRaw.previous_timesheet_code);
+			setNextTimesheetId(apiRaw.next_timesheet_code);
 			setTimesheetStatus(adapted.status ?? null);
 			const history = (apiRaw.history || []).map((item: any) => ({
 				id: uid(),
