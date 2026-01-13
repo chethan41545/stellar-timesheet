@@ -1323,14 +1323,8 @@ export default function Timesheet({
 			);
 
 			if (res?.data?.status === "success") {
-				toast.success(
-					action === "Approved"
-						? "Timesheet approved successfully"
-						: "Timesheet rejected successfully"
-				);
+				toast.success(res.data.message);
 				fetchTimesheet("");
-			} else {
-				toast.error(res?.data?.message || "Action failed");
 			}
 		} catch (error) {
 			console.error(error);

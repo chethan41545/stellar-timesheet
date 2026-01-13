@@ -8,7 +8,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 
 import SearchField from '../../shared/SearchField/SearchField';
 import { useDebouncedValue } from '../../utils/commonUtils';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import MultiSelect from '../../shared/MultiSelect/MultiSelectWithoutController';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useFormik } from 'formik';
@@ -145,11 +145,11 @@ const TimesheetList: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
     const [tableLoading, setTableLoading] = useState(true);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
-    const submitTimesheet = (row: any) => {
-        navigate(`/timesheets/${row.timesheet_code}`);
-    };
+    // const submitTimesheet = (row: any) => {
+    //     navigate(`/timesheets/${row.timesheet_code}`);
+    // };
 
     const columns = [
         {
