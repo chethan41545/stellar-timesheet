@@ -162,10 +162,12 @@ const TimesheetList: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                         <Typography
                             variant="body2"
+                            component={'a'}
+                            href={`/timesheets/${row.timesheet_code}`}
                             fontSize="12px"
                             role="button"
                             tabIndex={0}
-                            onClick={() => submitTimesheet(row)}
+                            // onClick={() => submitTimesheet(row)}
                             sx={{
                                 cursor: 'pointer',
                                 '&:hover': { textDecoration: 'underline', color: 'primary.main' },
