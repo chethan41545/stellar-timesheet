@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   GET_USER_DETAILS: "/user/details",
   TIMESHEET_UPDATE: "/timesheet/update",
   TIMESHEET_REVIEW: "/timesheet/review",
+  TIMESHEET_COPY: "/timesheet/copy-details",
 
   HOLIDAY_LIST: "/timesheet/holiday/search",
 

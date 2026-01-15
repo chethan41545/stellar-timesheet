@@ -1030,6 +1030,34 @@ export default function Timesheet({
 		return true;
 	};
 
+	const copyTimesheet = async () => {
+		setPageLoading(true);
+
+		const canEditStatus =
+			!timesheetStatus ||
+			timesheetStatus === "Draft" ||
+			timesheetStatus === "New";
+
+		if (id || !canEditStatus) return;
+
+		try {
+			setSaving(true);
+
+			const res = await Apiservice.postMethod(
+				API_ENDPOINTS.TIMESHEET_COPY, { "timesheet_code": timesheetCode }
+
+			);
+			toast.success(res.data.message);
+			fetchTimesheet("");
+		}
+		catch (err: unknown) {
+		} finally {
+
+			setPageLoading(false);
+			setSaving(false);
+		}
+	}
+
 
 
 	const savePeriod = async () => {
@@ -1634,9 +1662,18 @@ export default function Timesheet({
 				</div>
 
 				<div className={styles.rightControls}>
-					{editable && (
+					{!id && editable && (
 						<Button
+							label={"Copy from last week"}
+							type="button"
 							variant="secondary"
+							onClick={() => copyTimesheet()}
+							disabled={saving || !editable}
+						/>
+					)}
+					{!id && editable && (
+						<Button
+							// variant="secondary"
 							type="button"
 							label={projectLoading ? "Loading…" : "Add Entry"}
 							onClick={handleOpenAddEntry}
@@ -2006,6 +2043,7 @@ export default function Timesheet({
 				<div className={styles.footerActions}>
 					{!id && editable && entries[0]?.costCenterName ? (
 						<>
+
 							<Button
 								label={
 									saving
