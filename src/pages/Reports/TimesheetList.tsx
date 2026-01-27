@@ -238,7 +238,11 @@ const TimesheetList: React.FC = () => {
                                 checked={allSelectedOnPage}
                                 onChange={toggleAllOnPage}
                                 inputProps={{ 'aria-label': 'Select all on page' }}
-                                style={{ padding: 0, color: '#007bff', display: 'flex', justifyContent: 'center', }}
+                                // style={{ padding: 0, color: '#007bff', }}
+                                sx={{
+                                    p: 0,
+                                    color: '#007bff !important',
+                                }}
                             />
                         )}
                 </>
@@ -246,7 +250,7 @@ const TimesheetList: React.FC = () => {
             width: '20px',
             sortable: false,
             format: (_: any, row: any) => (
-                < div style={{justifyContent: 'center !important',}}>
+                <>
                     {
                         selectedProjects.length === 1 && (
                             <Checkbox
@@ -256,16 +260,16 @@ const TimesheetList: React.FC = () => {
                                 inputProps={{ 'aria-label': `Select ${row.timesheet_code}` }}
                                 sx={{
                                     p: 0,
-                                    color: '#007bff !important',                                    
+                                    color: '#007bff !important',
                                     '&.Mui-disabled': {
                                         color: '#ccc !important', // greyed out
-                                    },
+                                    }
                                 }}
-                                disabled={(row.timesheet_status === "Pending Approval" || row.timesheet_status === "PreApprovalRequested") ? false : true}
+                                disabled={(row.timesheet_status === "Pending Approval" || row.timesheet_status === "Partially Approved" || row.timesheet_status === "Partially Rejected") ? false : true}
                             />
                         )
                     }
-                </div>
+                </>
             ),
         },
         {
@@ -634,6 +638,7 @@ const TimesheetList: React.FC = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 1.5,
+                                        marginTop:'16px',
                                         background: '#F8FAFF',
                                     }}
                                 >
