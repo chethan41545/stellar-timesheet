@@ -16,7 +16,7 @@ interface ColumnOption {
 
 interface Column<T extends Record<string, any>> {
 	id: keyof T;
-	label: string;
+	label: string | React.ReactNode;
 	sortable?: boolean;
 	align?: 'left' | 'center' | 'right' | 'justify' | 'inherit';
 	format?: (value: T[keyof T], row: T) => React.ReactNode;

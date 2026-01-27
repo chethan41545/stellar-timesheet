@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import apiService from '../../services/apiService';
 import { API_ENDPOINTS } from '../../constants/apiUrls';
 import axios from 'axios';
 import CustomTable from '../../shared/CustomTable/CustomTable';
-import { Box, Grid, IconButton, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Skeleton, TextField, Tooltip, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 
 import SearchField from '../../shared/SearchField/SearchField';
@@ -18,6 +18,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
 import Button from '../../shared/Button/Button';
 import { getStatusColor } from '../../constants/constants';
+import { toast } from 'react-toastify';
 // import { enGB } from 'date-fns/locale/en-GB';
 
 
@@ -25,25 +26,25 @@ import { getStatusColor } from '../../constants/constants';
 interface TimesheetResponse {
     timesheet: any;
     meta: any;
-    // {
-    //     page: number;
-    //     per_page: number;
-    //     total: number;
-    //     total_pages: number;
-    // };
 }
 
 
 const TimesheetList: React.FC = () => {
 
     // const [data, setData] = useState<TimesheetResponse[]>([]);
-    const [data, setData] = useState<TimesheetResponse | null>(null);
+    const [data, setData] = useState<TimesheetResponse>();
+    const [rejecting, setRejecting] = useState(false);
+
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+
 
     const lookUpData = JSON.parse(
         localStorage.getItem("lookup") || "{}"
     );
 
     const timesheetStatus = lookUpData?.timesheet_status ?? [];
+    const projectsLk = lookUpData?.projects ?? [];
 
     const getInitialTimesheetStatus = () => {
 
@@ -64,13 +65,33 @@ const TimesheetList: React.FC = () => {
         return timesheetStatus.map((s: any) => s.value);
     };
 
+    const getInitialProjects = () => {
+
+        const saved = localStorage.getItem("selected_projects");
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            } catch {
+                // ignore invalid storage
+            }
+        }
+        return []
+
+        // fallback → select all
+        // return projectsLk.map((s: any) => s.value);
+    };
+
+
+
     const [selectedTimesheetStatus, setSelectedTimesheetStatus] =
         React.useState<string[]>(getInitialTimesheetStatus);
 
-
-    // const [selectedTimesheetStatus, setSelectedTimesheetStatus] = React.useState<string[]>(
-    //     timesheetStatus.map((s: any) => s.value)
-    // );
+    const [selectedProjects, setSelectedProjects] =
+        React.useState<string[]>(getInitialProjects);
 
     const validationSchema = yup.object({
         start_date: yup.date().nullable().required('Start date is required'),
@@ -131,6 +152,9 @@ const TimesheetList: React.FC = () => {
     const [sortBy, setSortBy] = useState('week_start');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+
 
     const handleSortChange = (sb: any, sd: 'asc' | 'desc') => {
         setSortBy(sb);
@@ -151,7 +175,99 @@ const TimesheetList: React.FC = () => {
     //     navigate(`/timesheets/${row.timesheet_code}`);
     // };
 
+    const allIdsOnPage = useMemo(
+        () =>
+            (data?.timesheet ?? [])
+                .map((r: any) =>
+                    r.timesheet_status === 'Pending Approval' ? String(r.timesheet_code) : null
+                )
+                .filter(
+                    (timesheet_code: any): timesheet_code is string =>
+                        timesheet_code !== null
+                ),
+        [data]
+    );
+
+
+    const isSelected = (row: any) => selectedIds.has(`${row.timesheet_code}`);
+
+    const toggleOne = (row: any) => {
+        const key = `${row.timesheet_code}`;
+        setSelectedIds(prev => {
+            const copy = new Set(prev);
+            if (copy.has(key)) copy.delete(key);
+            else copy.add(key);
+            return copy;
+        });
+    };
+
+
+    const toggleAllOnPage = () => {
+
+        setSelectedIds(prev => {
+            const copy = new Set(prev);
+            if (allSelectedOnPage) {
+                allIdsOnPage.forEach((code: string) => copy.delete(code));
+            } else {
+                allIdsOnPage.forEach((code: string) => {
+
+                    copy.add(code)
+                });
+            }
+            return copy;
+        });
+    };
+
+
+
+
+    const allSelectedOnPage = allIdsOnPage.length > 0 && allIdsOnPage.every((id: string) => selectedIds.has(id));
+    const someSelectedOnPage = allIdsOnPage.some((id: string) => selectedIds.has(id));
+
     const columns = [
+        {
+            id: 'select',
+            // align: 'center',
+            label: (
+                <>
+                    {
+                        selectedProjects.length === 1 && (
+                            <Checkbox
+                                size="small"
+                                indeterminate={someSelectedOnPage && !allSelectedOnPage}
+                                checked={allSelectedOnPage}
+                                onChange={toggleAllOnPage}
+                                inputProps={{ 'aria-label': 'Select all on page' }}
+                                style={{ padding: 0, color: '#007bff', display: 'flex', justifyContent: 'center', }}
+                            />
+                        )}
+                </>
+            ),
+            width: '20px',
+            sortable: false,
+            format: (_: any, row: any) => (
+                < div style={{justifyContent: 'center !important',}}>
+                    {
+                        selectedProjects.length === 1 && (
+                            <Checkbox
+                                size="small"
+                                checked={isSelected(row)}
+                                onChange={() => toggleOne(row)}
+                                inputProps={{ 'aria-label': `Select ${row.timesheet_code}` }}
+                                sx={{
+                                    p: 0,
+                                    color: '#007bff !important',                                    
+                                    '&.Mui-disabled': {
+                                        color: '#ccc !important', // greyed out
+                                    },
+                                }}
+                                disabled={(row.timesheet_status === "Pending Approval" || row.timesheet_status === "PreApprovalRequested") ? false : true}
+                            />
+                        )
+                    }
+                </div>
+            ),
+        },
         {
             id: 'user_name',
             label: 'User',
@@ -231,7 +347,8 @@ const TimesheetList: React.FC = () => {
         sortBy,
         sortDirection,
         debouncedSearch,
-        selectedTimesheetStatus
+        selectedTimesheetStatus,
+        selectedProjects
     ])
 
     const fetchData = async () => {
@@ -245,6 +362,7 @@ const TimesheetList: React.FC = () => {
             'sort_direction': sortDirection,
             'search': debouncedSearch,
             "timesheet_status": selectedTimesheetStatus,
+            "projects": selectedProjects,
             "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
             "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
         }
@@ -266,6 +384,53 @@ const TimesheetList: React.FC = () => {
             setTableLoading(false);
         }
     };
+
+
+    const handleBulkApprove = async (status: string) => {
+        setLoading(true);
+        const count = selectedIds.size;
+        if (!count) return;
+
+        const payload = {
+            timesheet_codes: Array.from(selectedIds),
+            action: status,
+            project_code: selectedProjects[0],
+            comment: rejectReason
+        }
+
+        try {
+            const response = await apiService.postMethod(API_ENDPOINTS.TIMESHEET_BULK_REVIEW, payload);
+            setSelectedIds(new Set());
+            setRejecting(false);
+            setShowRejectModal(false);
+            setRejectReason('');
+            // toast.success(response.data.)
+            if (response.data.status === "success") {
+                toast.success(response.data.message);
+            }
+
+            fetchData();
+
+        }
+        catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                console.error('API Error:', err.response?.data?.message || err.message);
+            } else {
+                console.error('Unexpected Error:', err);
+            }
+
+        } finally {
+            setLoading(false);
+        }
+
+        // toast.success("Expenses approved successfully.");
+        // setSelectedIds(new Set());
+        // setRejecting(false);
+        // setShowRejectModal(false);
+        // setRejectReason('');
+    };
+
+
 
     const handleDownload = async () => {
 
@@ -374,6 +539,28 @@ const TimesheetList: React.FC = () => {
                                     }
                                 </Grid>
 
+                                <Grid size={{ xs: 12, md: 2.5 }}>
+                                    {
+                                        projectsLk && (
+                                            <MultiSelect
+                                                label="Projects"
+                                                options={projectsLk}
+                                                value={selectedProjects}
+                                                onChange={(values) => {
+                                                    setSelectedProjects(values);
+                                                    localStorage.setItem(
+                                                        "selected_projects",
+                                                        JSON.stringify(values)
+                                                    );
+                                                }}
+                                                selectAllByDefault={selectedProjects.length > 0 ? false : true}
+                                                width={"96%"}
+                                            />
+
+                                        )
+                                    }
+                                </Grid>
+
                                 <LocalizationProvider dateAdapter={AdapterDateFns}
                                 >
 
@@ -437,6 +624,34 @@ const TimesheetList: React.FC = () => {
                             </Grid>
                         </Grid>
 
+                        <Grid>
+                            {selectedIds.size > 0 && (
+                                <Box
+                                    sx={{
+                                        p: '4px 12px',
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1.5,
+                                        background: '#F8FAFF',
+                                    }}
+                                >
+                                    <Typography variant="body2">{selectedIds.size} Selected</Typography>
+                                    <Box sx={{ flex: 1 }} />
+                                    <Button variant="secondary" onClick={() => setSelectedIds(new Set())} style={{ fontSize: '14px', padding: '5px 10px' }}>
+                                        Clear
+                                    </Button>
+                                    <Button variant="danger" onClick={() => setShowRejectModal(true)} style={{ fontSize: '14px', padding: '5px 10px' }}>
+                                        Reject
+                                    </Button>
+                                    <Button variant="success" onClick={() => handleBulkApprove("approve")} style={{ fontSize: '14px', padding: '5px 10px' }}>
+                                        Approve
+                                    </Button>
+                                </Box>
+                            )}
+                        </Grid>
+
                         <Grid size={{ xs: 1 }} display={"flex"} justifyContent={"flex-end"}>
                             <Tooltip title="Download Timesheets">
                                 <IconButton
@@ -482,6 +697,38 @@ const TimesheetList: React.FC = () => {
                             }
 
                         </Grid>
+
+                        <Dialog
+                            open={showRejectModal}
+                            onClose={() => !rejecting && setShowRejectModal(false)}
+                            maxWidth="sm"
+                            fullWidth
+                            PaperProps={{ sx: { borderRadius: 2 } }}
+                        >
+                            <DialogTitle sx={{ pb: 1 }}>
+                                Reject 1 item
+                            </DialogTitle>
+                            <DialogContent dividers>
+                                <TextField
+                                    label="Reason for rejection"
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    fullWidth
+                                    multiline
+                                    minRows={3}
+                                    inputProps={{ maxLength: 500 }}
+                                    helperText={`${rejectReason.trim().length}/500`}
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button variant="secondary" onClick={() => setShowRejectModal(false)} disabled={rejecting}>
+                                    Cancel
+                                </Button>
+                                <Button variant="danger" onClick={() => handleBulkApprove("reject")} disabled={rejecting || !rejectReason}>
+                                    {rejecting ? 'Rejecting...' : 'Reject'}
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </Grid>
                 )
             }

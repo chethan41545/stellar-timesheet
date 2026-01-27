@@ -76,6 +76,49 @@ const WeeklyReports: React.FC = () => {
     const [selected, setSelected] = React.useState<string[]>([]);
     const theme = useTheme();
 
+    const lookUpData = JSON.parse(
+        localStorage.getItem("lookup") || "{}"
+    );
+
+    const projectsLk = lookUpData?.projects ?? [];
+
+    const getInitialProjects = () => {
+
+        const saved = localStorage.getItem("selected_projects");
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            } catch {
+                // ignore invalid storage
+            }
+        }
+
+        // fallback → select all
+        return projectsLk.map((s: any) => s.value);
+    };
+
+    const [selectedProjects, setSelectedProjects] =
+        React.useState<string[]>(getInitialProjects);
+
+    const getInitialDates = () => {
+        const savedStart = localStorage.getItem("start_date");
+        const savedEnd = localStorage.getItem("end_date");
+
+        const { monday, sunday } = getCurrentWeekDates();
+
+        return {
+            start_date: savedStart ? new Date(savedStart) : monday,
+            end_date: savedEnd ? new Date(savedEnd) : sunday,
+        };
+    };
+
+
+    const initialDates = getInitialDates();
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -86,7 +129,7 @@ const WeeklyReports: React.FC = () => {
         }
     }, [selected]);
 
-    const { monday, sunday } = getCurrentWeekDates();
+    // const { monday, sunday } = getCurrentWeekDates();
 
 
     const validationSchema = yup.object({
@@ -99,8 +142,8 @@ const WeeklyReports: React.FC = () => {
 
     const formik = useFormik<any>({
         initialValues: {
-            start_date: monday,
-            end_date: sunday
+            start_date: initialDates.start_date,
+            end_date: initialDates.end_date
         },
         validationSchema,
         onSubmit: async () => {
@@ -145,6 +188,7 @@ const WeeklyReports: React.FC = () => {
         try {
             const payload = {
                 user_codes: selected,
+                projects : selectedProjects,
                 "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
                 "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
             };
@@ -272,6 +316,28 @@ const WeeklyReports: React.FC = () => {
                                     />
                                 </Box>
                             )} */}
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 2.5 }}>
+                            {
+                                projectsLk && (
+                                    <MultiSelect
+                                        label="Projects"
+                                        options={projectsLk}
+                                        value={selectedProjects}
+                                        onChange={(values) => {
+                                            setSelectedProjects(values);
+                                            localStorage.setItem(
+                                                "selected_projects",
+                                                JSON.stringify(values)
+                                            );
+                                        }}
+                                        selectAllByDefault={selectedProjects.length > 0 ? false : true}
+                                        width={"96%"}
+                                    />
+
+                                )
+                            }
                         </Grid>
 
                         <LocalizationProvider dateAdapter={AdapterDateFns}

@@ -872,7 +872,7 @@ export default function Timesheet({
 				status: item.new_status,
 				by: item.user,
 				at: item.date,
-				comment: null,
+				comment: item.comment,
 				project: item.project_name,
 				prevStatus: item.old_status,
 				newStatus: item.new_status,

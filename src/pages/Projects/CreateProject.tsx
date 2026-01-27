@@ -102,12 +102,12 @@ const CreateProjectScreen: React.FC = () => {
     /* ---------------- Fetch Managers ---------------- */
     const fetchUsers = async (assigned: any[] = assignedEmployees) => {
         try {
-            const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST);
+            const payload = {"variant":"manager"}
+            const response = await apiService.postMethod(API_ENDPOINTS.GET_USER_LIST, payload);
 
             // Managers
             setManagers(
                 response.data.data
-                    .filter((u: any) => u.role === "Manager")
                     .map((u: any) => ({
                         label: u.name,
                         value: u.code,
