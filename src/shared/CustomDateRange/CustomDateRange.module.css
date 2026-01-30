@@ -1,0 +1,177 @@
+.dropdownWrapper{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  /* background: #DAECEF; */
+  border: 1px solid #d9dde5;
+  border-radius: 4px;
+  color: #202224;
+  height: max-content;
+  width: 100%;
+}
+
+.trigger{
+  display:flex;
+  align-items:center;
+  /* gap:10px; */
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #202224;
+  padding: 8px 12px;
+}
+
+.triggerText{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerIcon{
+  display:inline-flex;
+  opacity: 0.85;
+}
+
+/* Popup */
+.menu{
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  width: 330px;
+  max-width: min(330px, calc(100vw - 24px));
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 12px 24px rgba(2,12,27,0.12);
+  z-index: 1000;
+
+  overflow: hidden;       /* IMPORTANT */
+  box-sizing: border-box; /* IMPORTANT */
+}
+
+/* Top input row */
+.inputsRow{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* IMPORTANT */
+  gap: 12px;
+  padding: 14px 14px 10px 14px;
+  border-bottom: 1px solid #eef2f7;
+  box-sizing: border-box;
+}
+
+/* If you are using MUI DatePicker (TextField) wrappers */
+.inputWrap{
+  min-width: 0;          /* IMPORTANT */
+  width: 100%;           /* IMPORTANT */
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 2px;
+}
+/* 
+.activeWrap{
+  border-color: #0954D5;
+  box-shadow: 0 0 0 3px rgba(9,84,213,0.12);
+} */
+
+/* Force MUI inputs to fit inside the grid cell */
+.inputWrap :global(.MuiFormControl-root){
+  width: 100%;
+  min-width: 0;
+}
+
+.inputWrap :global(.MuiInputBase-root){
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* If you're still using the older button-style dateBox somewhere, keep it */
+.dateBox{
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: pointer;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dateText{
+  font-size: 14px;
+  color: #111827;
+  min-width: 0;
+}
+
+.boxIcon{
+  opacity: 0.85;
+  color: #0954D5;
+}
+
+/* Calendar spacing */
+.calendarWrap{
+  padding: 4px 8px 0 8px;
+  box-sizing: border-box;
+}
+
+/* Constrain MUI StaticDatePicker layout so it doesn't overflow the popup */
+.calendarWrap :global(.MuiPickersLayout-root){
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.calendarWrap :global(.MuiPickersLayout-contentWrapper){
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.calendarWrap :global(.MuiDateCalendar-root){
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Prevent any internal slide/transition blocks from forcing a wider min-width */
+.calendarWrap :global(.MuiDayCalendar-slideTransition){
+  min-width: 0;
+}
+
+/* Footer */
+.footer{
+  display:flex;
+  align-items:center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 10px 14px 14px 14px;
+  box-sizing: border-box;
+}
+
+.cancelBtn{
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2563eb;
+}
+
+.applyBtn{
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: none;
+  background: #0954D5;
+  cursor: pointer;
+  font-size: 14px;
+  color: #ffffff;
+}

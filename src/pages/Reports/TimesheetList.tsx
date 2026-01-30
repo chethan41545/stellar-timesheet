@@ -10,15 +10,13 @@ import SearchField from '../../shared/SearchField/SearchField';
 import { useDebouncedValue } from '../../utils/commonUtils';
 // import { useNavigate } from 'react-router-dom';
 import MultiSelect from '../../shared/MultiSelect/MultiSelectWithoutController';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
 import Button from '../../shared/Button/Button';
 import { getStatusColor } from '../../constants/constants';
 import { toast } from 'react-toastify';
+import CustomDateRange from '../../shared/CustomDateRange/CustomDateRange';
 // import { enGB } from 'date-fns/locale/en-GB';
 
 
@@ -101,7 +99,9 @@ const TimesheetList: React.FC = () => {
             .min(yup.ref('start_date'), 'End date must be after start date'),
     });
 
-    // const { monday, sunday } = getCurrentWeekDates();
+
+    const formatYMD = (d: Date) =>
+        d.toISOString().split("T")[0]; // YYYY-MM-DD
 
     const getInitialDates = () => {
         const savedStart = localStorage.getItem("start_date");
@@ -110,10 +110,24 @@ const TimesheetList: React.FC = () => {
         const { monday, sunday } = getCurrentWeekDates();
 
         return {
-            start_date: savedStart ? new Date(savedStart) : monday,
-            end_date: savedEnd ? new Date(savedEnd) : sunday,
+            start_date: savedStart ?? formatYMD(monday),
+            end_date: savedEnd ?? formatYMD(sunday),
         };
     };
+
+    // const { monday, sunday } = getCurrentWeekDates();
+
+    // const getInitialDates = () => {
+    //     const savedStart = localStorage.getItem("start_date");
+    //     const savedEnd = localStorage.getItem("end_date");
+
+    //     const { monday, sunday } = getCurrentWeekDates();
+
+    //     return {
+    //         start_date: savedStart ? new Date(savedStart) : monday,
+    //         end_date: savedEnd ? new Date(savedEnd) : sunday,
+    //     };
+    // };
 
 
     const initialDates = getInitialDates();
@@ -147,14 +161,13 @@ const TimesheetList: React.FC = () => {
     const [size, setSize] = useState(10);
     const [search, setSearch] = useState<any>('');
 
+    // const [range, setRange] = useState({ startDate: null, endDate: null });
     const debouncedSearch = useDebouncedValue(search, 350);
 
-    const [sortBy, setSortBy] = useState('week_start');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+    const [sortBy, setSortBy] = useState('timesheet_status');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-
 
     const handleSortChange = (sb: any, sd: 'asc' | 'desc') => {
         setSortBy(sb);
@@ -306,7 +319,7 @@ const TimesheetList: React.FC = () => {
             id: 'timesheet_status',
             label: 'Status',
             width: '120px',
-            // sortable: true,
+            sortable: true,
             format: (value: string) => {
 
                 return (
@@ -445,6 +458,7 @@ const TimesheetList: React.FC = () => {
             'sort_direction': sortDirection,
             'search': debouncedSearch,
             "timesheet_status": selectedTimesheetStatus,
+            "projects": selectedProjects,
             "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
             "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
         }
@@ -564,8 +578,27 @@ const TimesheetList: React.FC = () => {
                                         )
                                     }
                                 </Grid>
+                                <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
 
-                                <LocalizationProvider dateAdapter={AdapterDateFns}
+                                    <CustomDateRange
+                                        name="createdDate"
+                                        value={{
+                                            startDate: formik.values.start_date,
+                                            endDate: formik.values.end_date,
+                                        }}
+                                        // onChange={setRange} 
+                                        onChange={(v:any) => {
+                                            // v is DateRangeValue
+                                            formik.setFieldValue("start_date", v.startDate);
+                                            formik.setFieldValue("end_date", v.endDate);
+
+                                            localStorage.setItem("start_date", v.startDate ?? "");
+                                            localStorage.setItem("end_date", v.endDate ?? "");
+                                        }}
+                                    />
+                                </Grid>
+
+                                {/* <LocalizationProvider dateAdapter={AdapterDateFns}
                                 >
 
                                     <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
@@ -614,17 +647,18 @@ const TimesheetList: React.FC = () => {
 
                                         />
                                     </Grid>
+                                </LocalizationProvider> */}
 
-                                    <Grid size={{ xs: 4, md: 1 }} mt={1}>
+                                <Grid size={{ xs: 4, md: 1 }} mt={1}>
 
-                                        <Button
-                                            type="submit"
-                                            onClick={handleSubmit}
+                                    <Button
+                                        type="submit"
+                                        onClick={handleSubmit}
 
-                                            label='Submit' />
+                                        label='Submit' />
 
-                                    </Grid>
-                                </LocalizationProvider>
+                                </Grid>
+
                             </Grid>
                         </Grid>
 
@@ -638,7 +672,7 @@ const TimesheetList: React.FC = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 1.5,
-                                        marginTop:'16px',
+                                        marginTop: '16px',
                                         background: '#F8FAFF',
                                     }}
                                 >

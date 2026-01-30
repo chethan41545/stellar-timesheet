@@ -38,9 +38,9 @@ import { useFormik } from "formik";
 import * as yup from 'yup';
 import { formatDate, getCurrentWeekDates } from "../../utils/dateUtils";
 import Button from "../../shared/Button/Button";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import CustomDateRange from "../../shared/CustomDateRange/CustomDateRange";
 
 
 interface ReportResponse {
@@ -104,6 +104,9 @@ const WeeklyReports: React.FC = () => {
     const [selectedProjects, setSelectedProjects] =
         React.useState<string[]>(getInitialProjects);
 
+    const formatYMD = (d: Date) =>
+        d.toISOString().split("T")[0]; // YYYY-MM-DD
+
     const getInitialDates = () => {
         const savedStart = localStorage.getItem("start_date");
         const savedEnd = localStorage.getItem("end_date");
@@ -111,8 +114,8 @@ const WeeklyReports: React.FC = () => {
         const { monday, sunday } = getCurrentWeekDates();
 
         return {
-            start_date: savedStart ? new Date(savedStart) : monday,
-            end_date: savedEnd ? new Date(savedEnd) : sunday,
+            start_date: savedStart ?? formatYMD(monday),
+            end_date: savedEnd ?? formatYMD(sunday),
         };
     };
 
@@ -188,7 +191,7 @@ const WeeklyReports: React.FC = () => {
         try {
             const payload = {
                 user_codes: selected,
-                projects : selectedProjects,
+                projects: selectedProjects,
                 "start_date": formik.values.start_date ? formatDate(formik.values.start_date, 'YYYY-MM-DD') : null,
                 "end_date": formik.values.end_date ? formatDate(formik.values.end_date, 'YYYY-MM-DD') : null
             };
@@ -344,25 +347,25 @@ const WeeklyReports: React.FC = () => {
                         >
 
                             <Grid size={{ xs: 12, md: 2.5 }}>
-                                <DatePicker
-                                    label="Start Date *"
-                                    value={formik.values.start_date}
-                                    onChange={(v) => formik.setFieldValue('start_date', v)}
-                                    format="dd/MM/yyyy"  // Indian date format
-                                    slotProps={{
-                                        textField: {
-                                            sx: {
-                                                "& .MuiPickersSectionList-root": {
-                                                    padding: "9px 6px",
-                                                },
-                                            },
-                                        },
-                                    }}
+                                <CustomDateRange
+                                        name="createdDate"
+                                        value={{
+                                            startDate: formik.values.start_date,
+                                            endDate: formik.values.end_date,
+                                        }}
+                                        // onChange={setRange} 
+                                        onChange={(v:any) => {
+                                            // v is DateRangeValue
+                                            formik.setFieldValue("start_date", v.startDate);
+                                            formik.setFieldValue("end_date", v.endDate);
 
-                                />
+                                            localStorage.setItem("start_date", v.startDate ?? "");
+                                            localStorage.setItem("end_date", v.endDate ?? "");
+                                        }}
+                                    />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 2.5 }}>
+                            {/* <Grid size={{ xs: 12, md: 2.5 }}>
                                 <DatePicker
                                     label="End Date *"
                                     value={formik.values.end_date}
@@ -382,7 +385,7 @@ const WeeklyReports: React.FC = () => {
                                     }}
 
                                 />
-                            </Grid>
+                            </Grid> */}
 
                             <Grid size={{ xs: 4, md: 1 }}>
 
