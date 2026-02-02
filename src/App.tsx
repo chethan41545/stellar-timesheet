@@ -16,6 +16,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./constants/routes";
 import HolidayScreen from "./pages/Dashboard/HolidayList";
 import ReportTab from "./pages/Reports/ReportsTab";
+import AnnouncementsList from "./pages/Dashboard/AnnouncementsList";
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 // Simple auth guard
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -58,7 +60,7 @@ export default function App() {
             <Route path=":id" element={<Timesheet />} />
           </Route>
 
-          <Route path="dashboard" element={<HolidayScreen />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="reports" element={<ReportTab />}/>
           {/* <Route path="projects" element={<Projects />} /> */}
 

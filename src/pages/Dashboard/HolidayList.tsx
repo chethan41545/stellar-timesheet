@@ -14,6 +14,8 @@ import {
     alpha,
     useTheme,
     Stack,
+    ListItem,
+    List,
 } from "@mui/material";
 import apiService from "../../services/apiService";
 import { API_ENDPOINTS } from "../../constants/apiUrls";
@@ -21,7 +23,7 @@ import axios from "axios";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import BeachAccessIcon from "@mui/icons-material/BeachAccess";
-import { format,  isToday, isValid, parse } from "date-fns";
+import { format, isToday, isValid, parse } from "date-fns";
 
 type Holiday = {
     code: string;
@@ -159,17 +161,17 @@ const HolidayScreen: React.FC = () => {
     return (
         <Box sx={{ p: 3 }}>
             {/* Header */}
-            <Box sx={{ mb: 4 }}>
+            {/* <Box sx={{ mb: 4 }}>
                 <Typography variant="h3" fontWeight={700} gutterBottom>
                     📅 Holidays Calendar {year}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
                     View all public holidays and floater leaves in an interactive calendar view
                 </Typography>
-            </Box>
+            </Box> */}
 
             {/* Stats Summary */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            {/* <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid size={{ xs: 6, sm: 3 }}>
                     <Card sx={{ p: 2, textAlign: 'center', borderRadius: 2 }}>
                         <Typography variant="h2" fontWeight={800} color="primary.main">
@@ -200,65 +202,13 @@ const HolidayScreen: React.FC = () => {
                         </Typography>
                     </Card>
                 </Grid>
-
-                {/* <Grid size={{ xs: 6, sm: 3 }}>
-                    <Card sx={{ p: 2, textAlign: 'center', borderRadius: 2, bgcolor: alpha(theme.palette.warning.light, 0.1) }}>
-                        <Typography variant="h2" fontWeight={800} color="warning.main">
-                            {filteredData.filter(item => isFuture(new Date(item.date)) || isToday(new Date(item.date))).length}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Upcoming
-                        </Typography>
-                    </Card>
-                </Grid> */}
-            </Grid>
+            </Grid> */}
 
             {/* Controls */}
             <Paper sx={{ p: 2, mb: 3, borderRadius: 2, bgcolor: 'background.default' }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        {/* <Button
-                            variant={filter === 'all' ? 'contained' : 'outlined'}
-                            size="small"
-                            onClick={() => setFilter('all')}
-                        >
-                            All Days
-                        </Button> */}
-                        {/* <Button
-                            variant={filter === 'public' ? 'contained' : 'outlined'}
-                            size="small"
-                            startIcon={<BeachAccessIcon />}
-                            onClick={() => setFilter('public')}
-                        >
-                            Public Holidays
-                        </Button>
-                        <Button
-                            variant={filter === 'floater' ? 'contained' : 'outlined'}
-                            size="small"
-                            startIcon={<EventNoteIcon />}
-                            onClick={() => setFilter('floater')}
-                            color="success"
-                        >
-                            Floater Leaves
-                        </Button>
-                        <Button
-                            variant={filter === 'upcoming' ? 'contained' : 'outlined'}
-                            size="small"
-                            onClick={() => setFilter('upcoming')}
-                            color="warning"
-                        >
-                            Upcoming
-                        </Button> */}
-                    </Box>
 
                     <Stack direction="row" spacing={1} alignItems="center">
-                        {/* <IconButton onClick={() => setViewMode('compact')} color={viewMode === 'compact' ? 'primary' : 'default'}>
-                            <ViewListIcon />
-                        </IconButton>
-                        <IconButton onClick={() => setViewMode('grid')} color={viewMode === 'grid' ? 'primary' : 'default'}>
-                            <ViewModuleIcon />
-                        </IconButton> */}
-
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Year</InputLabel>
                             <Select
@@ -293,87 +243,45 @@ const HolidayScreen: React.FC = () => {
                     </Typography>
                 </Box>
             ) : (
-                <Grid container spacing={3}>
+                <List sx={{ py: 0 }}>
                     {holidays.map((holiday) => {
                         const { dayName, day, monthYear } = formatHolidayDate(holiday.date);
+                        const month = monthYear.split(' ')[0];
 
                         return (
-                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={holiday.code}>
-                                <Card
-                                    sx={{
-                                        borderRadius: 2,
-                                        border: `1.5px solid ${getBorderColor(holiday.type || 'public', holiday.date)}`,
-                                        background: getCardBackground(holiday.type || 'public', holiday.date),
-                                        p: 2,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        // height: '100%',
-                                        transition: 'all 0.2s ease',
-                                        '&:hover': {
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: `0 6px 12px ${alpha(getBorderColor(holiday.type || 'public', holiday.date), 0.15)}`,
-                                        }
-                                    }}
-                                >
-                                    {/* Compact Calendar Header */}
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                                        {/* Calendar Date Box */}
-                                        <Box
-                                            sx={{
-                                                mr: 2,
-                                                textAlign: 'center',
-                                                minWidth: 56,
-                                                bgcolor: alpha(getBorderColor(holiday.type || 'public', holiday.date), 0.1),
-                                                borderRadius: 1.5,
-                                                p: 1,
-                                                border: `1px solid ${alpha(getBorderColor(holiday.type || 'public', holiday.date), 0.3)}`
-                                            }}
-                                        >
-                                            <Typography variant="caption" color="text.secondary">
-                                                {monthYear.split(' ')[0]}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary" display="block">
-                                                {day}
-                                            </Typography>
+                            <ListItem
+                                key={holiday.code}
+                                sx={{
+                                    px: 0,
+                                    py: 1,
+                                    alignItems: 'flex-start',
+                                    borderBottom: '1px solid rgba(0,0,0,0.08)',
+                                    '&:last-child': { borderBottom: 'none' }
+                                }}
+                            >
+                                <Box sx={{ minWidth: 32, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {month.slice(0, 3)}
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600}>
+                                        {day}
+                                    </Typography>
+                                </Box>
 
-
-                                        </Box>
-
-                                        {/* Holiday Title - Compact */}
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Typography variant="subtitle1" fontWeight={600} noWrap>
-                                                {holiday.name}
-                                            </Typography>
-
-                                            <Typography variant="caption" color="text.primary">
-                                                {dayName.substring(0, 3)}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                <Chip
-                                                    icon={holiday.type === 'floater' ? <EventNoteIcon fontSize="small" /> : <BeachAccessIcon fontSize="small" />}
-                                                    label={holiday.type === 'floater' ? 'Floater' : 'Public'}
-                                                    size="small"
-                                                    color={holiday.type === 'floater' ? 'success' : 'primary'}
-                                                    variant="outlined"
-                                                    sx={{
-                                                        height: 24,
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 500
-                                                    }}
-                                                />
-                                                {/* <Typography variant="caption" color="text.secondary">
-                                                    {holiday.description && holiday.description.length > 50
-                                                        ? `${holiday.description.substring(0, 50)}...`
-                                                        : holiday.description}
-                                                </Typography> */}
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                </Card>
-                            </Grid>
-                        )
+                                <Box sx={{ flexGrow: 1, ml: 1.5 }}>
+                                    <Typography variant="body2" fontWeight={500} noWrap>
+                                        {holiday.name}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {dayName.slice(0, 3)} • {holiday.type === 'floater' ? 'Floater' : 'Public'}
+                                    </Typography>
+                                </Box>
+                            </ListItem>
+                        );
                     })}
-                </Grid>
+                </List>
+
+
             )}
 
 
