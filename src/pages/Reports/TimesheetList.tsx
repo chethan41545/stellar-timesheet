@@ -16,7 +16,10 @@ import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
 import Button from '../../shared/Button/Button';
 import { getStatusColor } from '../../constants/constants';
 import { toast } from 'react-toastify';
-import CustomDateRange from '../../shared/CustomDateRange/CustomDateRange';
+// import CustomDateRange from '../../shared/CustomDateRange/CustomDateRange';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 // import { enGB } from 'date-fns/locale/en-GB';
 
 
@@ -100,22 +103,8 @@ const TimesheetList: React.FC = () => {
     });
 
 
-    const formatYMD = (d: Date) =>
-        d.toISOString().split("T")[0]; // YYYY-MM-DD
-
-    const getInitialDates = () => {
-        const savedStart = localStorage.getItem("start_date");
-        const savedEnd = localStorage.getItem("end_date");
-
-        const { monday, sunday } = getCurrentWeekDates();
-
-        return {
-            start_date: savedStart ?? formatYMD(monday),
-            end_date: savedEnd ?? formatYMD(sunday),
-        };
-    };
-
-    // const { monday, sunday } = getCurrentWeekDates();
+    // const formatYMD = (d: Date) =>
+    //     d.toISOString().split("T")[0]; // YYYY-MM-DD
 
     // const getInitialDates = () => {
     //     const savedStart = localStorage.getItem("start_date");
@@ -124,10 +113,24 @@ const TimesheetList: React.FC = () => {
     //     const { monday, sunday } = getCurrentWeekDates();
 
     //     return {
-    //         start_date: savedStart ? new Date(savedStart) : monday,
-    //         end_date: savedEnd ? new Date(savedEnd) : sunday,
+    //         start_date: savedStart ?? formatYMD(monday),
+    //         end_date: savedEnd ?? formatYMD(sunday),
     //     };
     // };
+
+    // const { monday, sunday } = getCurrentWeekDates();
+
+    const getInitialDates = () => {
+        const savedStart = localStorage.getItem("start_date");
+        const savedEnd = localStorage.getItem("end_date");
+
+        const { monday, sunday } = getCurrentWeekDates();
+
+        return {
+            start_date: savedStart ? new Date(savedStart) : monday,
+            end_date: savedEnd ? new Date(savedEnd) : sunday,
+        };
+    };
 
 
     const initialDates = getInitialDates();
@@ -518,10 +521,10 @@ const TimesheetList: React.FC = () => {
 
                     <Grid container justifyContent={"space-between"}>
 
-                        <Grid size={{ xs: 12, md: 11 }}>
+                        <Grid size={{ xs: 12, md:11}}>
                             <Grid container columnSpacing={2}>
 
-                                <Grid size={{ xs: 12, md: 3 }} sx={{ margin: "8px", marginLeft: 0 }}>
+                                <Grid size={{ xs: 12, md: 2 }} sx={{ margin: "8px", marginLeft: 0 }}>
                                     <SearchField
                                         name="searchUser"
                                         value={search}
@@ -534,7 +537,7 @@ const TimesheetList: React.FC = () => {
 
                                 </Grid>
 
-                                <Grid size={{ xs: 12, md: 2.5 }}>
+                                <Grid size={{ xs: 12, md: 2 }}>
                                     {
                                         timesheetStatus && (
                                             <MultiSelect
@@ -557,7 +560,7 @@ const TimesheetList: React.FC = () => {
                                     }
                                 </Grid>
 
-                                <Grid size={{ xs: 12, md: 2.5 }}>
+                                <Grid size={{ xs: 12, md: 2 }}>
                                     {
                                         projectsLk && (
                                             <MultiSelect
@@ -578,7 +581,7 @@ const TimesheetList: React.FC = () => {
                                         )
                                     }
                                 </Grid>
-                                <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                {/* <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
 
                                     <CustomDateRange
                                         name="createdDate"
@@ -596,12 +599,12 @@ const TimesheetList: React.FC = () => {
                                             localStorage.setItem("end_date", v.endDate ?? "");
                                         }}
                                     />
-                                </Grid>
+                                </Grid> */}
 
-                                {/* <LocalizationProvider dateAdapter={AdapterDateFns}
+                                <LocalizationProvider dateAdapter={AdapterDateFns}
                                 >
 
-                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                    <Grid size={{ xs: 12, md: 2 }} mt={1}>
                                         <DatePicker
                                             label="Start Date *"
                                             value={formik.values.start_date}
@@ -624,7 +627,7 @@ const TimesheetList: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                    <Grid size={{ xs: 12, md: 2 }} mt={1}>
                                         <DatePicker
                                             label="End Date *"
                                             value={formik.values.end_date}
@@ -647,7 +650,7 @@ const TimesheetList: React.FC = () => {
 
                                         />
                                     </Grid>
-                                </LocalizationProvider> */}
+                                </LocalizationProvider>
 
                                 <Grid size={{ xs: 4, md: 1 }} mt={1}>
 
@@ -691,7 +694,7 @@ const TimesheetList: React.FC = () => {
                             )}
                         </Grid>
 
-                        <Grid size={{ xs: 1 }} display={"flex"} justifyContent={"flex-end"}>
+                        <Grid size={{ xs:  12, md:1}} display={"flex"} justifyContent={"flex-end"}>
                             <Tooltip title="Download Timesheets">
                                 <IconButton
                                     onClick={handleDownload}
