@@ -108,7 +108,6 @@ const WeeklyReports: React.FC = () => {
         if (selected.length > 0) {
             fetchReports();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
 
     const { monday, sunday } = getCurrentWeekDates();
