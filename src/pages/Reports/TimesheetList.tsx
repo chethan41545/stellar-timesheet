@@ -580,7 +580,7 @@ const TimesheetList: React.FC = () => {
                             )}
                         </Grid>
 
-                        <Grid size={{ xs: 1 }} display={"flex"} justifyContent={"flex-end"}>
+                        <Grid size={{ xs:  12, md:1}} display={"flex"} justifyContent={"flex-end"}>
                             <Tooltip title="Download Timesheets">
                                 <IconButton
                                     onClick={handleDownload}

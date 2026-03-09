@@ -290,7 +290,7 @@ const WeeklyReports: React.FC = () => {
                             )}
                         </Grid>
 
-                        <Grid size={{ xs: 12, md: 2.5 }}>
+                        <Grid size={{ xs: 12, md: 2 }}>
                             {
                                 projectsLk && (
                                     <MultiSelect
