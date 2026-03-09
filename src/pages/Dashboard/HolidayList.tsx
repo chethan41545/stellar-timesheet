@@ -1,29 +1,23 @@
 import React, { useEffect, useState } from "react";
 import {
     Box,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    type SelectChangeEvent,
-    Card,
     Typography,
-    Grid,
-    Chip,
-    Paper,
     alpha,
     useTheme,
+    Chip,
+    Paper,
     Stack,
-    ListItem,
-    List,
 } from "@mui/material";
 import apiService from "../../services/apiService";
 import { API_ENDPOINTS } from "../../constants/apiUrls";
 import axios from "axios";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import BeachAccessIcon from "@mui/icons-material/BeachAccess";
-import { format, isToday, isValid, parse } from "date-fns";
+// import CelebrationIcon from "@mui/icons-material/Celebration";
+// import EventIcon from "@mui/icons-material/Event";
+// import BeachAccessIcon from "@mui/icons-material/BeachAccess";
+import { format, isValid, parse } from "date-fns";
+import { customCard } from "../../shared/Styles/CommonStyles";
+import CustomSkeleton from "../../shared/CustomSkeleton/CustomSkeleton";
 
 type Holiday = {
     code: string;
@@ -37,16 +31,15 @@ const HolidayScreen: React.FC = () => {
     const theme = useTheme();
     const [loading, setLoading] = useState(false);
     const [holidays, setHolidays] = useState<Holiday[]>([]);
-    const [year, setYear] = useState(new Date().getFullYear());
+    const year = new Date().getFullYear();
 
     const formatHolidayDate = (dateStr?: string) => {
-        if (!dateStr) return { dayName: '-', day: '-', monthYear: '-' };
+        if (!dateStr) return { dayName: '-', day: '-', month: '-', monthYear: '-' };
 
-        // Try multiple formats
         const formatsToTry = [
-            "yyyy-MM-dd'T'HH:mm:ssXXX", // ISO 8601
-            "EEE, dd MMM yyyy HH:mm:ss 'GMT'", // RFC 1123
-            "dd/MM/yyyy", // your DD/MM/YYYY format
+            "yyyy-MM-dd'T'HH:mm:ssXXX",
+            "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+            "dd/MM/yyyy",
         ];
 
         let parsedDate: Date | null = null;
@@ -59,16 +52,48 @@ const HolidayScreen: React.FC = () => {
             }
         }
 
-        if (!parsedDate) return { dayName: '-', day: '-', monthYear: '-' };
+        if (!parsedDate) return { dayName: '-', day: '-', month: '-', monthYear: '-' };
 
         return {
             dayName: format(parsedDate, 'EEEE'),
             day: format(parsedDate, 'dd'),
+            month: format(parsedDate, 'MMM'),
             monthYear: format(parsedDate, 'MMM yyyy'),
         };
     };
 
+    // const getHolidayIcon = (type?: string) => {
+    //     switch (type) {
+    //         case 'floater':
+    //             return <BeachAccessIcon fontSize="small" />;
+    //         case 'optional':
+    //             return <EventIcon fontSize="small" />;
+    //         default:
+    //             return <CelebrationIcon fontSize="small" />;
+    //     }
+    // };
 
+    const getTypeColor = (type?: string) => {
+        switch (type) {
+            case 'floater':
+                return theme.palette.info.main;
+            case 'optional':
+                return theme.palette.warning.main;
+            default:
+                return theme.palette.success.main;
+        }
+    };
+
+    const getTypeLabel = (type?: string) => {
+        switch (type) {
+            case 'floater':
+                return 'Floater';
+            case 'optional':
+                return 'Optional';
+            default:
+                return 'Public';
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -78,11 +103,6 @@ const HolidayScreen: React.FC = () => {
                 API_ENDPOINTS.HOLIDAY_LIST,
                 payload
             );
-            // Add type to fetched holidays
-            // const holidaysWithType = response.data.data.map((holiday: Holiday) => ({
-            //     ...holiday,
-            //     type: 'public'
-            // }));
             setHolidays(response.data.data);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -97,194 +117,153 @@ const HolidayScreen: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, [year]);
-
-    const handleYearChange = (event: SelectChangeEvent<number>) => {
-        setYear(Number(event.target.value));
-    };
-
-    // Generate years for selector
-    const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-
-
-    const publicHolidayCount = holidays.filter(h => h.type === "public").length;
-    const floaterLeaveCount = holidays.filter(h => h.type === "floater").length;
-
-    const totalHolidays = publicHolidayCount + floaterLeaveCount;
-
-    // Get holiday card background color
-    const getCardBackground = (type: string, date: string) => {
-        const holidayDate = new Date(date);
-
-        if (isToday(holidayDate)) {
-            return `linear-gradient(135deg, ${alpha(theme.palette.warning.light, 0.2)} 0%, ${alpha(theme.palette.warning.light, 0.1)} 100%)`;
-        }
-
-        if (type === 'floater') {
-            return `linear-gradient(135deg, ${alpha(theme.palette.success.light, 0.15)} 0%, ${alpha(theme.palette.success.light, 0.05)} 100%)`;
-        }
-
-        return `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.15)} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`;
-    };
-
-    // Get border color
-    const getBorderColor = (type: string, date: string) => {
-        const holidayDate = new Date(date);
-
-        if (isToday(holidayDate)) {
-            return theme.palette.warning.main;
-        }
-
-        if (type === 'floater') {
-            return theme.palette.success.main;
-        }
-
-        return theme.palette.primary.main;
-    };
-
-    // Get status chip
-    // const getStatusChip = (date: string) => {
-    //     const holidayDate = new Date(date);
-    //     console.log(holidayDate,"holidayDate");
-
-    //     if (isToday(holidayDate)) {
-    //         return <Chip label="Today" size="small" color="warning" sx={{ fontWeight: 600 }} />;
-    //     }
-
-    //     if (isPast(holidayDate)) {
-    //         return <Chip label="Passed" size="small" variant="outlined" color="default" />;
-    //     }
-
-    //     return <Chip label="Upcoming" size="small" color="success" variant="outlined" />;
-    // };
+    }, []);
 
     return (
-        <Box sx={{ p: 3 }}>
-            {/* Header */}
-            {/* <Box sx={{ mb: 4 }}>
-                <Typography variant="h3" fontWeight={700} gutterBottom>
-                    📅 Holidays Calendar {year}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    View all public holidays and floater leaves in an interactive calendar view
-                </Typography>
-            </Box> */}
+        <Box sx={{ height: '100%' }}>
 
-            {/* Stats Summary */}
-            {/* <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                    <Card sx={{ p: 2, textAlign: 'center', borderRadius: 2 }}>
-                        <Typography variant="h2" fontWeight={800} color="primary.main">
-                            {totalHolidays}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Total Days Off
-                        </Typography>
-                    </Card>
-                </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                    <Card sx={{ p: 2, textAlign: 'center', borderRadius: 2, bgcolor: alpha(theme.palette.success.light, 0.1) }}>
-                        <Typography variant="h2" fontWeight={800} color="success.main">
-                            {floaterLeaveCount}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Floater Leaves
-                        </Typography>
-                    </Card>
-                </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                    <Card sx={{ p: 2, textAlign: 'center', borderRadius: 2, bgcolor: alpha(theme.palette.primary.light, 0.1) }}>
-                        <Typography variant="h2" fontWeight={800} color="primary.main">
-                            {publicHolidayCount}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Public Holidays
-                        </Typography>
-                    </Card>
-                </Grid>
-            </Grid> */}
-
-            {/* Controls */}
-            <Paper sx={{ p: 2, mb: 3, borderRadius: 2, bgcolor: 'background.default' }}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
-
-                    <Stack direction="row" spacing={1} alignItems="center">
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
-                            <InputLabel>Year</InputLabel>
-                            <Select
-                                value={year}
-                                onChange={handleYearChange}
-                                label="Year"
-                            >
-                                {yearOptions.map((y) => (
-                                    <MenuItem key={y} value={y}>
-                                        {y}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Stack>
-                </Stack>
-            </Paper>
-
-            {/* Holiday Cards Grid */}
             {loading ? (
-                <Box sx={{ textAlign: 'center', py: 10 }}>
-                    <Typography>Loading holidays...</Typography>
-                </Box>
+                <CustomSkeleton height={"100%"} />
             ) : holidays.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 10, bgcolor: alpha(theme.palette.grey[200], 0.5), borderRadius: 2 }}>
-                    <CalendarTodayIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
-                    <Typography variant="h6" color="text.secondary">
+                <Paper
+                    elevation={0}
+                    sx={{
+                        textAlign: 'center',
+                        py: 4,
+                        borderRadius: 3,
+                        bgcolor: alpha(theme.palette.grey[100], 0.8),
+                        border: `1px dashed ${alpha(theme.palette.grey[400], 0.5)}`
+                    }}
+                >
+                    <CalendarTodayIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.6 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
                         No holidays found for {year}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Try selecting a different year or filter
-                    </Typography>
-                </Box>
+                </Paper>
             ) : (
-                <List sx={{ py: 0 }}>
+                <Box
+                    sx={{
+                        p: 1,
+                        display: 'grid',
+                        gridTemplateColumns: {
+                            xs: '1fr',
+                            md: '1fr 1fr'
+                        },
+                        gap: 2
+                    }}
+                >
                     {holidays.map((holiday) => {
-                        const { dayName, day, monthYear } = formatHolidayDate(holiday.date);
-                        const month = monthYear.split(' ')[0];
+                        const { dayName, day, month } = formatHolidayDate(holiday.date);
+                        const isWeekend = dayName === 'Saturday' || dayName === 'Sunday';
 
                         return (
-                            <ListItem
+                            <Box
                                 key={holiday.code}
                                 sx={{
-                                    px: 0,
-                                    py: 1,
-                                    alignItems: 'flex-start',
-                                    borderBottom: '1px solid rgba(0,0,0,0.08)',
-                                    '&:last-child': { borderBottom: 'none' }
+                                    ...customCard,
+                                    transition: 'all 0.2s ease',
+                                    borderRadius: 2,
+                                    bgcolor: 'background.paper',
+                                    '&:hover': {
+                                        bgcolor: alpha(theme.palette.primary.light, 0.04),
+                                        transform: 'translateY(-2px)'
+                                    },
+                                    display: 'flex',
+                                    gap: 2
+
                                 }}
                             >
-                                <Box sx={{ minWidth: 32, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {month.slice(0, 3)}
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight={600}>
-                                        {day}
-                                    </Typography>
+                                <Box display={'flex'} justifyContent={'center'}>
+                                    {/* Date box */}
+                                    <Box
+                                        sx={{
+                                            minWidth: 56,
+                                            maxWidth: 64,
+                                            textAlign: 'center',
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                p: 1,
+                                                borderRadius: 2,
+                                                bgcolor: isWeekend
+                                                    ? alpha(theme.palette.warning.light, 0.15)
+                                                    : alpha(theme.palette.primary.light, 0.15),
+                                                border: `1px solid ${isWeekend
+                                                    ? alpha(theme.palette.warning.light, 0.3)
+                                                    : alpha(theme.palette.primary.light, 0.3)
+                                                    }`
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="caption"
+                                                color={isWeekend ? 'warning.main' : 'primary.main'}
+                                                fontWeight={600}
+                                                sx={{ display: 'block', lineHeight: 1 }}
+                                            >
+                                                {month}
+                                            </Typography>
+
+                                            <Typography
+                                                variant="h5"
+                                                fontWeight={700}
+                                                color={isWeekend ? 'warning.dark' : 'primary.dark'}
+                                                sx={{ lineHeight: 1.2 }}
+                                            >
+                                                {day}
+                                            </Typography>
+
+                                            <Typography
+                                                variant="caption"
+                                                color={isWeekend ? 'warning.main' : 'text.secondary'}
+                                                sx={{ display: 'block', lineHeight: 1 }}
+                                            >
+                                                {dayName.slice(0, 3)}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
                                 </Box>
 
-                                <Box sx={{ flexGrow: 1, ml: 1.5 }}>
-                                    <Typography variant="body2" fontWeight={500} noWrap>
-                                        {holiday.name}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {dayName.slice(0, 3)} • {holiday.type === 'floater' ? 'Floater' : 'Public'}
-                                    </Typography>
+                                {/* Content */}
+                                <Box display={'flex'} flexDirection={'column'} alignItems={'center'}>
+                                    <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+
+                                        <Typography variant="body1" fontWeight={600} noWrap>
+                                            {holiday.name}
+                                        </Typography>
+                                    </Stack>
+
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Chip
+                                            label={getTypeLabel(holiday.type)}
+                                            size="small"
+                                            sx={{
+                                                bgcolor: alpha(getTypeColor(holiday.type), 0.1),
+                                                color: getTypeColor(holiday.type),
+                                                fontWeight: 400,
+                                                '& .MuiChip-label': { px: 1 }
+                                            }}
+                                        />
+
+                                        {isWeekend && (
+                                            <Chip
+                                                label="Weekend"
+                                                size="small"
+                                                variant="outlined"
+                                                sx={{
+                                                    borderColor: alpha(theme.palette.warning.main, 0.3),
+                                                    color: theme.palette.warning.dark
+                                                }}
+                                            />
+                                        )}
+                                    </Stack>
                                 </Box>
-                            </ListItem>
+                            </Box>
                         );
                     })}
-                </List>
-
+                </Box>
 
             )}
-
-
         </Box>
     );
 };

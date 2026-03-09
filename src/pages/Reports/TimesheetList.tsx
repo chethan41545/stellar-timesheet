@@ -16,26 +16,22 @@ import { formatDate, getCurrentWeekDates } from '../../utils/dateUtils';
 import Button from '../../shared/Button/Button';
 import { getStatusColor } from '../../constants/constants';
 import { toast } from 'react-toastify';
-import CustomDateRange from '../../shared/CustomDateRange/CustomDateRange';
+// import CustomDateRange from '../../shared/CustomDateRange/CustomDateRange';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // import { enGB } from 'date-fns/locale/en-GB';
-
-
 
 interface TimesheetResponse {
     timesheet: any;
     meta: any;
 }
 
-
 const TimesheetList: React.FC = () => {
-
-    // const [data, setData] = useState<TimesheetResponse[]>([]);
     const [data, setData] = useState<TimesheetResponse>();
     const [rejecting, setRejecting] = useState(false);
-
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
-
 
     const lookUpData = JSON.parse(
         localStorage.getItem("lookup") || "{}"
@@ -45,7 +41,6 @@ const TimesheetList: React.FC = () => {
     const projectsLk = lookUpData?.projects ?? [];
 
     const getInitialTimesheetStatus = () => {
-
         const saved = localStorage.getItem("selected_timesheet_status");
 
         if (saved) {
@@ -64,7 +59,6 @@ const TimesheetList: React.FC = () => {
     };
 
     const getInitialProjects = () => {
-
         const saved = localStorage.getItem("selected_projects");
 
         if (saved) {
@@ -77,13 +71,8 @@ const TimesheetList: React.FC = () => {
                 // ignore invalid storage
             }
         }
-        return []
-
-        // fallback → select all
-        // return projectsLk.map((s: any) => s.value);
+        return [];
     };
-
-
 
     const [selectedTimesheetStatus, setSelectedTimesheetStatus] =
         React.useState<string[]>(getInitialTimesheetStatus);
@@ -99,40 +88,22 @@ const TimesheetList: React.FC = () => {
             .min(yup.ref('start_date'), 'End date must be after start date'),
     });
 
+    const { monday, sunday } = getCurrentWeekDates();
 
-    const formatYMD = (d: Date) =>
-        d.toISOString().split("T")[0]; // YYYY-MM-DD
-
+    // Get initial dates from localStorage or use current week dates
     const getInitialDates = () => {
-        const savedStart = localStorage.getItem("start_date");
-        const savedEnd = localStorage.getItem("end_date");
-
-        const { monday, sunday } = getCurrentWeekDates();
+        const savedStart = localStorage.getItem("filter_start_date");
+        const savedEnd = localStorage.getItem("filter_end_date");
 
         return {
-            start_date: savedStart ?? formatYMD(monday),
-            end_date: savedEnd ?? formatYMD(sunday),
+            start_date: savedStart ? new Date(savedStart) : monday,
+            end_date: savedEnd ? new Date(savedEnd) : sunday,
         };
     };
 
-    // const { monday, sunday } = getCurrentWeekDates();
-
-    // const getInitialDates = () => {
-    //     const savedStart = localStorage.getItem("start_date");
-    //     const savedEnd = localStorage.getItem("end_date");
-
-    //     const { monday, sunday } = getCurrentWeekDates();
-
-    //     return {
-    //         start_date: savedStart ? new Date(savedStart) : monday,
-    //         end_date: savedEnd ? new Date(savedEnd) : sunday,
-    //     };
-    // };
-
-
     const initialDates = getInitialDates();
 
-    const formik = useFormik({
+    const formik = useFormik<any>({
         initialValues: {
             start_date: initialDates.start_date,
             end_date: initialDates.end_date,
@@ -143,25 +114,10 @@ const TimesheetList: React.FC = () => {
         },
     });
 
-
-
-
-    // const formik = useFormik<any>({
-    //     initialValues: {
-    //         start_date: monday,
-    //         end_date: sunday
-    //     },
-    //     validationSchema,
-    //     onSubmit: async () => {
-    //         fetchData();
-    //     }
-    // })
-
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [search, setSearch] = useState<any>('');
 
-    // const [range, setRange] = useState({ startDate: null, endDate: null });
     const debouncedSearch = useDebouncedValue(search, 350);
 
     const [sortBy, setSortBy] = useState('timesheet_status');
@@ -179,14 +135,8 @@ const TimesheetList: React.FC = () => {
         setSize(newPageSize);
     };
 
-
     const [loading, setLoading] = useState(true);
     const [tableLoading, setTableLoading] = useState(true);
-    // const navigate = useNavigate();
-
-    // const submitTimesheet = (row: any) => {
-    //     navigate(`/timesheets/${row.timesheet_code}`);
-    // };
 
     const allIdsOnPage = useMemo(
         () =>
@@ -201,7 +151,6 @@ const TimesheetList: React.FC = () => {
         [data]
     );
 
-
     const isSelected = (row: any) => selectedIds.has(`${row.timesheet_code}`);
 
     const toggleOne = (row: any) => {
@@ -214,16 +163,13 @@ const TimesheetList: React.FC = () => {
         });
     };
 
-
     const toggleAllOnPage = () => {
-
         setSelectedIds(prev => {
             const copy = new Set(prev);
             if (allSelectedOnPage) {
                 allIdsOnPage.forEach((code: string) => copy.delete(code));
             } else {
                 allIdsOnPage.forEach((code: string) => {
-
                     copy.add(code)
                 });
             }
@@ -231,16 +177,12 @@ const TimesheetList: React.FC = () => {
         });
     };
 
-
-
-
     const allSelectedOnPage = allIdsOnPage.length > 0 && allIdsOnPage.every((id: string) => selectedIds.has(id));
     const someSelectedOnPage = allIdsOnPage.some((id: string) => selectedIds.has(id));
 
     const columns = [
         {
             id: 'select',
-            // align: 'center',
             label: (
                 <>
                     {
@@ -251,7 +193,6 @@ const TimesheetList: React.FC = () => {
                                 checked={allSelectedOnPage}
                                 onChange={toggleAllOnPage}
                                 inputProps={{ 'aria-label': 'Select all on page' }}
-                                // style={{ padding: 0, color: '#007bff', }}
                                 sx={{
                                     p: 0,
                                     color: '#007bff !important',
@@ -300,7 +241,6 @@ const TimesheetList: React.FC = () => {
                             fontSize="12px"
                             role="button"
                             tabIndex={0}
-                            // onClick={() => submitTimesheet(row)}
                             sx={{
                                 cursor: 'pointer',
                                 '&:hover': { textDecoration: 'underline', color: 'primary.main' },
@@ -321,7 +261,6 @@ const TimesheetList: React.FC = () => {
             width: '120px',
             sortable: true,
             format: (value: string) => {
-
                 return (
                     <span
                         style={{
@@ -371,7 +310,6 @@ const TimesheetList: React.FC = () => {
     const fetchData = async () => {
         setTableLoading(true);
 
-        // if (typed.length === 1) return;
         const payload = {
             'page': page,
             'per_page': size,
@@ -385,11 +323,8 @@ const TimesheetList: React.FC = () => {
         }
 
         try {
-
             const response = await apiService.postMethod(API_ENDPOINTS.ALL_CANDIDATE_TIMESHEET_SEARCH, payload);
-
             setData(response.data.data);
-
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 console.error('API Error:', err.response?.data?.message || err.message);
@@ -401,7 +336,6 @@ const TimesheetList: React.FC = () => {
             setTableLoading(false);
         }
     };
-
 
     const handleBulkApprove = async (status: string) => {
         setLoading(true);
@@ -421,36 +355,24 @@ const TimesheetList: React.FC = () => {
             setRejecting(false);
             setShowRejectModal(false);
             setRejectReason('');
-            // toast.success(response.data.)
+            
             if (response.data.status === "success") {
                 toast.success(response.data.message);
             }
 
             fetchData();
-
-        }
-        catch (err: unknown) {
+        } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 console.error('API Error:', err.response?.data?.message || err.message);
             } else {
                 console.error('Unexpected Error:', err);
             }
-
         } finally {
             setLoading(false);
         }
-
-        // toast.success("Expenses approved successfully.");
-        // setSelectedIds(new Set());
-        // setRejecting(false);
-        // setShowRejectModal(false);
-        // setRejectReason('');
     };
 
-
-
     const handleDownload = async () => {
-
         const payload = {
             'page': page,
             'per_page': size,
@@ -464,7 +386,6 @@ const TimesheetList: React.FC = () => {
         }
 
         try {
-
             const response = await apiService.postMethod(API_ENDPOINTS.DOWNLOAD_TIMESHEET, payload);
 
             // Assuming your backend returns { data: "<base64_string>", filename: "timesheets.xlsx" }
@@ -489,8 +410,6 @@ const TimesheetList: React.FC = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-
-
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 console.error('API Error:', err.response?.data?.message || err.message);
@@ -502,9 +421,7 @@ const TimesheetList: React.FC = () => {
 
     const handleSubmit = () => {
         formik.handleSubmit();
-
     }
-
 
     return (
         <>
@@ -515,13 +432,10 @@ const TimesheetList: React.FC = () => {
                         <Skeleton variant="rectangular" width="100%" height={400} />
                     </>
                 ) : (
-
                     <Grid container justifyContent={"space-between"}>
-
                         <Grid size={{ xs: 12, md: 11 }}>
                             <Grid container columnSpacing={2}>
-
-                                <Grid size={{ xs: 12, md: 3 }} sx={{ margin: "8px", marginLeft: 0 }}>
+                                <Grid size={{ xs: 12, md: 2.5 }} sx={{ margin: "8px", marginLeft: 0 }}>
                                     <SearchField
                                         name="searchUser"
                                         value={search}
@@ -531,17 +445,15 @@ const TimesheetList: React.FC = () => {
                                         }}
                                         placeholder="Search by Employee"
                                     />
-
                                 </Grid>
 
-                                <Grid size={{ xs: 12, md: 2.5 }}>
+                                <Grid size={{ xs: 12, md: 2 }}>
                                     {
                                         timesheetStatus && (
                                             <MultiSelect
                                                 label="Timesheet Status"
                                                 options={timesheetStatus}
                                                 value={selectedTimesheetStatus}
-                                                // onChange={setSelectedTimesheetStatus}
                                                 onChange={(values) => {
                                                     setSelectedTimesheetStatus(values);
                                                     localStorage.setItem(
@@ -552,12 +464,11 @@ const TimesheetList: React.FC = () => {
                                                 selectAllByDefault={selectedTimesheetStatus.length > 0 ? false : true}
                                                 width={"96%"}
                                             />
-
                                         )
                                     }
                                 </Grid>
 
-                                <Grid size={{ xs: 12, md: 2.5 }}>
+                                <Grid size={{ xs: 12, md: 2 }}>
                                     {
                                         projectsLk && (
                                             <MultiSelect
@@ -574,43 +485,24 @@ const TimesheetList: React.FC = () => {
                                                 selectAllByDefault={selectedProjects.length > 0 ? false : true}
                                                 width={"96%"}
                                             />
-
                                         )
                                     }
                                 </Grid>
-                                <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
 
-                                    <CustomDateRange
-                                        name="createdDate"
-                                        value={{
-                                            startDate: formik.values.start_date,
-                                            endDate: formik.values.end_date,
-                                        }}
-                                        // onChange={setRange} 
-                                        onChange={(v:any) => {
-                                            // v is DateRangeValue
-                                            formik.setFieldValue("start_date", v.startDate);
-                                            formik.setFieldValue("end_date", v.endDate);
-
-                                            localStorage.setItem("start_date", v.startDate ?? "");
-                                            localStorage.setItem("end_date", v.endDate ?? "");
-                                        }}
-                                    />
-                                </Grid>
-
-                                {/* <LocalizationProvider dateAdapter={AdapterDateFns}
-                                >
-
-                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <Grid size={{ xs: 12, md: 2 }} mt={1}>
                                         <DatePicker
                                             label="Start Date *"
                                             value={formik.values.start_date}
-                                            // onChange={(v) => formik.setFieldValue('start_date', v)}
                                             onChange={(v) => {
                                                 formik.setFieldValue("start_date", v);
-                                                localStorage.setItem("start_date", v?.toISOString() ?? "");
+                                                if (v) {
+                                                    localStorage.setItem("filter_start_date", v.toISOString());
+                                                } else {
+                                                    localStorage.removeItem("filter_start_date");
+                                                }
                                             }}
-                                            format="dd/MM/yyyy"  // Indian date format
+                                            format="dd/MM/yyyy"
                                             slotProps={{
                                                 textField: {
                                                     sx: {
@@ -620,21 +512,22 @@ const TimesheetList: React.FC = () => {
                                                     },
                                                 },
                                             }}
-
                                         />
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, md: 2.5 }} mt={1}>
+                                    <Grid size={{ xs: 12, md: 2 }} mt={1}>
                                         <DatePicker
                                             label="End Date *"
                                             value={formik.values.end_date}
                                             onChange={(v) => {
                                                 formik.setFieldValue('end_date', v);
-                                                localStorage.setItem("end_date", v?.toISOString() ?? "");
-                                            }
-                                            }
+                                                if (v) {
+                                                    localStorage.setItem("filter_end_date", v.toISOString());
+                                                } else {
+                                                    localStorage.removeItem("filter_end_date");
+                                                }
+                                            }}
                                             format="dd/MM/yyyy"
-
                                             slotProps={{
                                                 textField: {
                                                     sx: {
@@ -644,21 +537,17 @@ const TimesheetList: React.FC = () => {
                                                     },
                                                 },
                                             }}
-
                                         />
                                     </Grid>
-                                </LocalizationProvider> */}
+                                </LocalizationProvider>
 
                                 <Grid size={{ xs: 4, md: 1 }} mt={1}>
-
                                     <Button
                                         type="submit"
                                         onClick={handleSubmit}
-
-                                        label='Submit' />
-
+                                        label='Submit'
+                                    />
                                 </Grid>
-
                             </Grid>
                         </Grid>
 
@@ -697,11 +586,11 @@ const TimesheetList: React.FC = () => {
                                     onClick={handleDownload}
                                     color="primary"
                                     sx={{
-                                        padding: 1, // adjust size
-                                        borderRadius: '50%', // ensures perfect circle
-                                        width: 40, // fixed width
-                                        height: 40, // fixed height
-                                        minWidth: 0, // remove default MUI minWidth
+                                        padding: 1,
+                                        borderRadius: '50%',
+                                        width: 40,
+                                        height: 40,
+                                        minWidth: 0,
                                     }}
                                 >
                                     <DownloadIcon />
@@ -709,13 +598,10 @@ const TimesheetList: React.FC = () => {
                             </Tooltip>
                         </Grid>
 
-
-
                         <Grid mt={2} size={{ xs: 12 }}>
                             {
                                 tableLoading ? (
                                     <Skeleton variant="rectangular" width="100%" height={400} />
-
                                 ) : (
                                     <CustomTable<any>
                                         columns={columns}
@@ -728,13 +614,10 @@ const TimesheetList: React.FC = () => {
                                         onRefresh={fetchData}
                                         onSortChange={handleSortChange}
                                         onPageChange={handlePageChange}
-                                        // loading={tableLoading}
                                         rowPadding='12px 8px'
                                     />
-
                                 )
                             }
-
                         </Grid>
 
                         <Dialog
@@ -745,7 +628,7 @@ const TimesheetList: React.FC = () => {
                             PaperProps={{ sx: { borderRadius: 2 } }}
                         >
                             <DialogTitle sx={{ pb: 1 }}>
-                                Reject 1 item
+                                Reject {selectedIds.size} {selectedIds.size === 1 ? 'item' : 'items'}
                             </DialogTitle>
                             <DialogContent dividers>
                                 <TextField
@@ -756,14 +639,14 @@ const TimesheetList: React.FC = () => {
                                     multiline
                                     minRows={3}
                                     inputProps={{ maxLength: 500 }}
-                                    helperText={`${rejectReason.trim().length}/500`}
+                                    helperText={`${rejectReason.length}/500`}
                                 />
                             </DialogContent>
                             <DialogActions>
                                 <Button variant="secondary" onClick={() => setShowRejectModal(false)} disabled={rejecting}>
                                     Cancel
                                 </Button>
-                                <Button variant="danger" onClick={() => handleBulkApprove("reject")} disabled={rejecting || !rejectReason}>
+                                <Button variant="danger" onClick={() => handleBulkApprove("reject")} disabled={rejecting || !rejectReason.trim()}>
                                     {rejecting ? 'Rejecting...' : 'Reject'}
                                 </Button>
                             </DialogActions>

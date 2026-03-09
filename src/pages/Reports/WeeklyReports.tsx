@@ -22,7 +22,6 @@ import {
     Cell,
     ResponsiveContainer,
     Legend,
-    // CartesianGrid,
 } from "recharts";
 import MultiSelect from "../../shared/MultiSelect/MultiSelectWithoutController";
 import {
@@ -40,8 +39,7 @@ import { formatDate, getCurrentWeekDates } from "../../utils/dateUtils";
 import Button from "../../shared/Button/Button";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import CustomDateRange from "../../shared/CustomDateRange/CustomDateRange";
-
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 interface ReportResponse {
     employee_summary: { user_full_name: string; total_hours: number }[];
@@ -68,7 +66,6 @@ const LESSER_COLORS = [
     "#BFE7FB",
 ];
 
-
 const WeeklyReports: React.FC = () => {
     const [data, setData] = useState<ReportResponse | null>(null);
     const [users, setUsers] = useState<any>([]);
@@ -83,7 +80,6 @@ const WeeklyReports: React.FC = () => {
     const projectsLk = lookUpData?.projects ?? [];
 
     const getInitialProjects = () => {
-
         const saved = localStorage.getItem("selected_projects");
 
         if (saved) {
@@ -102,25 +98,7 @@ const WeeklyReports: React.FC = () => {
     };
 
     const [selectedProjects, setSelectedProjects] =
-        React.useState<string[]>(getInitialProjects);
-
-    const formatYMD = (d: Date) =>
-        d.toISOString().split("T")[0]; // YYYY-MM-DD
-
-    const getInitialDates = () => {
-        const savedStart = localStorage.getItem("start_date");
-        const savedEnd = localStorage.getItem("end_date");
-
-        const { monday, sunday } = getCurrentWeekDates();
-
-        return {
-            start_date: savedStart ?? formatYMD(monday),
-            end_date: savedEnd ?? formatYMD(sunday),
-        };
-    };
-
-
-    const initialDates = getInitialDates();
+        React.useState<string[]>(getInitialProjects());
 
     useEffect(() => {
         fetchUsers();
@@ -130,10 +108,10 @@ const WeeklyReports: React.FC = () => {
         if (selected.length > 0) {
             fetchReports();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
 
-    // const { monday, sunday } = getCurrentWeekDates();
-
+    const { monday, sunday } = getCurrentWeekDates();
 
     const validationSchema = yup.object({
         start_date: yup.date().nullable().required('Start date is required'),
@@ -143,21 +121,33 @@ const WeeklyReports: React.FC = () => {
             .min(yup.ref('start_date'), 'End date must be after start date'),
     });
 
+    // Get initial dates from localStorage or use current week dates
+    const getInitialDates = () => {
+        const savedStart = localStorage.getItem("filter_start_date");
+        const savedEnd = localStorage.getItem("filter_end_date");
+
+        return {
+            start_date: savedStart ? new Date(savedStart) : monday,
+            end_date: savedEnd ? new Date(savedEnd) : sunday,
+        };
+    };
+
+    const initialDates = getInitialDates();
+
     const formik = useFormik<any>({
         initialValues: {
             start_date: initialDates.start_date,
-            end_date: initialDates.end_date
+            end_date: initialDates.end_date,
         },
         validationSchema,
         onSubmit: async () => {
             fetchReports();
         }
-    })
+    });
 
     const handleSubmit = () => {
         formik.handleSubmit();
-
-    }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -173,9 +163,7 @@ const WeeklyReports: React.FC = () => {
             }));
 
             setUsers(usersList);
-
             setSelected(usersList.map((s: any) => s.value));
-
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 console.error("API Error:", error.response?.data);
@@ -249,7 +237,6 @@ const WeeklyReports: React.FC = () => {
             elevation={0}
             sx={{
                 p: 3,
-                // height: "100%",
                 borderRadius: 3,
                 position: "relative",
                 border: "1px dashed black",
@@ -279,9 +266,7 @@ const WeeklyReports: React.FC = () => {
 
     return (
         <Grid container sx={{ py: 0 }}>
-
             <Grid size={{ xs: 12 }}>
-
                 <Paper
                     elevation={0}
                     sx={{
@@ -293,11 +278,6 @@ const WeeklyReports: React.FC = () => {
                     }}
                 >
                     <Grid container spacing={2} alignItems="center">
-                        {/* <Grid size={{ xs: 12, md: 3 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                                Filter by Employees
-                            </Typography>
-                        </Grid> */}
                         <Grid size={{ xs: 12, md: 2.5 }}>
                             {users && (
                                 <MultiSelect
@@ -309,16 +289,6 @@ const WeeklyReports: React.FC = () => {
                                     width={"94%"}
                                 />
                             )}
-                            {/* {selected.length > 0 && (
-                                <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
-                                    <Chip
-                                        label={`${selected.length} user${selected.length > 1 ? "s" : ""} selected`}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                    />
-                                </Box>
-                            )} */}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 2.5 }}>
@@ -338,42 +308,24 @@ const WeeklyReports: React.FC = () => {
                                         selectAllByDefault={selectedProjects.length > 0 ? false : true}
                                         width={"96%"}
                                     />
-
                                 )
                             }
                         </Grid>
 
-                        <LocalizationProvider dateAdapter={AdapterDateFns}
-                        >
-
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <Grid size={{ xs: 12, md: 2.5 }}>
-                                <CustomDateRange
-                                        name="createdDate"
-                                        value={{
-                                            startDate: formik.values.start_date,
-                                            endDate: formik.values.end_date,
-                                        }}
-                                        // onChange={setRange} 
-                                        onChange={(v:any) => {
-                                            // v is DateRangeValue
-                                            formik.setFieldValue("start_date", v.startDate);
-                                            formik.setFieldValue("end_date", v.endDate);
-
-                                            localStorage.setItem("start_date", v.startDate ?? "");
-                                            localStorage.setItem("end_date", v.endDate ?? "");
-                                        }}
-                                    />
-                            </Grid>
-
-                            {/* <Grid size={{ xs: 12, md: 2.5 }}>
                                 <DatePicker
-                                    label="End Date *"
-                                    value={formik.values.end_date}
-                                    onChange={(v) =>
-                                        formik.setFieldValue('end_date', v)
-                                    }
+                                    label="Start Date *"
+                                    value={formik.values.start_date}
+                                    onChange={(v) => {
+                                        formik.setFieldValue('start_date', v);
+                                        if (v) {
+                                            localStorage.setItem("filter_start_date", v.toISOString());
+                                        } else {
+                                            localStorage.removeItem("filter_start_date");
+                                        }
+                                    }}
                                     format="dd/MM/yyyy"
-
                                     slotProps={{
                                         textField: {
                                             sx: {
@@ -383,18 +335,40 @@ const WeeklyReports: React.FC = () => {
                                             },
                                         },
                                     }}
-
                                 />
-                            </Grid> */}
+                            </Grid>
+
+                            <Grid size={{ xs: 12, md: 2.5 }}>
+                                <DatePicker
+                                    label="End Date *"
+                                    value={formik.values.end_date}
+                                    onChange={(v) => {
+                                        formik.setFieldValue('end_date', v);
+                                        if (v) {
+                                            localStorage.setItem("filter_end_date", v.toISOString());
+                                        } else {
+                                            localStorage.removeItem("filter_end_date");
+                                        }
+                                    }}
+                                    format="dd/MM/yyyy"
+                                    slotProps={{
+                                        textField: {
+                                            sx: {
+                                                "& .MuiPickersSectionList-root": {
+                                                    padding: "9px 6px",
+                                                },
+                                            },
+                                        },
+                                    }}
+                                />
+                            </Grid>
 
                             <Grid size={{ xs: 4, md: 1 }}>
-
                                 <Button
                                     type="submit"
                                     onClick={handleSubmit}
-
-                                    label='Submit' />
-
+                                    label='Submit'
+                                />
                             </Grid>
                         </LocalizationProvider>
                     </Grid>
@@ -440,7 +414,6 @@ const WeeklyReports: React.FC = () => {
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-
                 {/* Charts Grid */}
                 <Grid container spacing={3}>
                     {/* Employee Hours Bar Chart */}
@@ -469,7 +442,6 @@ const WeeklyReports: React.FC = () => {
                                         barGap={8}
                                         barCategoryGap="15%"
                                     >
-                                        {/* <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} /> */}
                                         <XAxis
                                             dataKey="user_full_name"
                                             angle={-45}
@@ -523,23 +495,6 @@ const WeeklyReports: React.FC = () => {
                             <Box sx={{ height: 360 }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
-                                        {/* <Pie
-                                        data={data?.project_summary || []}
-                                        dataKey="total_hours"
-                                        nameKey="project_name"
-                                        // cx="50%"
-                                        // cy="50%"
-                                        outerRadius={100}
-                                        innerRadius={50}
-                                        paddingAngle={2}
-                                        label={(entry: any) => `${entry.project_name}: ${entry.total_hours}h`}
-                                        labelLine={false}
-                                    >
-                                        {(data?.project_summary || []).map((_, i) => (
-                                            <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
-                                        ))}
-                                    </Pie> */}
-
                                         <Pie
                                             data={data?.project_summary || []}
                                             dataKey="total_hours"
@@ -561,18 +516,8 @@ const WeeklyReports: React.FC = () => {
                                                 fontSize: "12px"
                                             }}
                                         />
-
-                                        {/* <Tooltip
-                                            formatter={(value) => [`${value} hours`, "Total Hours"]}
-                                            contentStyle={{
-                                                borderRadius: 8,
-                                                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                                                boxShadow: theme.shadows[3],
-                                            }}
-                                        /> */}
                                         <Tooltip
                                             formatter={(_value, _name, props) => {
-                                                // props.payload contains the original data point
                                                 const { project_name, total_hours } = props.payload;
                                                 return [
                                                     <div key="tooltip-content">
@@ -587,7 +532,6 @@ const WeeklyReports: React.FC = () => {
                                                 boxShadow: theme.shadows[3],
                                             }}
                                         />
-
                                     </PieChart>
                                 </ResponsiveContainer>
                             </Box>
@@ -619,10 +563,8 @@ const WeeklyReports: React.FC = () => {
                                         barGap={4}
                                         barCategoryGap="15%"
                                     >
-                                        {/* <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.3)} /> */}
                                         <XAxis
                                             dataKey="project_name"
-                                            // angle={-45}
                                             textAnchor="middle"
                                             height={80}
                                             tick={{ fill: theme.palette.text.secondary }}
@@ -657,8 +599,6 @@ const WeeklyReports: React.FC = () => {
                     </Grid>
                 </Grid>
             </Grid>
-
-
         </Grid>
     );
 };

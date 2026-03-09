@@ -240,6 +240,32 @@ const formatDateMDYLocal = (d: Date | string) => {
 	)}/${date.getFullYear()}`;
 };
 
+const parseStoredDate = (input: string | null): Date | null => {
+	const value = (input || "").trim();
+	if (!value) return null;
+
+	try {
+		return parseMDY(value);
+	} catch {
+		// fallback for ISO/date-time values persisted in localStorage
+		const parsed = new Date(value);
+		if (Number.isNaN(parsed.getTime())) return null;
+		parsed.setHours(0, 0, 0, 0);
+		return parsed;
+	}
+};
+
+const readStoredRange = () => {
+	try {
+		return {
+			start: parseStoredDate(localStorage.getItem("start_date")),
+			end: parseStoredDate(localStorage.getItem("end_date")),
+		};
+	} catch {
+		return { start: null, end: null };
+	}
+};
+
 // const toRequestDate = (input: Date | string): string => {
 // 	if (typeof input === "string") return input;
 // 	return formatDateMDY(input);
@@ -532,10 +558,13 @@ export default function Timesheet({
 
 	const [freq, setFreq] = useState<Frequency>(freqOverride ?? "BIWEEKLY");
 
-	const initialPeriodStart = periodStartOverride
-		? startOfPeriodByFreq(freq, toDateStrict(periodStartOverride))
-		: startOfPeriodByFreq(freq, new Date());
-	const [periodStart, setPeriodStart] = useState<Date>(initialPeriodStart);
+	const [periodStart, setPeriodStart] = useState<Date>(() => {
+		if (periodStartOverride) {
+			return startOfPeriodByFreq(freq, toDateStrict(periodStartOverride));
+		}
+		const { start } = readStoredRange();
+		return startOfPeriodByFreq(freq, start ?? new Date());
+	});
 
 	const [days, setDays] = useState<Date[]>([]);
 	const [holidayByDay, setHolidayByDay] = useState<any>([]);
@@ -558,8 +587,14 @@ export default function Timesheet({
 	const [nextTimesheetId, setNextTimesheetId] = useState<number | null>(null);
 	const [alignRight, setAlignRight] = useState(false);
 	// const [alertMessage, setAlertMessage] = useState("");
-	const [apiStartDate, setApiStartDate] = useState<any>("");
-	const [apiEndDate, setApiEndDate] = useState<any>("");
+	const [apiStartDate, setApiStartDate] = useState<any>(() => {
+		const { start } = readStoredRange();
+		return start ? formatDateMDY(start) : "";
+	});
+	const [apiEndDate, setApiEndDate] = useState<any>(() => {
+		const { end } = readStoredRange();
+		return end ? formatDateMDY(end) : "";
+	});
 
 	/* === Add Entry modal state + project/task API === */
 	const [showAddEntryModal, setShowAddEntryModal] = useState(false);
@@ -864,6 +899,10 @@ export default function Timesheet({
 			setTimesheetId(adapted.timesheetId ?? null);
 			setApiStartDate(apiRaw.week_start);
 			setApiEndDate(apiRaw.week_end);
+			const storedStart = parseStoredDate(apiRaw.week_start);
+			const storedEnd = parseStoredDate(apiRaw.week_end);
+			if (storedStart) localStorage.setItem("start_date", storedStart.toISOString());
+			if (storedEnd) localStorage.setItem("end_date", storedEnd.toISOString());
 			setPrevTimesheetId(apiRaw.previous_timesheet_code);
 			setNextTimesheetId(apiRaw.next_timesheet_code);
 			setTimesheetStatus(adapted.status ?? null);

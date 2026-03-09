@@ -5,15 +5,15 @@ import {
   List,
   ListItem,
   ListItemText,
-  Avatar,
+  // Avatar,
   Chip,
   Divider
 } from '@mui/material';
 import {
-  PriorityHigh,
+  // PriorityHigh,
   CalendarToday,
   AccessTime,
-  Person
+  // Person
 } from '@mui/icons-material';
 import { alpha } from '@mui/material/styles';
 

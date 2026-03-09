@@ -14,9 +14,9 @@ import UserList from "./pages/Users/UserList";
 import UserForm from "./pages/Users/UserCreation";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./constants/routes";
-import HolidayScreen from "./pages/Dashboard/HolidayList";
+// import HolidayScreen from "./pages/Dashboard/HolidayList";
 import ReportTab from "./pages/Reports/ReportsTab";
-import AnnouncementsList from "./pages/Dashboard/AnnouncementsList";
+// import AnnouncementsList from "./pages/Dashboard/AnnouncementsList";
 import Dashboard from "./pages/Dashboard/Dashboard";
 
 // Simple auth guard
